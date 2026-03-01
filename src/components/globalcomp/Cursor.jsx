@@ -47,8 +47,35 @@ export default function Cursor() {
 
   return (
     <>
-      <div id="cursor"></div>
-      <div id="cursor-ring"></div>
+      <div
+        id="cursor"
+        style={{
+          position: 'fixed',
+          width: '12px',
+          height: '12px',
+          background: '#FF6B00',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 99999,
+          transform: 'translate(-50%, -50%)',
+          transition: 'transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s',
+          mixBlendMode: 'multiply',
+        }}
+      />
+      <div
+        id="cursor-ring"
+        style={{
+          position: 'fixed',
+          width: '40px',
+          height: '40px',
+          border: '1.5px solid rgba(255,107,0,0.4)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 99998,
+          transform: 'translate(-50%, -50%)',
+          transition: 'transform 0.12s ease-out, width 0.3s, height 0.3s',
+        }}
+      />
     </>
   )
 }
