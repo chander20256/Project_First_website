@@ -1,9 +1,11 @@
+import GlobalCallingPage from "./components/globalcomp/GlobalCallingPage"
 
 function App() {
 
   return (
     <>
-      <div className="bg-black text-yellow"><h5> This website is loading.....</h5></div>
+      <GlobalCallingPage />
+      
     </>
   )
 }
