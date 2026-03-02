@@ -79,7 +79,7 @@ export default function Navbar() {
             letterSpacing: '0.06em', textDecoration: 'none',
             color: textColor, transition: 'color 0.4s',
           }}>
-            EARN<span style={{ color: '#FF6B00' }}>FLOW</span>
+            Reva<span style={{ color: '#FF6B00' }}>Doo</span>
           </Link>
 
           {/* Desktop Links */}
