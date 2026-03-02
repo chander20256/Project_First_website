@@ -13,12 +13,16 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Hero />} />
-         <Route path="/about" element={<About />} />
+        <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         {/* <Route path="/auth" element={<AuthPage />} />  */}
         <Route path="/blog" element={<Blog />} /> 
       </Routes>
-      <HowItWorks />
+      <Routes>
+         <Route path="/" element={<HowItWorks />} />
+      </Routes>
+      
+      
     </BrowserRouter>
   );
 }
