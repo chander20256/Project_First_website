@@ -4,7 +4,6 @@ const LandingPage = () => {
   return (
     <>
     <Hero />
-    <HowItWorks/>
 
     
      
