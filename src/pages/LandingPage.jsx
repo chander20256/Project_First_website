@@ -1,13 +1,13 @@
-import Hero from '../components/landingcomp/home/Hero';
-import Features from '../components/landingcomp/home/Features';
-import Testimonials from '../components/landingcomp/home/Testimonials';
-
+import Hero from '../components/landingcomp/Hero';
+import HowItWorks from '../components/landingcomp/HowItWorks';
 const LandingPage = () => {
   return (
     <>
-      <Hero />
-      <Features />
-      <Testimonials />
+    <Hero />
+    <HowItWorks/>
+
+    
+     
     </>
   );
 };

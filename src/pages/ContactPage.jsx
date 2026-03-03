@@ -1,7 +1,11 @@
-import ContactForm from '../components/landingcomp/contact/ContactForm';
+import React from 'react'
 
 const ContactPage = () => {
-  return <ContactForm />;
-};
+  return (
+    <div>
+      
+    </div>
+  )
+}
 
-export default ContactPage;
+export default ContactPage
