@@ -1,5 +1,5 @@
 import React from 'react'
-
+import Logo from '../../assets/logo.png'; // Adjust the path to your logo image
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100">
@@ -28,7 +28,7 @@ export default function Footer() {
           <div>
             {/* Company Logo Image */}
             <img
-              src="/public/logo.png"               // Replace with your actual logo path
+              src={Logo}               // Replace with your actual logo path
               alt="Revadoo company logo"
               className="h-30 w-auto mb-4"   // Adjust size as needed
             />

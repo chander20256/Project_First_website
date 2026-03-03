@@ -1,5 +1,6 @@
 // import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import Layout from './layout';
+// // import Layout from './layout';
+// import Layout from './layouts/PublicLayout';
 // import LandingPage from './pages/LandingPage';
 // import AboutPage from './pages/AboutPage';
 // import ContactPage from './pages/ContactPage';
@@ -7,42 +8,49 @@
 
 // function App() {
 //   return (
-//     <ThemeProvider>
-//       <BrowserRouter>
-//         <Routes>
-//           <Route path="/" element={<Layout />}>
-//             <Route index element={<LandingPage />} />
-//             <Route path="about" element={<AboutPage />} />
-//             <Route path="contact" element={<ContactPage />} />
-//             <Route path="blog" element={<BlogPage />} />
-//           </Route>
-//         </Routes>
-//       </BrowserRouter>
-//     </ThemeProvider>
+//     <BrowserRouter>
+//       <Routes>
+//         <Route path="/" element={<Layout />}>
+//           <Route index element={<LandingPage />} />
+//           <Route path="about" element={<AboutPage />} />
+//           <Route path="contact" element={<ContactPage />} />
+//           <Route path="blog" element={<BlogPage />} />
+//         </Route>
+//       </Routes>
+//     </BrowserRouter>
 //   );
 // }
 
 // export default App;
 
-
-
-
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from './layout';
-import LandingPage from './pages/LandingPage';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PublicLayout from "./layouts/PublicLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import LandingPage from "./pages/LandingPage";
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
+import DashboardPage from "./pages/userdashboard/DashboardPage";
+import DashboardWallet from "./pages/userdashboard/DashboardWallet";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Public Routes */}
+        <Route path="/" element={<PublicLayout />}>
           <Route index element={<LandingPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="blog" element={<BlogPage />} />
+        </Route>
+
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="wallet" element={<DashboardWallet />} /> 
+          {/* Add more dashboard routes as needed */}
         </Route>
       </Routes>
     </BrowserRouter>
