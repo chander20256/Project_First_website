@@ -226,9 +226,45 @@ const GLOBAL_CSS = `
     padding: 40px 0;
   }
 
+  /* ── RESPONSIVE: hide phone on tablet/mobile, tighten padding ── */
   @media (max-width: 900px) {
     .hero-right  { display: none !important; }
     .hero-inner  { padding: 60px 20px !important; }
+  }
+
+  /* ── RESPONSIVE: mobile-specific tweaks ── */
+  @media (max-width: 600px) {
+
+    /* Hero inner padding */
+    .hero-inner { padding: 40px 16px 60px !important; }
+
+    /* Trust bar: wrap items cleanly, hide dividers */
+    .hero-trust-divider { display: none !important; }
+    .hero-trust         { gap: 16px !important; }
+
+    /* CTA buttons: stack vertically and go full width */
+    .hero-ctas {
+      flex-direction: column !important;
+      gap: 12px !important;
+    }
+    .hero-ctas a {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    /* Badge: smaller text on tiny screens */
+    .hero-badge span {
+      font-size: 0.64rem !important;
+    }
+
+    /* Scroll indicator: hide on mobile to save space */
+    .hero-scroll { display: none !important; }
+  }
+
+  /* ── RESPONSIVE: tablet (601–900px) ── */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .hero-inner { padding: 60px 32px !important; }
+    .hero-ctas  { gap: 14px !important; }
   }
 `
 
@@ -537,10 +573,12 @@ const Hero = () => {
         <div className="hero-left">
 
           {/* Badge */}
-          <div style={{ display:'inline-flex', alignItems:'center', gap:8, borderRadius:999, background:'#FFF5EE',
-            border:'1px solid rgba(255,107,0,0.3)', padding:'8px 20px', marginBottom:36,
-            opacity: visible.badge?1:0, transform: visible.badge?'translateY(0)':'translateY(20px)',
-            transition:'opacity 0.6s, transform 0.6s' }}>
+          <div
+            className="hero-badge"
+            style={{ display:'inline-flex', alignItems:'center', gap:8, borderRadius:999, background:'#FFF5EE',
+              border:'1px solid rgba(255,107,0,0.3)', padding:'8px 20px', marginBottom:36,
+              opacity: visible.badge?1:0, transform: visible.badge?'translateY(0)':'translateY(20px)',
+              transition:'opacity 0.6s, transform 0.6s' }}>
             <div style={{ width:8, height:8, borderRadius:'50%', background:'#FF6B00', animation:'pulse-dot 2s ease infinite' }} />
             <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.74rem', color:'#FF6B00', letterSpacing:'0.1em' }}>
               2.4M+ USERS EARNING DAILY
@@ -571,16 +609,20 @@ const Hero = () => {
             REVADOO turns your everyday time into tangible gains. Browse hundreds of tasks across surveys, games, creative challenges, and more — then convert your Creds into real gift cards, cash, and premium rewards.
           </p>
 
-          {/* CTAs */}
-          <div style={{ display:'flex', flexWrap:'wrap', gap:16, marginBottom:56,
-            opacity:visible.ctas?1:0, transition:'opacity 0.6s 0.5s' }}>
+          {/* CTAs — className added so mobile CSS can target them */}
+          <div
+            className="hero-ctas"
+            style={{ display:'flex', flexWrap:'wrap', gap:16, marginBottom:56,
+              opacity:visible.ctas?1:0, transition:'opacity 0.6s 0.5s' }}>
             <a href="#tasks-section" className="btn-primary" style={{ fontSize:'1rem', padding:'15px 36px' }}>Start Earning Free &nbsp;→</a>
             <a href="#rewards-section" className="btn-outline" style={{ fontSize:'1rem', padding:'15px 36px' }}>View Rewards</a>
           </div>
 
-          {/* Trust bar */}
-          <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:28,
-            opacity:visible.trust?1:0, transition:'opacity 0.6s 0.65s' }}>
+          {/* Trust bar — classNames added so mobile CSS can hide dividers + tighten gap */}
+          <div
+            className="hero-trust"
+            style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:28,
+              opacity:visible.trust?1:0, transition:'opacity 0.6s 0.65s' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ display:'flex' }}>
                 {[{l:'A',bg:'#FF6B00'},{l:'B',bg:'#3B82F6'},{l:'C',bg:'#10B981'},{l:'D',bg:'#8B5CF6'},{l:'E',bg:'#EF4444'}].map((av,i) => (
@@ -593,26 +635,29 @@ const Hero = () => {
                 <strong style={{ color:'#0A0A0A' }}>2.4M+</strong> active earners
               </span>
             </div>
-            <div style={{ width:1, height:24, background:'#E0E0E0' }} />
+            {/* Dividers — className so mobile CSS hides them */}
+            <div className="hero-trust-divider" style={{ width:1, height:24, background:'#E0E0E0' }} />
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
               <span style={{ color:'#FF6B00', fontSize:13 }}>★★★★★</span>
               <span style={{ fontSize:'0.85rem', color:'#999' }}><strong style={{ color:'#0A0A0A' }}>4.9/5</strong> rating</span>
             </div>
-            <div style={{ width:1, height:24, background:'#E0E0E0' }} />
+            <div className="hero-trust-divider" style={{ width:1, height:24, background:'#E0E0E0' }} />
             <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.72rem', color:'#999', letterSpacing:'0.08em' }}>FREE TO JOIN</span>
           </div>
         </div>
 
-        {/* RIGHT — phone mockup, centered in its column */}
+        {/* RIGHT — phone mockup, hidden on tablet/mobile via CSS */}
         <div className="hero-right">
           <PhoneMockup />
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)',
-        zIndex:2, display:'flex', flexDirection:'column', alignItems:'center', gap:8,
-        animation:'float 2s ease-in-out infinite' }}>
+      {/* Scroll indicator — className added so mobile CSS can hide it */}
+      <div
+        className="hero-scroll"
+        style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)',
+          zIndex:2, display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+          animation:'float 2s ease-in-out infinite' }}>
         <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.68rem', color:'#999', letterSpacing:'0.12em' }}>SCROLL</div>
         <div style={{ width:24, height:38, border:'2px solid rgba(0,0,0,0.12)', borderRadius:12, padding:5, display:'flex', justifyContent:'center' }}>
           <div style={{ width:4, height:9, borderRadius:2, background:'#FF6B00', animation:'float 1.6s ease-in-out infinite' }} />
