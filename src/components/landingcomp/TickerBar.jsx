@@ -1,7 +1,7 @@
-import React from 'react'   
+import React from 'react'
 
 const TickerBar = () => {
-     const items = ['🎮 Mini Game Reward +500 Creds','✅ Survey Completed +180 Creds','🏆 Daily Streak Bonus +250 Creds','🎁 Gift Card Unlocked $25','⭐ Level 50 Achieved +1000 Creds','🔥 Challenge Complete +750 Creds','💸 Cash Out $50 Processed','🥇 Top 10 Leaderboard Bonus']
+  const items = ['🎮 Mini Game Reward +500 Creds','✅ Survey Completed +180 Creds','🏆 Daily Streak Bonus +250 Creds','🎁 Gift Card Unlocked $25','⭐ Level 50 Achieved +1000 Creds','🔥 Challenge Complete +750 Creds','💸 Cash Out $50 Processed','🥇 Top 10 Leaderboard Bonus']
   const doubled = [...items, ...items]
   return (
     <div style={{ background:'#FF6B00', overflow:'hidden', padding:'12px 0', position:'relative', zIndex:10 }}>

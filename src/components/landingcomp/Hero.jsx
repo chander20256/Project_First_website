@@ -7,6 +7,7 @@ import Leaderboard from './Leaderboard'
 import FAQ from './FAQ'
 import Testimonials from './Testimonials'
 import CTASECTION from './CTASECTION'
+import React from 'react'
 
 
 /* ─────────────────────── GLOBAL STYLES injected once ─────────────────────── */
@@ -296,7 +297,7 @@ const SCREENS = [
   },
 ]
 
-function PhoneMockup() {
+const PhoneMockup = () => {
   const [active, setActive] = useState(0)
   const [animating, setAnimating] = useState(false)
 
@@ -415,7 +416,7 @@ function PhoneMockup() {
 /* ═══════════════════════════════ HERO ═══════════════════════════════════ */
 const words = ['Complete Tasks','Play Mini Games','Level Up','Beat Challenges','Get Paid']
 
-function Hero() {
+const Hero = () => {
   const [visible, setVisible] = useState({ badge:false, headline:false, sub:false, ctas:false, trust:false })
   const [wordIndex, setWordIndex] = useState(0)
   const [wordState, setWordState] = useState('visible')
@@ -515,6 +516,7 @@ function Hero() {
 
   return (
     <section id="hero" style={{ position:'relative', display:'flex', alignItems:'center', minHeight:'100vh', background:'#fff', overflow:'hidden' }}>
+      <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
       <canvas id="three-canvas" style={{ position:'absolute', inset:0, zIndex:0 }} />
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" async />
 
@@ -620,39 +622,4 @@ function Hero() {
   )
 }
 
-/* ══════════════════════ SCROLL REVEAL HOOK ══════════════════════════════ */
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll('.reveal')
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target) } })
-    }, { threshold: 0.12 })
-    els.forEach(el => obs.observe(el))
-    return () => obs.disconnect()
-  }, [])
-}
-
-/* ══════════════════════ ROOT APP ════════════════════════════════════════ */
-export default function App() {
-  useScrollReveal()
-
-  return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" />
-
-      <main>
-        <Hero />
-        <TickerBar />
-        <HowItWorks />
-        <TasksSection />
-        <RewardsSection />
-        <Leaderboard />
-        <FAQ />
-        <Testimonials />
-        <CTASECTION /> 
-        
-      </main>
-    </>
-  )
-}
+export default Hero;

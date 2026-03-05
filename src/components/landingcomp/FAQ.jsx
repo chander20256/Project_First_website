@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useReveal } from './UseReveal'
-
+import { useReveal } from './useReveal'
 
 const FAQS = [
   { q:'Is REVADOO really free to join?', a:'Yes, completely free. There are no subscription fees, no premium tiers that gate earnings, and no hidden charges. You sign up, complete tasks, and earn. That\'s it.' },
@@ -23,7 +22,8 @@ export default function FAQ() {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'80px', alignItems:'start' }}>
           {/* Left: sticky header */}
           <div ref={hRef} style={{ position:'sticky', top:'100px', opacity:hVis?1:0, transform:hVis?'translateY(0)':'translateY(40px)', transition:'all 0.8s cubic-bezier(0.16,1,0.3,1)' }}>
-            <div className="section-tag">
+            {/* FIX: was "section-tag" — correct class is "sec-label" */}
+            <div className="sec-label">
               <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#FF6B00', display:'inline-block', animation:'pulse-dot 2s ease infinite' }} />
               FAQ
             </div>
@@ -59,7 +59,7 @@ function FAQItem({ faq, index, isOpen, onToggle }) {
         onClick={onToggle}
         style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', background:'none', border:'none', cursor:'pointer', textAlign:'left', gap:'16px' }}
       >
-        <span style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:600, fontSize:'0.97rem', color:'#0A0A0A', lineHeight:1.5 }}>{faq.q}</span>
+        <span style={{ fontFamily:"'Manrope',sans-serif", fontWeight:600, fontSize:'0.97rem', color:'#0A0A0A', lineHeight:1.5 }}>{faq.q}</span>
         <div style={{ width:'28px', height:'28px', borderRadius:'50%', background: isOpen?'#FF6B00':'rgba(0,0,0,0.06)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'background 0.2s, transform 0.3s', transform: isOpen?'rotate(45deg)':'rotate(0deg)' }}>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M6 1v10M1 6h10" stroke={isOpen?'#fff':'#555'} strokeWidth="1.8" strokeLinecap="round"/>

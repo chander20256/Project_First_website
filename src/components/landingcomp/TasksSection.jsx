@@ -1,8 +1,7 @@
-
 import React from 'react'
 
 const TasksSection = () => {
-      const tasks = [
+  const tasks = [
     { icon:'📋', label:'Surveys', creds:'50–400', time:'3–15 min', tag:'Most Popular', color:'#3B82F6' },
     { icon:'🎮', label:'Mini Games', creds:'100–600', time:'2–10 min', tag:'High Payout', color:'#10B981' },
     { icon:'🎨', label:'Creative Tasks', creds:'200–800', time:'10–30 min', tag:'Skill Based', color:'#8B5CF6' },
@@ -11,7 +10,7 @@ const TasksSection = () => {
     { icon:'🤝', label:'Referrals', creds:'500–2000', time:'One-time', tag:'Best Value', color:'#FF6B00' },
   ]
   return (
-        <section id="tasks-section" style={{ padding:'120px 48px', background:'#fff' }}>
+    <section id="tasks-section" style={{ padding:'120px 48px', background:'#fff' }}>
       <div style={{ maxWidth:1200, margin:'0 auto' }}>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:80, alignItems:'center', marginBottom:80 }}>
           <div className="reveal">

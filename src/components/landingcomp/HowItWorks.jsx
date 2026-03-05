@@ -1,15 +1,14 @@
-
 import React from 'react'
 
 const HowItWorks = () => {
-    const steps = [
+  const steps = [
     { num:'01', icon:'🆕', title:'Create Free Account', desc:'Sign up in 30 seconds. No credit card, no hidden fees. Your journey to earning starts immediately.' },
     { num:'02', icon:'🎯', title:'Pick Your Tasks', desc:'Choose from surveys, mini games, creative challenges, watching content, and 50+ more task types updated daily.' },
     { num:'03', icon:'⚡', title:'Earn Creds Instantly', desc:'Every completed task drops Creds directly into your wallet. Watch your balance grow in real-time.' },
     { num:'04', icon:'💰', title:'Cash Out Anytime', desc:'Convert Creds to PayPal cash, Amazon gift cards, crypto, or 100+ reward options with zero minimum threshold.' },
   ]
   return (
- <section id="how-it-works" style={{ padding:'120px 48px', background:'#FAFAFA', position:'relative', overflow:'hidden' }}>
+    <section id="how-it-works" style={{ padding:'120px 48px', background:'#FAFAFA', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:-200, right:-200, width:600, height:600, borderRadius:'50%',
         background:'radial-gradient(circle,rgba(255,107,0,0.05) 0%,transparent 70%)', pointerEvents:'none' }} />
 
