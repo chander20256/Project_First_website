@@ -1,23 +1,33 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 import Logo from '../../assets/logo.png'; // Adjust the path to your logo image
 export default function Footer() {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/AuthPage';
+  
+  if (isAuthPage) {
+    return null;
+  }
+  
   return (
     <footer className="bg-white border-t border-gray-100">
       {/* ===== FIRST ROW: GOOGLE MAP (with side margins) ===== */}
-      <div className="max-w-[1380px] mx-auto px-6 md:px-12 pt-8">
-        <div className="w-full h-[200px] md:h-[250px] overflow-hidden rounded-lg shadow-sm">
-          <iframe
-            title="Company Location"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343004!2d-73.9851076845846!3d40.7588969793269!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+      {!isAuthPage && (
+        <div className="max-w-[1380px] mx-auto px-6 md:px-12 pt-8">
+          <div className="w-full h-[200px] md:h-[250px] overflow-hidden rounded-lg shadow-sm">
+            <iframe
+              title="Company Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343004!2d-73.9851076845846!3d40.7588969793269!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ===== SECOND ROW: MAIN FOOTER CONTENT ===== */}
       <div className="max-w-[1380px] mx-auto px-6 md:px-12 py-12 md:py-16">
