@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
-import Hero from './Hero'
-import TickerBar from './TickerBar'
-import HowItWorks from './HowItWorks'
-import TasksSection from './TasksSection'
-import RewardsSection from './RewardsSection'
-import Leaderboard from './Leaderboard'
-import FAQ from './FAQ'
-import Testimonials from './Testimonials'
-import CTASECTION from './CTASECTION'
+import Hero from '../components/landingcomp/Hero';
+import TickerBar from '../components/landingcomp/TickerBar'
+import HowItWorks from '../components/landingcomp/HowItWorks'
+import TasksSection from '../components/landingcomp/TasksSection'
+import RewardsSection from '../components/landingcomp/RewardsSection'
+import Leaderboard from '../components/landingcomp/Leaderboard'
+import FAQ from '../components/landingcomp/FAQ'
+import Testimonials from '../components/landingcomp/Testimonials'
+import CTASECTION from '../components/landingcomp/CTASECTION'
 
 /* ─── Global CSS lives here so it's injected once for the whole page ─── */
 const GLOBAL_CSS = `
