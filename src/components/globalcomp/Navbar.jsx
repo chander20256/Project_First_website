@@ -330,7 +330,7 @@ export default function Navbar() {
             Start Earning
           </Link>
           <Link
-            to="/Footer"
+            to="/AuthPage"
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: '0.92rem', fontWeight: 600,

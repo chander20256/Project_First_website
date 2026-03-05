@@ -30,6 +30,7 @@ import LandingPage from "./pages/LandingPage";
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
+import AuthPage from './pages/AuthPage';
 import DashboardPage from "./pages/userdashboard/DashboardPage";
 import DashboardWallet from "./pages/userdashboard/DashboardWallet";
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="blog" element={<BlogPage />} />
+          <Route path="AuthPage" element={<AuthPage />} />
         </Route>
 
         {/* Dashboard Routes */}
