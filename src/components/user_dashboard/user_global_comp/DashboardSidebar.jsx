@@ -1,53 +1,76 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 const DashboardSidebar = () => {
-  const menuItems = [
-    { path: "/dashboard", icon: "📊", label: "Dashboard" },
-    { path: "/dashboard/wallet", icon: "💰", label: "Wallet" },
-    { path: "/dashboard/games", icon: "🎮", label: "Games" },
-    { path: "/dashboard/surveys", icon: "📝", label: "Surveys" },
-    { path: "/dashboard/tasks", icon: "✅", label: "Tasks" },
-    { path: "/dashboard/leaderboard", icon: "🏆", label: "Leaderboard" },
-    { path: "/dashboard/referrals", icon: "👥", label: "Referrals" },
+  const location = useLocation();
+
+  const mainItems = [
+    { path: "/dashboard", label: "Dashboard", exact: true },
+    { path: "/dashboard/wallet", label: "Wallet" },
+    { path: "/dashboard/games", label: "Games" },
+    { path: "/dashboard/surveys", label: "Surveys" },
+    { path: "/dashboard/tasks", label: "Tasks" },
+    { path: "/dashboard/leaderboard", label: "Leaderboard" },
+    { path: "/dashboard/referrals", label: "Referrals" },
+    { path: "/dashboard/quizzes", label: "Quizzes" },
   ];
 
+  const bottomItems = [
+    { path: "/dashboard/profile", label: "Profile" },
+    { path: "/dashboard/settings", label: "Settings" },
+  ];
+
+  const isActiveLink = (path, exact = false) => {
+    if (exact) return location.pathname === path;
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <aside
-      style={{
-        width: "250px",
-        background: "#1a1a1a",
-        color: "white",
-        height: "100vh",
-        overflowY: "auto",
-      }}
-    >
-      <div style={{ padding: "20px", borderBottom: "1px solid #333" }}>
-        <h3 style={{ margin: 0, color: "white" }}>Menu</h3>
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-gray-300 border-r border-gray-800 flex flex-col justify-between">
+      {/* TOP SECTION */}
+      <div>
+        {/* Logo */}
+        <div className="px-6 py-5 border-b border-gray-800">
+          <h2 className="text-lg font-semibold text-white">Gaming Forge</h2>
+        </div>
+
+        {/* Main Navigation */}
+        <nav className="flex flex-col mt-4">
+          {mainItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.exact || false}
+              className={`px-6 py-3 text-sm font-medium transition
+                ${
+                  isActiveLink(item.path, item.exact)
+                    ? "bg-gray-800 text-white border-l-4 border-green-500"
+                    : "hover:bg-gray-800 hover:text-white"
+                }`}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
-      <nav style={{ padding: "20px 0" }}>
-        {menuItems.map((item) => (
+
+      {/* BOTTOM SECTION */}
+      <div className="border-t border-gray-800">
+        {bottomItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            style={({ isActive }) => ({
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              padding: "12px 20px",
-              color: isActive ? "#4CAF50" : "#fff",
-              textDecoration: "none",
-              background: isActive ? "#333" : "transparent",
-              borderLeft: isActive
-                ? "4px solid #4CAF50"
-                : "4px solid transparent",
-            })}
+            className={`block px-6 py-3 text-sm font-medium transition
+              ${
+                isActiveLink(item.path)
+                  ? "bg-gray-800 text-white border-l-4 border-green-500"
+                  : "hover:bg-gray-800 hover:text-white"
+              }`}
           >
-            <span style={{ fontSize: "20px" }}>{item.icon}</span>
-            <span>{item.label}</span>
+            {item.label}
           </NavLink>
         ))}
-      </nav>
+      </div>
     </aside>
   );
 };

@@ -33,6 +33,13 @@ import BlogPage from './pages/BlogPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from "./pages/userdashboard/DashboardPage";
 import DashboardWallet from "./pages/userdashboard/DashboardWallet";
+import DashboardGames from "./pages/userdashboard/DashboardGames";  
+import DashboardSurveys from "./pages/userdashboard/DashboardSurveys";
+import DashboardTasks from "./pages/userdashboard/DashboardTasks";
+import DashboardLeaderboard from "./pages/userdashboard/DashboardLeaderboard";
+import DashboardReferrals from "./pages/userdashboard/DashboardReferrals";
+import DashboardQuizzes from "./pages/userdashboard/DashboardQuizzes";
+import DashboardSettings from "./pages/userdashboard/DashboardSettings";
 
 
 function App() {
@@ -52,6 +59,14 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="wallet" element={<DashboardWallet />} /> 
+        <Route path="games" element={<DashboardGames />} />
+        <Route path="surveys" element={<DashboardSurveys />} />
+        <Route path="tasks" element={<DashboardTasks />} />
+        <Route path="leaderboard" element={<DashboardLeaderboard />} />
+        <Route path="referrals" element={<DashboardReferrals />} />
+        <Route path="quizzes" element={<DashboardQuizzes />} />
+        <Route path="settings" element={<DashboardSettings />} />
+        <Route path="profile" element={<DashboardSettings />} />
           {/* Add more dashboard routes as needed */}
         </Route>
       </Routes>

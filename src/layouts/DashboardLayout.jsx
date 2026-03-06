@@ -4,21 +4,13 @@ import DashboardSidebar from "../components/user_dashboard/user_global_comp/Dash
 
 const DashboardLayout = () => {
   return (
-    <div
-      className="dashboard-layout"
-      style={{ display: "flex", height: "100vh" }}
-    >
-      <DashboardSidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <DashboardHeader />
-        <main
-          style={{
-            flex: 1,
-            padding: "24px",
-            backgroundColor: "#f5f5f5",
-            overflowY: "auto",
-          }}
-        >
+    <div className="flex flex-col min-h-screen">
+      <DashboardHeader />
+
+      <div className="flex flex-1">
+        <DashboardSidebar />
+
+        <main className="flex-1 ml-64 p-6 bg-white overflow-y-auto">
           <Outlet />
         </main>
       </div>
