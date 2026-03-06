@@ -1,16 +1,7 @@
 import React from 'react'
-import { useLocation } from 'react-router-dom'
-import Logo from '../../assets/logo.png'; // Adjust the path to your logo image
 import Logo from '../../assets/logo.png'
 
 export default function Footer() {
-  const location = useLocation();
-  const isAuthPage = location.pathname === '/AuthPage';
-  
-  if (isAuthPage) {
-    return null;
-  }
-  
 
   const quickLinks  = ['Home', 'About Us', 'Blog', 'FAQ', 'Contact Us']
   const legalLinks  = ['Terms & Conditions', 'Privacy Policy', 'Responsible Gaming']
@@ -32,24 +23,6 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="bg-white border-t border-gray-100">
-      {/* ===== FIRST ROW: GOOGLE MAP (with side margins) ===== */}
-      {!isAuthPage && (
-        <div className="max-w-[1380px] mx-auto px-6 md:px-12 pt-8">
-          <div className="w-full h-[200px] md:h-[250px] overflow-hidden rounded-lg shadow-sm">
-            <iframe
-              title="Company Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343004!2d-73.9851076845846!3d40.7588969793269!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </div>
-      )}
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800;900&display=swap');
@@ -102,18 +75,73 @@ export default function Footer() {
           border-color: #FF6B00 !important;
         }
 
-        /* Map responsive height */
-        .footer-map { height: 220px; }
-
-        @media (max-width: 640px) {
-          .footer-map { height: 160px; }
-          .footer-wordmark { font-size: clamp(4rem, 22vw, 7rem) !important; }
-          .footer-bottom-bar { text-align: center; }
-          .footer-bottom-links { justify-content: center; }
+        /* ── FOOTER GRID — pure CSS, no Tailwind conflicts ── */
+        #footer-container {
+          max-width: 1380px;
+          margin: 0 auto;
+          padding: 56px 48px;
+          position: relative;
+          zIndex: 1;
         }
 
-        @media (min-width: 641px) and (max-width: 1023px) {
-          .footer-wordmark { font-size: clamp(5rem, 16vw, 10rem) !important; }
+        #footer-cols {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr 1fr 1fr;
+          gap: 40px;
+        }
+
+        #footer-bottom-inner {
+          max-width: 1380px;
+          margin: 0 auto;
+          padding: 20px 48px;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+        }
+
+        /* Ghost wordmark */
+        .footer-wordmark {
+          font-size: clamp(6rem, 18vw, 14rem);
+        }
+
+        /* ── TABLET (≤ 1024px): 2-col grid ── */
+        @media (max-width: 1024px) {
+          #footer-cols {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px 32px;
+          }
+          .footer-wordmark {
+            font-size: clamp(5rem, 16vw, 10rem) !important;
+          }
+        }
+
+        /* ── MOBILE (≤ 640px): single column ── */
+        @media (max-width: 640px) {
+          #footer-container {
+            padding: 40px 20px;
+          }
+          #footer-cols {
+            grid-template-columns: 1fr;
+            gap: 36px;
+          }
+          #footer-bottom-inner {
+            padding: 16px 20px;
+            flex-direction: column;
+            text-align: center;
+          }
+          .footer-wordmark {
+            font-size: clamp(4rem, 22vw, 7rem) !important;
+          }
+          .footer-bottom-links {
+            justify-content: center;
+          }
+          .footer-rewards-btn {
+            display: flex !important;
+            width: 100%;
+            justify-content: center;
+          }
         }
       `}</style>
 
@@ -150,7 +178,6 @@ export default function Footer() {
             transform: 'translateX(-50%)',
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(6rem, 18vw, 14rem)',
             letterSpacing: '-0.02em',
             textTransform: 'uppercase',
             color: 'transparent',
@@ -165,54 +192,32 @@ export default function Footer() {
           REVADOO
         </div>
 
-        {/* ══ ROW 1 — Google Map ══ */}
-        <div className="max-w-[1380px] mx-auto px-6 md:px-12 pt-10" style={{ position: 'relative', zIndex: 1 }}>
-          <div
-            className="footer-map w-full overflow-hidden"
-            style={{
-              borderRadius: 20,
-              border: '1px solid rgba(255,107,0,0.2)',
-              boxShadow: '0 0 40px rgba(255,107,0,0.06)',
-            }}
-          >
-            <iframe
-              title="Revadoo Company Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343004!2d-73.9851076845846!3d40.7588969793269!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-              width="100%" height="100%"
-              style={{ border: 0, filter: 'grayscale(1) brightness(0.6) contrast(1.2)' }}
-              allowFullScreen loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </div>
+        {/* ══ ROW 1 — Google Map (commented out) ══ */}
+        {/* <div style={{ maxWidth:1380, margin:'0 auto', padding:'40px 48px 0', position:'relative', zIndex:1 }}>
+          ...map iframe...
+        </div> */}
 
-        {/* ══ ROW 2 — Main 4-col footer grid ══ */}
-        <div
-          className="max-w-[1380px] mx-auto px-6 md:px-12 py-14"
-          style={{ position: 'relative', zIndex: 1 }}
-        >
+        {/* ══ MAIN GRID ══ */}
+        <div id="footer-container" style={{ position: 'relative', zIndex: 1 }}>
+
           {/* Orange gradient divider */}
           <div style={{ height: 1, background: 'linear-gradient(90deg, #FF6B00, rgba(255,107,0,0.1), transparent)', marginBottom: 52 }} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+          <div id="footer-cols">
 
             {/* ── Col 1: Logo + About ── */}
             <div>
               <img
                 src={Logo}
-                alt="Revadoo — Task and Earn Rewards Platform"
-                className="h-12 w-auto mb-6"
+                alt="Revadoo"
+                style={{ height: 48, width: 'auto', marginBottom: 24 }}
               />
-
-              {/* Orange dash label */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                 <div style={{ width: 24, height: 2, background: '#FF6B00', flexShrink: 0 }} />
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.25em', color: '#FF6B00', textTransform: 'uppercase' }}>
                   EARN. REDEEM. REPEAT.
                 </span>
               </div>
-
-              {/* Bigger body text */}
               <p style={{
                 fontWeight: 400, fontSize: '1.05rem',
                 color: 'rgba(255,255,255,0.5)', lineHeight: 1.7,
@@ -220,7 +225,6 @@ export default function Footer() {
               }}>
                 Turning spare time into real cash and gift cards for thousands of earners every day.
               </p>
-
               <div style={{ display: 'flex', gap: 8 }}>
                 {socialIcons.map((s) => (
                   <a key={s.label} href="#" aria-label={s.label} className="social-icon">
@@ -232,7 +236,6 @@ export default function Footer() {
 
             {/* ── Col 2: Quick Links ── */}
             <div>
-              {/* Bigger column heading */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
                 <div style={{ width: 24, height: 2, background: '#FF6B00' }} />
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
@@ -260,7 +263,6 @@ export default function Footer() {
             {/* ── Col 3: Legal + Contact ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
 
-              {/* Legal */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
                   <div style={{ width: 24, height: 2, background: '#FF6B00' }} />
@@ -286,7 +288,6 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* Contact */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
                   <div style={{ width: 24, height: 2, background: '#FF6B00' }} />
@@ -322,7 +323,6 @@ export default function Footer() {
                       }}>
                         {icon}
                       </span>
-                      {/* Bigger contact text */}
                       <span style={{ fontWeight: 400, fontSize: '1rem', letterSpacing: '0.02em' }}>{text}</span>
                     </a>
                   ))}
@@ -338,13 +338,9 @@ export default function Footer() {
                   Payout Methods
                 </span>
               </div>
-
-              {/* Bigger description */}
               <p style={{ fontWeight: 400, fontSize: '1.05rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, letterSpacing: '0.01em', marginBottom: 18 }}>
                 Fast, secure payouts via all major providers. No minimum required.
               </p>
-
-              {/* Bigger payout badges */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
                 {payouts.map((p) => (
                   <span
@@ -364,9 +360,9 @@ export default function Footer() {
                   </span>
                 ))}
               </div>
-
               <a
                 href="#rewards-section"
+                className="footer-rewards-btn"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
                   background: 'transparent', color: '#FF6B00',
@@ -397,13 +393,13 @@ export default function Footer() {
 
         {/* ══ BOTTOM BAR ══ */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
-          <div className="max-w-[1380px] mx-auto px-6 md:px-12 py-5 flex flex-col md:flex-row justify-between items-center gap-3 footer-bottom-bar">
-            <p style={{ fontWeight: 400, fontSize: '0.85rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}>
+          <div id="footer-bottom-inner">
+            <p style={{ fontWeight: 400, fontSize: '0.85rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em', margin: 0 }}>
               © 2026{' '}
               <span style={{ color: '#FF6B00', fontWeight: 700 }}>Revadoo</span>
               . All Rights Reserved.
             </p>
-            <div className="flex gap-6 footer-bottom-links">
+            <div className="footer-bottom-links" style={{ display: 'flex', gap: 24 }}>
               {['Privacy', 'Terms', 'Cookies'].map((item) => (
                 <a
                   key={item}

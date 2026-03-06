@@ -63,3 +63,56 @@
   border-color: #FF6B00; color: #FF6B00;
   background: rgba(255,107,0,0.05);
 }
+
+/* ── RESPONSIVE ADDITIONS (layout/touch only, nothing above changed) ── */
+
+/* Mobile — slightly larger tap targets & font for readability */
+@media (max-width: 640px) {
+  .btn-primary {
+    font-size: 1rem;        /* easier to read on small screens */
+    padding: 13px 20px;    /* bigger tap target (min 44px height) */
+    width: 100%;            /* full-width buttons on mobile */
+    justify-content: center;
+  }
+  .btn-outline {
+    font-size: 1rem;
+    padding: 13px 20px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Tablet (641–1023px) — medium tap targets */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .btn-primary { padding: 11px 22px; }
+  .btn-outline  { padding: 11px 22px; }
+}
+
+/* Touch devices — disable hover effects that feel broken on tap */
+@media (hover: none) {
+  .btn-primary:hover {
+    transform: none;
+    box-shadow: 0 4px 20px rgba(255,107,0,0.4); /* reset to default */
+  }
+  .btn-outline:hover {
+    border-color: #E0E0E0;
+    color: #0A0A0A;
+    background: transparent;
+  }
+  .nav-link:hover .nav-underline {
+    transform: scaleX(0); /* don't trigger underline on tap-then-release */
+  }
+  .nav-link:hover {
+    color: inherit !important;
+  }
+}
+
+/* Reduce motion — respect user's system preference */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes float      { from, to { transform: translateY(0); } }
+  @keyframes pulse-dot  { from, to { opacity: 1; transform: scale(1); } }
+  @keyframes flip-in    { from, to { opacity: 1; transform: none; } }
+  .btn-primary,
+  .btn-outline          { transition: none; }
+  .nav-link .nav-underline { transition: none; }
+}
