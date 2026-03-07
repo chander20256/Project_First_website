@@ -1,33 +1,126 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const DashboardHeader = () => {
-  return (
-    <header className="ml-64 bg-gray-900 border-b border-gray-800 px-8 py-4 flex items-center justify-between">
-      {/* Left Section */}
-      <div className="flex items-center gap-6">
-        <h1 className="text-xl font-semibold text-white">Dashboard</h1>
+  useEffect(() => {
+    if (!document.getElementById("dashboard-fonts")) {
+      const link = document.createElement("link");
+      link.id = "dashboard-fonts";
+      link.rel = "stylesheet";
+      link.href =
+        "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap";
+      document.head.appendChild(link);
+    }
+  }, []);
 
-        <span className="text-sm text-gray-400">User Control Panel</span>
-      </div>
+  return (
+    <header
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8"
+      style={{
+        background: "rgba(10,10,10,0.98)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,107,0,0.15)",
+        boxShadow: "0 2px 24px rgba(0,0,0,0.4)",
+        height: "65px",
+      }}
+    >
+      {/* Logo */}
+      <Link
+        to="/dashboard"
+        style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: "1.85rem",
+          letterSpacing: "0.08em",
+          lineHeight: 1,
+          textDecoration: "none",
+          color: "white",
+        }}
+      >
+        REVA<span style={{ color: "#FF6B00" }}>Doo</span>
+      </Link>
 
       {/* Right Section */}
       <div className="flex items-center gap-6">
         {/* Notifications */}
-        <button className="text-gray-400 hover:text-white transition">
-          Notifications
+        <button
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            color: "rgba(255,255,255,0.5)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B00")}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "rgba(255,255,255,0.5)")
+          }
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
         </button>
 
         {/* Balance */}
-        <div className="text-sm text-gray-300">
-          Balance: <span className="text-green-400 font-medium">$124</span>
+        <div
+          className="flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-semibold"
+          style={{
+            background: "rgba(255,107,0,0.1)",
+            border: "1px solid rgba(255,107,0,0.25)",
+            fontFamily: "'DM Sans', sans-serif",
+            color: "rgba(255,255,255,0.7)",
+          }}
+        >
+          Balance: <span style={{ color: "#FF6B00" }}>$124</span>
         </div>
 
+        {/* Divider */}
+        <div
+          style={{ width: 1, height: 28, background: "rgba(255,255,255,0.08)" }}
+        />
+
         {/* Profile */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gray-700"></div>
-          <span className="text-sm text-gray-300">User</span>
+        <div className="flex items-center gap-3 cursor-pointer">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+            style={{
+              background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+              boxShadow: "0 4px 14px rgba(255,107,0,0.32)",
+            }}
+          >
+            U
+          </div>
+          <span
+            className="text-sm font-medium"
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              color: "rgba(255,255,255,0.7)",
+            }}
+          >
+            User
+          </span>
         </div>
       </div>
+
+      {/* Orange accent line at bottom */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, #FF6B00 50%, transparent 100%)",
+        }}
+      />
     </header>
   );
 };

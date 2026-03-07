@@ -1,19 +1,21 @@
 import { Outlet } from "react-router-dom";
 import DashboardHeader from "../components/user_dashboard/user_global_comp/DashboardHeader";
 import DashboardSidebar from "../components/user_dashboard/user_global_comp/DashboardSidebar";
-
+import Footer from "../components/globalcomp/Footer";
 const DashboardLayout = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col bg-gray-950">
       <DashboardHeader />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 pt-[65px]">
         <DashboardSidebar />
 
-        <main className="flex-1 ml-64 p-6 bg-white overflow-y-auto">
+        <main className="flex-1 p-6 bg-white">
           <Outlet />
         </main>
       </div>
+
+      <Footer/>
     </div>
   );
 };
