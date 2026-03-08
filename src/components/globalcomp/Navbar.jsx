@@ -28,6 +28,7 @@ export default function Navbar() {
     { to: '/',        label: 'Home' },
     { to: '/about',   label: 'About' },
     { to: '/Blog',    label: 'Blog' },
+     { to: '/Infopage', label: 'Howitworks' },
     { to: '/contact', label: 'Contact Us' },
   ]
 

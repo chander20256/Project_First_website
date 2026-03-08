@@ -40,6 +40,7 @@ import DashboardLeaderboard from "./pages/userdashboard/DashboardLeaderboard";
 import DashboardReferrals from "./pages/userdashboard/DashboardReferrals";
 import DashboardQuizzes from "./pages/userdashboard/DashboardQuizzes";
 import DashboardSettings from "./pages/userdashboard/DashboardSettings";
+import Infopage from "./pages/Infopage";
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="blog" element={<BlogPage />} />
+          <Route path="Infopage" element={<Infopage />} />
           <Route path="AuthPage" element={<AuthPage />} />
         </Route>
 
