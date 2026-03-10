@@ -13,17 +13,68 @@ const floatingParticles = Array.from({ length: 18 }, (_, i) => ({
 }));
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("login"); // "login" | "register"
+  const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "" });
   const [focused, setFocused] = useState(null);
   const [shake, setShake] = useState(false);
   const [successPulse, setSuccessPulse] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const handleSubmit = () => {
-    setShake(true);
-    setTimeout(() => setShake(false), 500);
-    setSuccessPulse(true);
-    setTimeout(() => setSuccessPulse(false), 800);
+  const handleSubmit = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const url = mode === "login"
+        ? "http://localhost:5000/api/auth/login"
+        : "http://localhost:5000/api/auth/register";
+
+      const body = mode === "login"
+        ? { email: form.email, password: form.password }
+        : { username: form.username, email: form.email, password: form.password, confirm: form.confirm };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMsg(data.message || "Something went wrong");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Save token + user to localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setSuccessPulse(true);
+      setTimeout(() => setSuccessPulse(false), 800);
+
+      setSuccessMsg(
+        mode === "login"
+          ? `Welcome back, ${data.user.username}! 🎉`
+          : `Account created! You have ${data.user.creds} free creds 🎉`
+      );
+
+      setForm({ username: "", email: "", password: "", confirm: "" });
+
+    } catch (err) {
+      console.error("Error:", err);
+      setErrorMsg("Cannot connect to server. Make sure your backend is running on port 5000.");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -37,20 +88,14 @@ export default function AuthPage() {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Google Font Import */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         @keyframes floatUp {
           0% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
           50% { opacity: 0.7; }
           100% { transform: translateY(-60px) rotate(180deg); opacity: 0; }
-        }
-        @keyframes pulse-ring {
-          0% { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(1.8); opacity: 0; }
         }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -71,13 +116,8 @@ export default function AuthPage() {
           from { width: 0; }
           to { width: 100%; }
         }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
+        @keyframes spinLoader {
           to { transform: rotate(360deg); }
-        }
-        @keyframes bgShift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
         }
 
         .particle {
@@ -87,7 +127,6 @@ export default function AuthPage() {
           animation: floatUp var(--dur) var(--delay) infinite ease-in-out;
           pointer-events: none;
         }
-
         .input-field {
           width: 100%;
           background: #fff;
@@ -104,10 +143,7 @@ export default function AuthPage() {
           border-color: ${ORANGE};
           box-shadow: 0 0 0 3px rgba(255,107,0,0.12);
         }
-        .input-field::placeholder {
-          color: #bbb;
-        }
-
+        .input-field::placeholder { color: #bbb; }
         .btn-primary {
           width: 100%;
           background: linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_LIGHT} 100%);
@@ -124,14 +160,16 @@ export default function AuthPage() {
           transition: transform 0.15s, box-shadow 0.15s;
           position: relative;
           overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(255,107,0,0.45);
         }
-        .btn-primary:active {
-          transform: translateY(0px);
-        }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
         .btn-primary::after {
           content: '';
           position: absolute;
@@ -139,7 +177,6 @@ export default function AuthPage() {
           background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
           pointer-events: none;
         }
-
         .tab-btn {
           flex: 1;
           background: none;
@@ -154,18 +191,9 @@ export default function AuthPage() {
           transition: color 0.2s;
           position: relative;
         }
-
-        .success-pulse {
-          animation: glow 0.8s ease-out;
-        }
-        .shake-anim {
-          animation: shake 0.45s ease;
-        }
-
-        .card-animate {
-          animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
+        .success-pulse { animation: glow 0.8s ease-out; }
+        .shake-anim { animation: shake 0.45s ease; }
+        .card-animate { animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
         .social-btn {
           flex: 1;
           background: #fff;
@@ -183,26 +211,29 @@ export default function AuthPage() {
           gap: 8px;
           transition: border-color 0.2s, background 0.2s;
         }
-        .social-btn:hover {
-          border-color: ${ORANGE};
-          background: #fff8f3;
-        }
-
+        .social-btn:hover { border-color: ${ORANGE}; background: #fff8f3; }
         .geo-circle {
           position: absolute;
           border-radius: 50%;
           border: 1.5px solid rgba(255,107,0,0.12);
           pointer-events: none;
         }
+        .loader {
+          width: 18px; height: 18px;
+          border: 2px solid rgba(255,255,255,0.4);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: spinLoader 0.6s linear infinite;
+          flex-shrink: 0;
+        }
       `}</style>
 
-      {/* Background geometric circles */}
+      {/* Background circles */}
       <div className="geo-circle" style={{ width: 600, height: 600, top: -200, right: -200 }} />
       <div className="geo-circle" style={{ width: 400, height: 400, top: -100, right: -100 }} />
       <div className="geo-circle" style={{ width: 800, height: 800, bottom: -300, left: -300 }} />
       <div className="geo-circle" style={{ width: 500, height: 500, bottom: -150, left: -150 }} />
 
-      {/* Floating particles */}
       {floatingParticles.map(p => (
         <div key={p.id} className="particle" style={{
           left: p.left, top: p.top,
@@ -212,7 +243,6 @@ export default function AuthPage() {
         }} />
       ))}
 
-      {/* Dot grid texture */}
       <div style={{
         position: "absolute", inset: 0,
         backgroundImage: "radial-gradient(circle, rgba(255,107,0,0.12) 1px, transparent 1px)",
@@ -220,19 +250,17 @@ export default function AuthPage() {
         pointerEvents: "none",
       }} />
 
-      {/* Left branding panel (desktop) */}
+      {/* Left branding panel */}
       <div style={{
         display: "flex", flexDirection: "column",
         justifyContent: "center", padding: "60px 52px",
         maxWidth: 420, flex: 1,
         position: "relative", zIndex: 2,
       }}>
-        {/* Logo */}
         <div style={{ marginBottom: 40 }}>
           <span style={{
             fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 900, fontSize: 36, letterSpacing: 2,
-            color: "#111",
+            fontWeight: 900, fontSize: 36, letterSpacing: 2, color: "#111",
           }}>
             REVA<span style={{ color: ORANGE }}>DOO</span>
           </span>
@@ -247,11 +275,13 @@ export default function AuthPage() {
           <div>& GET</div>
           <div>REWARDED</div>
         </div>
+
         <div style={{
           width: 80, height: 4, borderRadius: 2,
           background: `linear-gradient(90deg, ${ORANGE}, transparent)`,
           marginBottom: 28,
         }} />
+
         <p style={{
           fontFamily: "'Barlow', sans-serif",
           fontSize: 16, color: "#666", lineHeight: 1.6, marginBottom: 40,
@@ -259,7 +289,6 @@ export default function AuthPage() {
           REVADOO turns your everyday time into tangible gains. Browse hundreds of tasks across surveys, games, creative challenges, and more — then convert your Creds into real gift cards, cash, and premium rewards.
         </p>
 
-        {/* Stats row */}
         <div style={{ display: "flex", gap: 32 }}>
           {[
             { val: "2.4M+", label: "Active Users" },
@@ -279,14 +308,12 @@ export default function AuthPage() {
           ))}
         </div>
 
-        {/* Floating reward card */}
         <div style={{
           marginTop: 48, background: "#fff",
           borderRadius: 14, padding: "14px 20px",
           display: "flex", alignItems: "center", gap: 14,
           boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-          border: "1px solid #f0e8e0",
-          maxWidth: 280,
+          border: "1px solid #f0e8e0", maxWidth: 280,
         }}>
           <div style={{
             width: 42, height: 42, borderRadius: 10,
@@ -299,20 +326,17 @@ export default function AuthPage() {
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 800, fontSize: 20, color: ORANGE,
             }}>+250 CREDS</div>
-            <div style={{
-              fontFamily: "'Barlow', sans-serif",
-              fontSize: 12, color: "#999",
-            }}>Just Click & earned!</div>
+            <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>
+              Just Click & earned!
+            </div>
           </div>
         </div>
 
-        {/* Daily tasks widget */}
         <div style={{
           marginTop: 16, background: "#fff",
           borderRadius: 14, padding: "14px 20px",
           boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-          border: "1px solid #f0e8e0",
-          maxWidth: 280,
+          border: "1px solid #f0e8e0", maxWidth: 280,
         }}>
           <div style={{
             fontFamily: "'Barlow', sans-serif",
@@ -330,14 +354,13 @@ export default function AuthPage() {
               }}>{done ? "✓" : ""}</div>
             ))}
           </div>
-          <div style={{
-            fontFamily: "'Barlow', sans-serif",
-            fontSize: 12, color: "#999",
-          }}>7 Day Login Rewards</div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>
+            7 Day Login Rewards
+          </div>
         </div>
       </div>
 
-      {/* Auth Card */}
+      {/* ============ AUTH CARD ============ */}
       <div style={{
         width: "100%", maxWidth: 420, margin: "32px 24px",
         position: "relative", zIndex: 3,
@@ -351,13 +374,13 @@ export default function AuthPage() {
             overflow: "hidden",
           }}
         >
-          {/* Tab switcher */}
+          {/* Tabs */}
           <div style={{ display: "flex", borderBottom: "2px solid #f0e8e0" }}>
             {["login", "register"].map(tab => (
               <button
                 key={tab}
                 className="tab-btn"
-                onClick={() => setMode(tab)}
+                onClick={() => { setMode(tab); setErrorMsg(""); setSuccessMsg(""); }}
                 style={{ color: mode === tab ? ORANGE : "#bbb" }}
               >
                 {tab === "login" ? "Sign In" : "Register"}
@@ -373,7 +396,7 @@ export default function AuthPage() {
           </div>
 
           <div style={{ padding: "36px 36px 32px" }}>
-            {/* Header */}
+
             <div style={{ marginBottom: 28 }}>
               <h2 style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
@@ -382,15 +405,34 @@ export default function AuthPage() {
               }}>
                 {mode === "login" ? "Welcome Back" : "Start Earning Today"}
               </h2>
-              <p style={{
-                fontFamily: "'Barlow', sans-serif",
-                fontSize: 14, color: "#999",
-              }}>
+              <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: 14, color: "#999" }}>
                 {mode === "login"
                   ? "Sign in to your REVADOO account"
                   : "Create your free account and get 250 creds"}
               </p>
             </div>
+
+            {/* ✅ Error Message Box */}
+            {errorMsg && (
+              <div style={{
+                background: "#fff0f0", border: "1.5px solid #ffcccc",
+                borderRadius: 10, padding: "10px 14px", marginBottom: 18,
+                fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#cc0000",
+              }}>
+                ❌ {errorMsg}
+              </div>
+            )}
+
+            {/* ✅ Success Message Box */}
+            {successMsg && (
+              <div style={{
+                background: "#f0fff4", border: "1.5px solid #b2f5c8",
+                borderRadius: 10, padding: "10px 14px", marginBottom: 18,
+                fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#1a7f3c",
+              }}>
+                ✅ {successMsg}
+              </div>
+            )}
 
             {/* Social buttons */}
             <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
@@ -411,7 +453,6 @@ export default function AuthPage() {
               </button>
             </div>
 
-            {/* Divider */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ flex: 1, height: 1, background: "#f0e8e0" }} />
               <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#ccc" }}>
@@ -420,7 +461,7 @@ export default function AuthPage() {
               <div style={{ flex: 1, height: 1, background: "#f0e8e0" }} />
             </div>
 
-            {/* Fields */}
+            {/* Form Fields */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {mode === "register" && (
                 <div>
@@ -507,14 +548,14 @@ export default function AuthPage() {
               )}
             </div>
 
-            {/* CTA Button */}
+            {/* Submit Button */}
             <div style={{ marginTop: 24 }}>
-              <button className="btn-primary" onClick={handleSubmit}>
-                {mode === "login" ? " Sign In" : " Create Account & Earn"}
+              <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+                {loading && <span className="loader" />}
+                {loading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account & Earn"}
               </button>
             </div>
 
-            {/* Bonus badge on register */}
             {mode === "register" && (
               <div style={{
                 marginTop: 16, background: "#fff8f3",
@@ -522,17 +563,13 @@ export default function AuthPage() {
                 borderRadius: 10, padding: "10px 14px",
                 display: "flex", alignItems: "center", gap: 10,
               }}>
-                <span style={{ fontSize: 18 }}></span>
-                <span style={{
-                  fontFamily: "'Barlow', sans-serif",
-                  fontSize: 13, color: "#555",
-                }}>
+                <span style={{ fontSize: 18 }}>🎁</span>
+                <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#555" }}>
                   <strong style={{ color: ORANGE }}>+250 FREE CREDS</strong> added to your account on signup
                 </span>
               </div>
             )}
 
-            {/* Switch mode */}
             <p style={{
               marginTop: 22, textAlign: "center",
               fontFamily: "'Barlow', sans-serif",
@@ -540,7 +577,7 @@ export default function AuthPage() {
             }}>
               {mode === "login" ? "New here? " : "Already have an account? "}
               <button
-                onClick={() => setMode(mode === "login" ? "register" : "login")}
+                onClick={() => { setMode(mode === "login" ? "register" : "login"); setErrorMsg(""); setSuccessMsg(""); }}
                 style={{
                   background: "none", border: "none",
                   color: ORANGE, fontWeight: 700, cursor: "pointer",
@@ -554,13 +591,12 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Footer trust line */}
         <p style={{
           textAlign: "center", marginTop: 18,
           fontFamily: "'Barlow', sans-serif",
           fontSize: 12, color: "#bbb",
         }}>
-           Secure login · No spam · Cancel anytime
+          🔒 Secure login · No spam · Cancel anytime
         </p>
       </div>
     </div>
