@@ -1,3 +1,6 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first'); // Fix for Node v18+ DNS issues
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -7,19 +10,29 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-// ✅ Middleware - must come BEFORE routes
-app.use(cors({ origin: 'http://localhost:3000' })); // your React app's URL
-app.use(express.json()); // lets Express read JSON from requests
+// ─── Middleware ───────────────────────────────────────────
+app.use(cors({ origin: 'http://localhost:5173' })); // Vite default port
+app.use(express.json());
 
-// ✅ Routes
+// ─── Routes ──────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 
-// ✅ Connect to MongoDB, then start server
-mongoose.connect(process.env.MONGO_URI)
+// ─── Health check ────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({ message: '✅ REVADOO Backend is running!' });
+});
+
+// ─── Connect to MongoDB then start server ────────────────
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 10000,
+  family: 4,
+})
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(process.env.PORT, () => {
-      console.log(`✅ Server running on port ${process.env.PORT}`);
+    app.listen(process.env.PORT || 5000, () => {
+      console.log(`✅ Server running on http://localhost:${process.env.PORT || 5000}`);
     });
   })
-  .catch((err) => console.error('❌ MongoDB error:', err));
+  .catch((err) => {
+    console.error('❌ MongoDB error:', err.message);
+  });
