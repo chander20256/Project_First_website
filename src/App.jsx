@@ -56,6 +56,7 @@ function App() {
           <Route path="Infopage" element={<Infopage />} />
           <Route path="AuthPage" element={<AuthPage />} />
         </Route>
+        
 
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>

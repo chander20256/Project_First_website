@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADDED
 
 const ORANGE = "#FF6B00";
 const ORANGE_LIGHT = "#FF8C00";
@@ -13,6 +14,7 @@ const floatingParticles = Array.from({ length: 18 }, (_, i) => ({
 }));
 
 export default function AuthPage() {
+  const navigate = useNavigate(); // ✅ ADDED
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "" });
   const [focused, setFocused] = useState(null);
@@ -57,41 +59,36 @@ export default function AuthPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       setSuccessPulse(true);
-      setTimeout(() => setSuccessPulse(false), 800);
-
       setSuccessMsg(
         mode === "login"
           ? `Welcome back, ${data.user.username}! 🎉`
           : `Account created! You have ${data.user.creds} free creds 🎉`
       );
 
-      setForm({ username: "", email: "", password: "", confirm: "" });
+      // ✅ Redirect to dashboard after 1 second (so user sees success message)
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
 
     } catch (err) {
       console.error("Error:", err);
       setErrorMsg("Cannot connect to server. Make sure your backend is running on port 5000.");
       setShake(true);
       setTimeout(() => setShake(false), 500);
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div style={{
-      minHeight: "100vh",
-      background: "#faf8f5",
+      minHeight: "100vh", background: "#faf8f5",
       fontFamily: "'Barlow Condensed', sans-serif",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-      overflow: "hidden",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      position: "relative", overflow: "hidden",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         @keyframes floatUp {
           0% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
           50% { opacity: 0.7; }
@@ -112,123 +109,65 @@ export default function AuthPage() {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(255,107,0,0.0); }
           50% { box-shadow: 0 0 18px 4px rgba(255,107,0,0.35); }
         }
-        @keyframes lineExpand {
-          from { width: 0; }
-          to { width: 100%; }
-        }
-        @keyframes spinLoader {
-          to { transform: rotate(360deg); }
-        }
-
+        @keyframes lineExpand { from { width: 0; } to { width: 100%; } }
+        @keyframes spinLoader { to { transform: rotate(360deg); } }
         .particle {
-          position: absolute;
-          background: ${ORANGE};
-          border-radius: 2px;
+          position: absolute; background: ${ORANGE}; border-radius: 2px;
           animation: floatUp var(--dur) var(--delay) infinite ease-in-out;
           pointer-events: none;
         }
         .input-field {
-          width: 100%;
-          background: #fff;
-          border: 2px solid #e8e0d8;
-          border-radius: 10px;
-          padding: 14px 18px;
-          font-family: 'Barlow', sans-serif;
-          font-size: 15px;
-          color: #222;
-          outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s;
+          width: 100%; background: #fff; border: 2px solid #e8e0d8;
+          border-radius: 10px; padding: 14px 18px;
+          font-family: 'Barlow', sans-serif; font-size: 15px; color: #222;
+          outline: none; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .input-field:focus {
-          border-color: ${ORANGE};
-          box-shadow: 0 0 0 3px rgba(255,107,0,0.12);
-        }
+        .input-field:focus { border-color: ${ORANGE}; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
         .input-field::placeholder { color: #bbb; }
         .btn-primary {
-          width: 100%;
-          background: linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_LIGHT} 100%);
-          color: white;
-          border: none;
-          border-radius: 10px;
-          padding: 16px;
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 20px;
-          font-weight: 800;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: transform 0.15s, box-shadow 0.15s;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
+          width: 100%; background: linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_LIGHT} 100%);
+          color: white; border: none; border-radius: 10px; padding: 16px;
+          font-family: 'Barlow Condensed', sans-serif; font-size: 20px;
+          font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+          cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+          position: relative; overflow: hidden; display: flex;
+          align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(255,107,0,0.45);
-        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,0,0.45); }
         .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
         .btn-primary::after {
-          content: '';
-          position: absolute;
-          inset: 0;
+          content: ''; position: absolute; inset: 0;
           background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
           pointer-events: none;
         }
         .tab-btn {
-          flex: 1;
-          background: none;
-          border: none;
-          padding: 14px 0;
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 18px;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: color 0.2s;
-          position: relative;
+          flex: 1; background: none; border: none; padding: 14px 0;
+          font-family: 'Barlow Condensed', sans-serif; font-size: 18px;
+          font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          cursor: pointer; transition: color 0.2s; position: relative;
         }
         .success-pulse { animation: glow 0.8s ease-out; }
         .shake-anim { animation: shake 0.45s ease; }
         .card-animate { animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
         .social-btn {
-          flex: 1;
-          background: #fff;
-          border: 2px solid #e8e0d8;
-          border-radius: 10px;
-          padding: 11px 8px;
-          font-family: 'Barlow', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          color: #444;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
+          flex: 1; background: #fff; border: 2px solid #e8e0d8; border-radius: 10px;
+          padding: 11px 8px; font-family: 'Barlow', sans-serif; font-size: 13px;
+          font-weight: 600; color: #444; cursor: pointer; display: flex;
+          align-items: center; justify-content: center; gap: 8px;
           transition: border-color 0.2s, background 0.2s;
         }
         .social-btn:hover { border-color: ${ORANGE}; background: #fff8f3; }
         .geo-circle {
-          position: absolute;
-          border-radius: 50%;
-          border: 1.5px solid rgba(255,107,0,0.12);
-          pointer-events: none;
+          position: absolute; border-radius: 50%;
+          border: 1.5px solid rgba(255,107,0,0.12); pointer-events: none;
         }
         .loader {
-          width: 18px; height: 18px;
-          border: 2px solid rgba(255,255,255,0.4);
-          border-top-color: #fff;
-          border-radius: 50%;
-          animation: spinLoader 0.6s linear infinite;
-          flex-shrink: 0;
+          width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4);
+          border-top-color: #fff; border-radius: 50%;
+          animation: spinLoader 0.6s linear infinite; flex-shrink: 0;
         }
       `}</style>
 
-      {/* Background circles */}
       <div className="geo-circle" style={{ width: 600, height: 600, top: -200, right: -200 }} />
       <div className="geo-circle" style={{ width: 400, height: 400, top: -100, right: -100 }} />
       <div className="geo-circle" style={{ width: 800, height: 800, bottom: -300, left: -300 }} />
@@ -236,205 +175,109 @@ export default function AuthPage() {
 
       {floatingParticles.map(p => (
         <div key={p.id} className="particle" style={{
-          left: p.left, top: p.top,
-          width: p.size, height: p.size,
-          "--dur": p.duration,
-          "--delay": p.delay,
+          left: p.left, top: p.top, width: p.size, height: p.size,
+          "--dur": p.duration, "--delay": p.delay,
         }} />
       ))}
 
       <div style={{
         position: "absolute", inset: 0,
         backgroundImage: "radial-gradient(circle, rgba(255,107,0,0.12) 1px, transparent 1px)",
-        backgroundSize: "32px 32px",
-        pointerEvents: "none",
+        backgroundSize: "32px 32px", pointerEvents: "none",
       }} />
 
       {/* Left branding panel */}
       <div style={{
-        display: "flex", flexDirection: "column",
-        justifyContent: "center", padding: "60px 52px",
-        maxWidth: 420, flex: 1,
+        display: "flex", flexDirection: "column", justifyContent: "center",
+        padding: "60px 52px", maxWidth: 420, flex: 1,
         position: "relative", zIndex: 2,
       }}>
         <div style={{ marginBottom: 40 }}>
-          <span style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 900, fontSize: 36, letterSpacing: 2, color: "#111",
-          }}>
+          <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 36, letterSpacing: 2, color: "#111" }}>
             REVA<span style={{ color: ORANGE }}>DOO</span>
           </span>
         </div>
-
-        <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontWeight: 900, fontSize: 68, lineHeight: 1,
-          color: "#111", letterSpacing: -1, marginBottom: 16,
-        }}>
+        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 68, lineHeight: 1, color: "#111", letterSpacing: -1, marginBottom: 16 }}>
           <div style={{ color: ORANGE }}>GET PAID</div>
           <div>& GET</div>
           <div>REWARDED</div>
         </div>
-
-        <div style={{
-          width: 80, height: 4, borderRadius: 2,
-          background: `linear-gradient(90deg, ${ORANGE}, transparent)`,
-          marginBottom: 28,
-        }} />
-
-        <p style={{
-          fontFamily: "'Barlow', sans-serif",
-          fontSize: 16, color: "#666", lineHeight: 1.6, marginBottom: 40,
-        }}>
+        <div style={{ width: 80, height: 4, borderRadius: 2, background: `linear-gradient(90deg, ${ORANGE}, transparent)`, marginBottom: 28 }} />
+        <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: 16, color: "#666", lineHeight: 1.6, marginBottom: 40 }}>
           REVADOO turns your everyday time into tangible gains. Browse hundreds of tasks across surveys, games, creative challenges, and more — then convert your Creds into real gift cards, cash, and premium rewards.
         </p>
-
         <div style={{ display: "flex", gap: 32 }}>
-          {[
-            { val: "2.4M+", label: "Active Users" },
-            { val: "500+", label: "Daily Tasks" },
-            { val: "$25", label: "Top Reward" },
-          ].map(s => (
+          {[{ val: "2.4M+", label: "Active Users" }, { val: "500+", label: "Daily Tasks" }, { val: "$25", label: "Top Reward" }].map(s => (
             <div key={s.label}>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800, fontSize: 28, color: ORANGE,
-              }}>{s.val}</div>
-              <div style={{
-                fontFamily: "'Barlow', sans-serif",
-                fontSize: 12, color: "#999", fontWeight: 500,
-              }}>{s.label}</div>
+              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 28, color: ORANGE }}>{s.val}</div>
+              <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999", fontWeight: 500 }}>{s.label}</div>
             </div>
           ))}
         </div>
-
-        <div style={{
-          marginTop: 48, background: "#fff",
-          borderRadius: 14, padding: "14px 20px",
-          display: "flex", alignItems: "center", gap: 14,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-          border: "1px solid #f0e8e0", maxWidth: 280,
-        }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: 10,
-            background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 20, flexShrink: 0,
-          }}>⚡</div>
+        <div style={{ marginTop: 48, background: "#fff", borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 24px rgba(0,0,0,0.08)", border: "1px solid #f0e8e0", maxWidth: 280 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>⚡</div>
           <div>
-            <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 800, fontSize: 20, color: ORANGE,
-            }}>+250 CREDS</div>
-            <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>
-              Just Click & earned!
-            </div>
+            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 20, color: ORANGE }}>+250 CREDS</div>
+            <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>Just Click & earned!</div>
           </div>
         </div>
-
-        <div style={{
-          marginTop: 16, background: "#fff",
-          borderRadius: 14, padding: "14px 20px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-          border: "1px solid #f0e8e0", maxWidth: 280,
-        }}>
-          <div style={{
-            fontFamily: "'Barlow', sans-serif",
-            fontSize: 10, fontWeight: 600, color: "#bbb",
-            textTransform: "uppercase", letterSpacing: 2, marginBottom: 10,
-          }}>Daily Tasks</div>
+        <div style={{ marginTop: 16, background: "#fff", borderRadius: 14, padding: "14px 20px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid #f0e8e0", maxWidth: 280 }}>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>Daily Tasks</div>
           <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
             {[true, true, true, false, false, false, false].map((done, i) => (
-              <div key={i} style={{
-                width: 26, height: 26, borderRadius: 6,
-                background: done ? ORANGE : "#f5f0ea",
-                border: done ? "none" : "1px solid #e8e0d8",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 700, color: done ? "#fff" : "#ddd",
-              }}>{done ? "✓" : ""}</div>
+              <div key={i} style={{ width: 26, height: 26, borderRadius: 6, background: done ? ORANGE : "#f5f0ea", border: done ? "none" : "1px solid #e8e0d8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: done ? "#fff" : "#ddd" }}>{done ? "✓" : ""}</div>
             ))}
           </div>
-          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>
-            7 Day Login Rewards
-          </div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>7 Day Login Rewards</div>
         </div>
       </div>
 
-      {/* ============ AUTH CARD ============ */}
-      <div style={{
-        width: "100%", maxWidth: 420, margin: "32px 24px",
-        position: "relative", zIndex: 3,
-      }}>
+      {/* AUTH CARD */}
+      <div style={{ width: "100%", maxWidth: 420, margin: "32px 24px", position: "relative", zIndex: 3 }}>
         <div
           className={`card-animate ${shake ? "shake-anim" : ""} ${successPulse ? "success-pulse" : ""}`}
-          style={{
-            background: "#fff",
-            borderRadius: 20,
-            boxShadow: "0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,107,0,0.08)",
-            overflow: "hidden",
-          }}
+          style={{ background: "#fff", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,107,0,0.08)", overflow: "hidden" }}
         >
           {/* Tabs */}
           <div style={{ display: "flex", borderBottom: "2px solid #f0e8e0" }}>
             {["login", "register"].map(tab => (
-              <button
-                key={tab}
-                className="tab-btn"
+              <button key={tab} className="tab-btn"
                 onClick={() => { setMode(tab); setErrorMsg(""); setSuccessMsg(""); }}
                 style={{ color: mode === tab ? ORANGE : "#bbb" }}
               >
                 {tab === "login" ? "Sign In" : "Register"}
                 {mode === tab && (
-                  <div style={{
-                    position: "absolute", bottom: -2, left: 0, right: 0,
-                    height: 3, background: ORANGE, borderRadius: "2px 2px 0 0",
-                    animation: "lineExpand 0.3s ease",
-                  }} />
+                  <div style={{ position: "absolute", bottom: -2, left: 0, right: 0, height: 3, background: ORANGE, borderRadius: "2px 2px 0 0", animation: "lineExpand 0.3s ease" }} />
                 )}
               </button>
             ))}
           </div>
 
           <div style={{ padding: "36px 36px 32px" }}>
-
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 900, fontSize: 32,
-                color: "#111", letterSpacing: 0.5, marginBottom: 6,
-              }}>
+              <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 32, color: "#111", letterSpacing: 0.5, marginBottom: 6 }}>
                 {mode === "login" ? "Welcome Back" : "Start Earning Today"}
               </h2>
               <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: 14, color: "#999" }}>
-                {mode === "login"
-                  ? "Sign in to your REVADOO account"
-                  : "Create your free account and get 250 creds"}
+                {mode === "login" ? "Sign in to your REVADOO account" : "Create your free account and get 250 creds"}
               </p>
             </div>
 
-            {/* ✅ Error Message Box */}
+            {/* Error */}
             {errorMsg && (
-              <div style={{
-                background: "#fff0f0", border: "1.5px solid #ffcccc",
-                borderRadius: 10, padding: "10px 14px", marginBottom: 18,
-                fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#cc0000",
-              }}>
+              <div style={{ background: "#fff0f0", border: "1.5px solid #ffcccc", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#cc0000" }}>
                 ❌ {errorMsg}
               </div>
             )}
 
-            {/* ✅ Success Message Box */}
+            {/* ✅ Success — shows "Redirecting to dashboard..." */}
             {successMsg && (
-              <div style={{
-                background: "#f0fff4", border: "1.5px solid #b2f5c8",
-                borderRadius: 10, padding: "10px 14px", marginBottom: 18,
-                fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#1a7f3c",
-              }}>
-                ✅ {successMsg}
+              <div style={{ background: "#f0fff4", border: "1.5px solid #b2f5c8", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#1a7f3c" }}>
+                ✅ {successMsg} Redirecting to dashboard...
               </div>
             )}
 
-            {/* Social buttons */}
+            {/* Social */}
             <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
               <button className="social-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24">
@@ -455,100 +298,48 @@ export default function AuthPage() {
 
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ flex: 1, height: 1, background: "#f0e8e0" }} />
-              <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#ccc" }}>
-                or continue with email
-              </span>
+              <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#ccc" }}>or continue with email</span>
               <div style={{ flex: 1, height: 1, background: "#f0e8e0" }} />
             </div>
 
-            {/* Form Fields */}
+            {/* Fields */}
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {mode === "register" && (
                 <div>
-                  <label style={{
-                    display: "block", marginBottom: 6,
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                    color: "#888", textTransform: "uppercase",
-                  }}>Username</label>
-                  <input
-                    className="input-field"
-                    placeholder="Choose a username"
-                    value={form.username}
-                    onFocus={() => setFocused("username")}
-                    onBlur={() => setFocused(null)}
-                    onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
-                  />
+                  <label style={{ display: "block", marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, color: "#888", textTransform: "uppercase" }}>Username</label>
+                  <input className="input-field" placeholder="Choose a username" value={form.username}
+                    onFocus={() => setFocused("username")} onBlur={() => setFocused(null)}
+                    onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
                 </div>
               )}
-
               <div>
-                <label style={{
-                  display: "block", marginBottom: 6,
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                  color: "#888", textTransform: "uppercase",
-                }}>Email</label>
-                <input
-                  className="input-field"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={form.email}
-                  onFocus={() => setFocused("email")}
-                  onBlur={() => setFocused(null)}
-                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                />
+                <label style={{ display: "block", marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, color: "#888", textTransform: "uppercase" }}>Email</label>
+                <input className="input-field" type="email" placeholder="your@email.com" value={form.email}
+                  onFocus={() => setFocused("email")} onBlur={() => setFocused(null)}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
-
               <div>
-                <label style={{
-                  display: "block", marginBottom: 6,
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                  color: "#888", textTransform: "uppercase",
-                }}>Password</label>
-                <input
-                  className="input-field"
-                  type="password"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onFocus={() => setFocused("password")}
-                  onBlur={() => setFocused(null)}
-                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                />
+                <label style={{ display: "block", marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, color: "#888", textTransform: "uppercase" }}>Password</label>
+                <input className="input-field" type="password" placeholder="••••••••" value={form.password}
+                  onFocus={() => setFocused("password")} onBlur={() => setFocused(null)}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
               </div>
-
               {mode === "register" && (
                 <div>
-                  <label style={{
-                    display: "block", marginBottom: 6,
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                    color: "#888", textTransform: "uppercase",
-                  }}>Confirm Password</label>
-                  <input
-                    className="input-field"
-                    type="password"
-                    placeholder="••••••••"
-                    value={form.confirm}
-                    onFocus={() => setFocused("confirm")}
-                    onBlur={() => setFocused(null)}
-                    onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
-                  />
+                  <label style={{ display: "block", marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, color: "#888", textTransform: "uppercase" }}>Confirm Password</label>
+                  <input className="input-field" type="password" placeholder="••••••••" value={form.confirm}
+                    onFocus={() => setFocused("confirm")} onBlur={() => setFocused(null)}
+                    onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))} />
                 </div>
               )}
-
               {mode === "login" && (
                 <div style={{ textAlign: "right", marginTop: -6 }}>
-                  <a href="#" style={{
-                    fontFamily: "'Barlow', sans-serif",
-                    fontSize: 13, color: ORANGE, textDecoration: "none", fontWeight: 600,
-                  }}>Forgot password?</a>
+                  <a href="#" style={{ fontFamily: "'Barlow', sans-serif", fontSize: 13, color: ORANGE, textDecoration: "none", fontWeight: 600 }}>Forgot password?</a>
                 </div>
               )}
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <div style={{ marginTop: 24 }}>
               <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
                 {loading && <span className="loader" />}
@@ -557,12 +348,7 @@ export default function AuthPage() {
             </div>
 
             {mode === "register" && (
-              <div style={{
-                marginTop: 16, background: "#fff8f3",
-                border: `1.5px dashed ${ORANGE}`,
-                borderRadius: 10, padding: "10px 14px",
-                display: "flex", alignItems: "center", gap: 10,
-              }}>
+              <div style={{ marginTop: 16, background: "#fff8f3", border: `1.5px dashed ${ORANGE}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 18 }}>🎁</span>
                 <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 13, color: "#555" }}>
                   <strong style={{ color: ORANGE }}>+250 FREE CREDS</strong> added to your account on signup
@@ -570,32 +356,18 @@ export default function AuthPage() {
               </div>
             )}
 
-            <p style={{
-              marginTop: 22, textAlign: "center",
-              fontFamily: "'Barlow', sans-serif",
-              fontSize: 14, color: "#999",
-            }}>
+            <p style={{ marginTop: 22, textAlign: "center", fontFamily: "'Barlow', sans-serif", fontSize: 14, color: "#999" }}>
               {mode === "login" ? "New here? " : "Already have an account? "}
               <button
                 onClick={() => { setMode(mode === "login" ? "register" : "login"); setErrorMsg(""); setSuccessMsg(""); }}
-                style={{
-                  background: "none", border: "none",
-                  color: ORANGE, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Barlow', sans-serif", fontSize: 14,
-                  textDecoration: "underline",
-                }}
+                style={{ background: "none", border: "none", color: ORANGE, fontWeight: 700, cursor: "pointer", fontFamily: "'Barlow', sans-serif", fontSize: 14, textDecoration: "underline" }}
               >
                 {mode === "login" ? "Create account →" : "Sign in →"}
               </button>
             </p>
           </div>
         </div>
-
-        <p style={{
-          textAlign: "center", marginTop: 18,
-          fontFamily: "'Barlow', sans-serif",
-          fontSize: 12, color: "#bbb",
-        }}>
+        <p style={{ textAlign: "center", marginTop: 18, fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#bbb" }}>
           🔒 Secure login · No spam · Cancel anytime
         </p>
       </div>
