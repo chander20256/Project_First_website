@@ -1,38 +1,44 @@
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first'); // Fix for Node v18+ DNS issues
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+require("dotenv").config();
 
-const authRoutes = require('./routes/auth');
+const authRoutes = require("./routes/auth");
+const walletRoutes = require("./routes/walletRoutes");
 
 const app = express();
 
-// ─── Middleware ───────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173' })); // Vite default port
+// Middleware
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
-// ─── Routes ──────────────────────────────────────────────
-app.use('/api/auth', authRoutes);
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/wallet", walletRoutes);
 
-// ─── Health check ────────────────────────────────────────
-app.get('/', (req, res) => {
-  res.json({ message: '✅ REVADOO Backend is running!' });
+// Health check
+app.get("/", (req, res) => {
+  res.json({ message: "✅ REVADOO Backend is running!" });
 });
 
-// ─── Connect to MongoDB then start server ────────────────
-mongoose.connect(process.env.MONGO_URI, {
-  serverSelectionTimeoutMS: 10000,
-  family: 4,
-})
+// MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+    family: 4,
+  })
   .then(() => {
-    console.log('✅ MongoDB connected');
+    console.log("✅ MongoDB connected");
+
     app.listen(process.env.PORT || 5000, () => {
-      console.log(`✅ Server running on http://localhost:${process.env.PORT || 5000}`);
+      console.log(
+        `✅ Server running on http://localhost:${process.env.PORT || 5000}`
+      );
     });
   })
   .catch((err) => {
-    console.error('❌ MongoDB error:', err.message);
+    console.error("❌ MongoDB error:", err.message);
   });
