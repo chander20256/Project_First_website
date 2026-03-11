@@ -1,27 +1,4 @@
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// // import Layout from './layout';
-// import Layout from './layouts/PublicLayout';
-// import LandingPage from './pages/LandingPage';
-// import AboutPage from './pages/AboutPage';
-// import ContactPage from './pages/ContactPage';
-// import BlogPage from './pages/BlogPage';
 
-// function App() {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<Layout />}>
-//           <Route index element={<LandingPage />} />
-//           <Route path="about" element={<AboutPage />} />
-//           <Route path="contact" element={<ContactPage />} />
-//           <Route path="blog" element={<BlogPage />} />
-//         </Route>
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
@@ -33,7 +10,7 @@ import BlogPage from './pages/BlogPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from "./pages/userdashboard/DashboardPage";
 import DashboardWallet from "./pages/userdashboard/DashboardWallet";
-import DashboardGames from "./pages/userdashboard/DashboardGames";  
+import DashboardGames from "./pages/userdashboard/DashboardGames";
 import DashboardSurveys from "./pages/userdashboard/DashboardSurveys";
 import DashboardTasks from "./pages/userdashboard/DashboardTasks";
 import DashboardLeaderboard from "./pages/userdashboard/DashboardLeaderboard";
@@ -41,6 +18,28 @@ import DashboardReferrals from "./pages/userdashboard/DashboardReferrals";
 import DashboardQuizzes from "./pages/userdashboard/DashboardQuizzes";
 import DashboardSettings from "./pages/userdashboard/DashboardSettings";
 import Infopage from "./pages/Infopage";
+
+import { i } from "framer-motion/client";
+
+
+
+
+import AdminDashboardLayout from "./layouts/AdminDashboardLayout";
+// import AdminDashboardPage from "./pages/admin_dashboard/AdminDashboardPage";
+import AdminWallet from "./pages/admin_dashboard/AdminWallet";
+import AdminGames from "./pages/admin_dashboard/AdminGames";
+// import AdminOverview from "./pages/admin_dashboard/AdminOverview";
+// import AdminSurveys from "./pages/admin_dashboard/AdminSurveys";
+import AdminUsers from "./pages/admin_dashboard/AdminUsers";
+import AdminSettings from "./pages/admin_dashboard/AdminSettings";
+import AdminProfile from "./pages/admin_dashboard/AdminProfile";
+import AdminDashboardPage from "./pages/admin_dashboard/AdminDashboardPage";
+import AdminReports from "./pages/admin_dashboard/AdminReports";
+import Adminleaderboard from "./pages/admin_dashboard/Adminleaderboard";
+import AdminReferrals from "./pages/admin_dashboard/AdminReferrals";
+import AdminQuizes from "./pages/admin_dashboard/AdminQuizes";
+import AdminSurveys from "./pages/admin_dashboard/AdminSurveys";
+import AdminTask from "./pages/admin_dashboard/AdminTask";
 
 
 function App() {
@@ -56,21 +55,41 @@ function App() {
           <Route path="Infopage" element={<Infopage />} />
           <Route path="AuthPage" element={<AuthPage />} />
         </Route>
-        
+
 
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="wallet" element={<DashboardWallet />} /> 
-        <Route path="games" element={<DashboardGames />} />
-        <Route path="surveys" element={<DashboardSurveys />} />
-        <Route path="tasks" element={<DashboardTasks />} />
-        <Route path="leaderboard" element={<DashboardLeaderboard />} />
-        <Route path="referrals" element={<DashboardReferrals />} />
-        <Route path="quizzes" element={<DashboardQuizzes />} />
-        <Route path="settings" element={<DashboardSettings />} />
-        <Route path="profile" element={<DashboardSettings />} />
+          <Route index element={<DashboardPage />} />
+          <Route path="wallet" element={<DashboardWallet />} />
+          <Route path="games" element={<DashboardGames />} />
+          <Route path="surveys" element={<DashboardSurveys />} />
+          <Route path="tasks" element={<DashboardTasks />} />
+          <Route path="leaderboard" element={<DashboardLeaderboard />} />
+          <Route path="referrals" element={<DashboardReferrals />} />
+          <Route path="quizzes" element={<DashboardQuizzes />} />
+          <Route path="settings" element={<DashboardSettings />} />
+          <Route path="profile" element={<DashboardSettings />} />
           {/* Add more dashboard routes as needed */}
+
+        </Route>
+
+
+        <Route path="/Admin" element={<AdminDashboardLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="wallet" element={<AdminWallet />} />
+          <Route path="games" element={<AdminGames />} />
+          <Route path="users" element={<AdminUsers />} />
+          {/* <Route path="overview" element={<AdminOverview />} /> */}
+          <Route path="surveys" element={<AdminSurveys />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="quizes" element={<AdminQuizes />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="leaderboard" element={<Adminleaderboard />} />
+          <Route path="referrals" element={<AdminReferrals />} />
+          <Route path="tasks" element={<AdminTask />} />
+
+
         </Route>
       </Routes>
     </BrowserRouter>
