@@ -1,30 +1,34 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 const TransactionHistory = () => {
-  const transactions = [
-    {
-      id: 1,
-      type: "credit",
-      desc: "Survey #142",
-      amount: 5,
-      date: "2023-02-27",
-      status: "completed",
-    },
-    {
-      id: 2,
-      type: "credit",
-      desc: "Quiz Game Win",
-      amount: 2.5,
-      date: "2023-02-27",
-      status: "completed",
-    },
-    {
-      id: 3,
-      type: "debit",
-      desc: "Withdrawal PayPal",
-      amount: 50,
-      date: "2023-02-24",
-      status: "pending",
-    },
-  ];
+
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    const res = await axios.get(
+      "http://localhost:5000/api/wallet/transactions"
+    );
+    setTransactions(res.data);
+  };
+
+  useEffect(() => {
+  fetchTransactions();
+
+  const updateHandler = () => {
+    fetchTransactions();
+  };
+
+  window.addEventListener("walletUpdated", updateHandler);
+
+  return () => {
+    window.removeEventListener("walletUpdated", updateHandler);
+  };
+}, []);
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -44,7 +48,9 @@ const TransactionHistory = () => {
             <div className="text-right">
               <p
                 className={`font-bold ${
-                  t.type === "credit" ? "text-green-500" : "text-red-500"
+                  t.type === "credit"
+                    ? "text-green-500"
+                    : "text-red-500"
                 }`}
               >
                 {t.type === "credit" ? "+" : "-"}${t.amount}
