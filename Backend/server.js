@@ -31,12 +31,18 @@ mongoose
     family: 4,
   })
   .then(() => {
+<<<<<<< HEAD
     console.log("✅ MongoDB connected");
 
     app.listen(process.env.PORT || 5000, () => {
       console.log(
         `✅ Server running on http://localhost:${process.env.PORT || 5000}`
       );
+=======
+    console.log('✅ MongoDB connected');
+    app.listen(process.env.PORT || 5001, () => {
+      console.log(`✅ Server running on http://localhost:${process.env.PORT || 5001}`);
+>>>>>>> dcdc3647d11e9507ad5b4a1699b24d6921767c96
     });
   })
   .catch((err) => {
