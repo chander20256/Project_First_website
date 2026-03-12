@@ -5,64 +5,81 @@ const WalletBalanceCard = () => {
 
   const [balance, setBalance] = useState(0);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
-    fetchBalance();
+
+    if(user){
+      fetchBalance();
+    }
+
   }, []);
 
   const fetchBalance = async () => {
+
     try {
-      const res = await axios.get("http://localhost:5000/api/wallet/balance");
+
+      const res = await axios.get(
+        `http://localhost:5000/api/wallet/balance/${user.id}`
+      );
+
       setBalance(res.data.balance);
+
     } catch (error) {
       console.error("Error fetching balance:", error);
     }
+
   };
 
   const addMoney = async () => {
-    const amount = 100;
 
     try {
+
       const res = await axios.post(
         "http://localhost:5000/api/wallet/add",
-        { amount }
+        {
+          userId: user.id,
+          amount: 100
+        }
       );
 
       setBalance(res.data.balance);
 
-      // refresh balance
-      fetchBalance();
-
-      // notify other components
-      window.dispatchEvent(new Event("walletUpdated"));
+window.dispatchEvent(new Event("walletUpdated"));
 
     } catch (error) {
-      console.error("Add money error:", error);
+      console.error("Add money error:", error.response?.data || error);
     }
+
   };
 
   const withdrawMoney = async () => {
-    const amount = 50;
 
     try {
+
       const res = await axios.post(
         "http://localhost:5000/api/wallet/withdraw",
-        { amount }
+        {
+          userId: user.id,
+          amount: 50
+        }
       );
 
       setBalance(res.data.balance);
-
-      // notify other components
-      window.dispatchEvent(new Event("walletUpdated"));
+      
+window.dispatchEvent(new Event("walletUpdated"));
 
     } catch (error) {
       alert(error.response?.data?.message || "Withdraw failed");
     }
+
   };
 
   return (
     <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-8 rounded-2xl shadow-lg flex justify-between items-center flex-wrap gap-4">
 
       <div>
+
         <p className="opacity-80">Available Balance</p>
 
         <h2 className="text-5xl font-bold mt-2">
@@ -72,6 +89,7 @@ const WalletBalanceCard = () => {
         <p className="text-sm opacity-80 mt-2">
           ≈ {(balance * 82).toFixed(2)} INR
         </p>
+
       </div>
 
       <div className="flex gap-4">
@@ -94,6 +112,7 @@ const WalletBalanceCard = () => {
 
     </div>
   );
+
 };
 
 export default WalletBalanceCard;
