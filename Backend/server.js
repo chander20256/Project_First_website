@@ -4,41 +4,35 @@ dns.setDefaultResultOrder("ipv4first");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
 require("dotenv").config();
 
-const authRoutes = require("./routes/auth");
 const walletRoutes = require("./routes/walletRoutes");
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 
-// Health check
+
+// health check
 app.get("/", (req, res) => {
-  res.json({ message: "✅ REVADOO Backend is running!" });
+  res.json({ message: "Backend running successfully" });
 });
 
-// MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 10000,
-    family: 4,
-  })
-  .then(() => {
-    console.log("✅ MongoDB connected");
 
-    const PORT = process.env.PORT || 5000;
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
 
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB error:", err.message);
+  console.log("MongoDB connected");
+
+  app.listen(5000, () => {
+    console.log("Server running on http://localhost:5000");
   });
+
+})
+.catch(err => {
+  console.log(err);
+});

@@ -5,27 +5,35 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true,
+    trim: true
   },
+
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
-    trim: true,
+    lowercase: true
   },
+
   password: {
     type: String,
-    required: true,
+    required: true
   },
+
+  wallet: {
+    type: Number,
+    default: 0
+  },
+
   creds: {
     type: Number,
-    default: 250, // new users get 250 free creds!
+    default: 250
   },
+
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   }
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);
