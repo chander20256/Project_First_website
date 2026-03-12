@@ -162,27 +162,46 @@ const GLOBAL_CSS = `
     align-items: center; justify-content: center; padding: 40px 0;
   }
 
-  /* ── Responsive: tablet ── */
+  /* ── Responsive: tablet (≤ 900px) ──
+     Stack vertically, show phone below copy (scaled down) */
   @media (max-width: 900px) {
-    .hero-right { display: none !important; }
-    .hero-inner { padding: 60px 20px !important; }
+    .hero-inner {
+      flex-direction: column !important;
+      align-items: center !important;
+      padding: 80px 32px 60px !important;
+      gap: 32px !important;
+      text-align: center !important;
+    }
+    .hero-left {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+    .hero-right {
+      display: flex !important;
+      transform: scale(0.88) !important;
+      transform-origin: top center !important;
+    }
+    .hero-ctas { justify-content: center !important; }
+    .hero-trust { justify-content: center !important; }
+    .hero-scroll { display: none !important; }
   }
 
-  /* ── Responsive: mobile ── */
+  /* ── Responsive: mobile (≤ 600px) ── */
   @media (max-width: 600px) {
-    .hero-inner         { padding: 40px 16px 60px !important; }
+    .hero-inner         { padding: 72px 16px 48px !important; gap: 24px !important; }
+    .hero-right         { transform: scale(0.78) !important; transform-origin: top center !important; }
     .hero-trust-divider { display: none !important; }
-    .hero-trust         { gap: 16px !important; }
-    .hero-ctas          { flex-direction: column !important; gap: 12px !important; }
-    .hero-ctas a        { width: 100% !important; justify-content: center !important; }
+    .hero-trust         { gap: 16px !important; flex-direction: column !important; align-items: center !important; }
+    .hero-ctas          { flex-direction: column !important; gap: 12px !important; align-items: center !important; }
+    .hero-ctas a        { width: 100% !important; max-width: 320px !important; justify-content: center !important; }
     .hero-badge span    { font-size: 0.64rem !important; }
-    .hero-scroll        { display: none !important; }
   }
 
-  /* ── Responsive: tablet (601–900px) ── */
-  @media (min-width: 601px) and (max-width: 900px) {
-    .hero-inner { padding: 60px 32px !important; }
-    .hero-ctas  { gap: 14px !important; }
+  /* ── Responsive: small phones (≤ 380px) ── */
+  @media (max-width: 380px) {
+    .hero-inner { padding: 64px 12px 40px !important; }
+    .hero-right { transform: scale(0.68) !important; }
   }
 `
 
