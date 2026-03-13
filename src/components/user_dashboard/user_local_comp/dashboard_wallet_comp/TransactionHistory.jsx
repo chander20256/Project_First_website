@@ -1,27 +1,26 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const FF = "'Arial Black','Helvetica Neue',Arial,sans-serif";
-const ORANGE = "#FF6B00";
-
 const TxRow = ({ t, isLast }) => {
-  const [hov, setHov] = useState(false);
   const isCredit = t.type === "credit";
   return (
-    <div
-      style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 22px", borderBottom: isLast ? "none" : "1px solid #f0f0f0", background: hov ? "#fff8f3" : "transparent", transition: "background .15s", cursor: "default" }}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{ width: "34px", height: "34px", background: isCredit ? "#000" : ORANGE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <span style={{ color: "#fff", fontSize: "15px", fontWeight: 900, fontFamily: FF }}>{isCredit ? "↑" : "↓"}</span>
+    <div className={`flex justify-between items-center py-3.5 ${isLast ? "" : "border-b border-gray-100"}`}>
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isCredit ? "bg-green-50" : "bg-orange-50"}`}>
+          <span className={`text-base font-bold ${isCredit ? "text-green-600" : "text-orange-500"}`}>
+            {isCredit ? "↑" : "↓"}
+          </span>
         </div>
         <div>
-          <p style={{ margin: 0, color: "#000", fontSize: "12px", fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", fontFamily: FF }}>{t.description}</p>
-          <p style={{ margin: "3px 0 0", color: "#bbb", fontSize: "10px", letterSpacing: ".08em", fontFamily: FF }}>{new Date(t.createdAt).toLocaleString()}</p>
+          <p className="text-sm font-semibold text-black leading-tight">
+            {t.description}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {new Date(t.createdAt).toLocaleString()}
+          </p>
         </div>
       </div>
-      <span style={{ color: isCredit ? "#000" : ORANGE, fontSize: "17px", fontWeight: 900, letterSpacing: "-.02em", fontFamily: FF }}>
+      <span className={`text-sm font-bold ${isCredit ? "text-green-600" : "text-orange-500"}`}>
         {isCredit ? "+" : "-"}${t.amount}
       </span>
     </div>
@@ -56,18 +55,23 @@ const TransactionHistory = () => {
   }, []);
 
   return (
-    <div style={{ background: "#fff", border: "3px solid #000", overflow: "hidden" }}>
-      <div style={{ background: "#000", padding: "14px 22px", display: "flex", alignItems: "center", gap: "10px" }}>
-        <div style={{ width: "9px", height: "9px", background: ORANGE, borderRadius: "50%", flexShrink: 0 }} />
-        <span style={{ color: "#fff", fontSize: "12px", fontWeight: 900, letterSpacing: ".2em", textTransform: "uppercase", fontFamily: FF }}>TRANSACTION HISTORY</span>
+    <div className="bg-white rounded-xl border border-gray-100 p-5 font-['DM_Sans',sans-serif]">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-base font-bold text-black">Transactions</h3>
+        <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
+          {transactions.length} total
+        </span>
       </div>
 
-      {transactions.length === 0
-        ? <div style={{ padding: "40px", textAlign: "center", color: "#ccc", fontSize: "11px", letterSpacing: ".15em", textTransform: "uppercase", fontFamily: FF }}>NO TRANSACTIONS YET</div>
-        : transactions.map((t, i) => <TxRow key={t._id} t={t} isLast={i === transactions.length - 1} />)
-      }
-
-      <div style={{ background: ORANGE, height: "4px" }} />
+      {transactions.length === 0 ? (
+        <div className="py-10 text-center text-sm text-gray-300">
+          No transactions yet
+        </div>
+      ) : (
+        transactions.map((t, i) => (
+          <TxRow key={t._id} t={t} isLast={i === transactions.length - 1} />
+        ))
+      )}
     </div>
   );
 };

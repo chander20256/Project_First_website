@@ -1,39 +1,57 @@
 import { useState } from "react";
 
-const FF = "'Arial Black','Helvetica Neue',Arial,sans-serif";
-const ORANGE = "#FF6B00";
+const actions = [
+  { icon: "📊", label: "Earnings Report",  desc: "View full report"    },
+  { icon: "📧", label: "Payment Settings", desc: "Manage payouts"      },
+  { icon: "📱", label: "Mobile Money",     desc: "Link mobile wallet"  },
+  { icon: "⚙️", label: "Support",          desc: "Get help"            },
+];
 
-const QuickActionBtn = ({ icon, label, bar }) => {
+const ActionCard = ({ icon, label, desc }) => {
   const [hov, setHov] = useState(false);
   return (
     <button
-      style={{ background: hov ? ORANGE : "#fff", border: `2px solid ${hov ? ORANGE : "#000"}`, padding: "20px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", cursor: "pointer", transition: "all .15s", fontFamily: FF, outline: "none", position: "relative", overflow: "hidden" }}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: hov ? "#FFF0E6" : "#fff",
+        border: `1.5px solid ${hov ? "#FF6B00" : "#eee"}`,
+        borderRadius: "12px", padding: "16px",
+        display: "flex", flexDirection: "column",
+        alignItems: "flex-start", gap: "8px",
+        cursor: "pointer", transition: "all 0.15s",
+        fontFamily: "'DM Sans', sans-serif",
+        textAlign: "left", outline: "none",
+      }}
     >
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: bar }} />
       <span style={{ fontSize: "22px" }}>{icon}</span>
-      <span style={{ color: hov ? "#fff" : "#000", fontSize: "9px", fontWeight: 900, letterSpacing: ".12em", textAlign: "center", transition: "color .15s", fontFamily: FF }}>{label}</span>
+      <div>
+        <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: hov ? "#FF6B00" : "#000", transition: "color 0.15s" }}>
+          {label}
+        </p>
+        <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#aaa" }}>
+          {desc}
+        </p>
+      </div>
     </button>
   );
 };
 
 const WalletQuickActions = () => {
-  const actions = [
-    { icon: "📊", label: "EARNINGS REPORT",  bar: ORANGE },
-    { icon: "📧", label: "PAYMENT SETTINGS", bar: "#000" },
-    { icon: "📱", label: "MOBILE MONEY",     bar: ORANGE },
-    { icon: "⚙️", label: "SUPPORT",          bar: "#000" },
-  ];
-
   return (
-    <div style={{ marginTop: "4px" }}>
-      <p style={{ margin: "0 0 12px", color: "#bbb", fontSize: "10px", fontWeight: 700, letterSpacing: ".3em", textTransform: "uppercase", fontFamily: FF }}>— QUICK ACTIONS</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "3px" }}>
-        {actions.map((a, i) => (
-          <QuickActionBtn key={i} icon={a.icon} label={a.label} bar={a.bar} />
-        ))}
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
+      <div style={{ fontFamily: "'DM Sans', sans-serif", marginTop: "16px" }}>
+        <h3 style={{ margin: "0 0 12px", fontSize: "15px", fontWeight: 700, color: "#000" }}>
+          Quick Actions
+        </h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+          {actions.map((a, i) => (
+            <ActionCard key={i} icon={a.icon} label={a.label} desc={a.desc} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
