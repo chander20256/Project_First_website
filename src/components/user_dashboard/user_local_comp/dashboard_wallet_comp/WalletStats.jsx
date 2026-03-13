@@ -1,26 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const FF = "'Arial Black','Helvetica Neue',Arial,sans-serif";
-const ORANGE = "#FF6B00";
-
-const StatCard = ({ title, amount, color, bar, symbol }) => {
-  const [hov, setHov] = useState(false);
-  return (
-    <div
-      style={{ background: "#fff", border: `2px solid ${hov ? ORANGE : "#000"}`, padding: "22px 18px", position: "relative", overflow: "hidden", transition: "border-color .15s", cursor: "default" }}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-    >
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "5px", background: bar }} />
-      <div style={{ position: "absolute", top: "14px", right: "14px", color: ORANGE, fontSize: "10px", opacity: .6, fontFamily: FF }}>{symbol}</div>
-      <p style={{ margin: "0 0 8px", color: "#aaa", fontSize: "9px", fontWeight: 900, letterSpacing: ".22em", textTransform: "uppercase", fontFamily: FF }}>{title}</p>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "2px" }}>
-        <span style={{ color, fontSize: "13px", fontWeight: 900, marginTop: "5px", fontFamily: FF }}>$</span>
-        <span style={{ color, fontSize: "34px", fontWeight: 900, lineHeight: 1, letterSpacing: "-.03em", fontFamily: FF }}>{amount.toFixed(2)}</span>
-      </div>
+const StatCard = ({ label, value, orange }) => (
+  <div className="bg-white rounded-xl border border-gray-100 p-5 font-['DM_Sans',sans-serif]">
+    <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${orange ? "bg-orange-50" : "bg-gray-100"}`}>
+      <div className={`w-2.5 h-2.5 rounded-full ${orange ? "bg-orange-500" : "bg-black"}`} />
     </div>
-  );
-};
+    <p className="text-xs font-medium text-gray-400 mb-1">{label}</p>
+    <p className={`text-2xl font-bold tracking-tight ${orange ? "text-orange-500" : "text-black"}`}>
+      ${value.toFixed(2)}
+    </p>
+  </div>
+);
 
 const WalletStats = () => {
   const [stats, setStats] = useState({ earned: 0, withdrawn: 0, pending: 0 });
@@ -70,10 +61,10 @@ const WalletStats = () => {
   }, []);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "3px", marginBottom: "4px" }}>
-      <StatCard title="TOTAL EARNED"    amount={stats.earned}    color="#000"   bar="#000"   symbol="▲" />
-      <StatCard title="TOTAL WITHDRAWN" amount={stats.withdrawn} color={ORANGE} bar={ORANGE} symbol="▼" />
-      <StatCard title="PENDING"         amount={stats.pending}   color="#000"   bar="#000"   symbol="◆" />
+    <div className="grid grid-cols-3 gap-3 mb-4">
+      <StatCard label="Total Earned"    value={stats.earned}    orange={false} />
+      <StatCard label="Total Withdrawn" value={stats.withdrawn} orange={true}  />
+      <StatCard label="Pending"         value={stats.pending}   orange={false} />
     </div>
   );
 };
