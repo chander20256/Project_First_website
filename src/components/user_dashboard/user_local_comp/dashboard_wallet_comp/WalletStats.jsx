@@ -1,24 +1,35 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const FF = "'Arial Black','Helvetica Neue',Arial,sans-serif";
+const ORANGE = "#FF6B00";
+
+const StatCard = ({ title, amount, color, bar, symbol }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      style={{ background: "#fff", border: `2px solid ${hov ? ORANGE : "#000"}`, padding: "22px 18px", position: "relative", overflow: "hidden", transition: "border-color .15s", cursor: "default" }}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "5px", background: bar }} />
+      <div style={{ position: "absolute", top: "14px", right: "14px", color: ORANGE, fontSize: "10px", opacity: .6, fontFamily: FF }}>{symbol}</div>
+      <p style={{ margin: "0 0 8px", color: "#aaa", fontSize: "9px", fontWeight: 900, letterSpacing: ".22em", textTransform: "uppercase", fontFamily: FF }}>{title}</p>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "2px" }}>
+        <span style={{ color, fontSize: "13px", fontWeight: 900, marginTop: "5px", fontFamily: FF }}>$</span>
+        <span style={{ color, fontSize: "34px", fontWeight: 900, lineHeight: 1, letterSpacing: "-.03em", fontFamily: FF }}>{amount.toFixed(2)}</span>
+      </div>
+    </div>
+  );
+};
+
 const WalletStats = () => {
-
-  const [stats, setStats] = useState({
-    earned: 0,
-    withdrawn: 0,
-    pending: 0
-  });
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const [stats, setStats] = useState({ earned: 0, withdrawn: 0, pending: 0 });
 
   const fetchStats = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/wallet/transactions"
       );
-
       const transactions = res.data;
 
       let earned = 0;
@@ -29,65 +40,40 @@ const WalletStats = () => {
         if (t.type === "credit") {
           earned += t.amount;
         }
-
         if (t.type === "debit" && t.status === "completed") {
           withdrawn += t.amount;
         }
-
         if (t.type === "debit" && t.status === "pending") {
           pending += t.amount;
         }
       });
 
       setStats({ earned, withdrawn, pending });
-
     } catch (error) {
       console.error(error);
     }
   };
 
-  const statCards = [
-    {
-      title: "Total Earned",
-      amount: `$${stats.earned.toFixed(2)}`,
-      color: "text-green-500",
-    },
-    {
-      title: "Total Withdrawn",
-      amount: `$${stats.withdrawn.toFixed(2)}`,
-      color: "text-red-500",
-    },
-    {
-      title: "Pending Withdrawals",
-      amount: `$${stats.pending.toFixed(2)}`,
-      color: "text-orange-500",
-    },
-  ];
   useEffect(() => {
-  fetchStats();
-
-  const updateHandler = () => {
     fetchStats();
-  };
+  }, []);
 
-  window.addEventListener("walletUpdated", updateHandler);
-
-  return () => {
-    window.removeEventListener("walletUpdated", updateHandler);
-  };
-}, []);
+  useEffect(() => {
+    fetchStats();
+    const updateHandler = () => {
+      fetchStats();
+    };
+    window.addEventListener("walletUpdated", updateHandler);
+    return () => {
+      window.removeEventListener("walletUpdated", updateHandler);
+    };
+  }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      {statCards.map((stat, index) => (
-        <div key={index} className="bg-white p-6 rounded-xl shadow-sm border">
-          <p className="text-gray-500 text-sm">{stat.title}</p>
-
-          <h3 className={`text-2xl font-bold mt-2 ${stat.color}`}>
-            {stat.amount}
-          </h3>
-        </div>
-      ))}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "3px", marginBottom: "4px" }}>
+      <StatCard title="TOTAL EARNED"    amount={stats.earned}    color="#000"   bar="#000"   symbol="▲" />
+      <StatCard title="TOTAL WITHDRAWN" amount={stats.withdrawn} color={ORANGE} bar={ORANGE} symbol="▼" />
+      <StatCard title="PENDING"         amount={stats.pending}   color="#000"   bar="#000"   symbol="◆" />
     </div>
   );
 };
