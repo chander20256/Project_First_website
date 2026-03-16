@@ -6,12 +6,14 @@ import LeaderboardQuickActions from "../../components/user_dashboard/user_local_
 
 const DashboardLeaderboard = () => {
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <LeaderboardHeader />
-      <LeaderboardStats />
-      <LeaderboardGrid />
-      <TopUserHighlight />
-      <LeaderboardQuickActions />
+    <div className="min-h-screen" style={{ background: "#0A0A0A" }}>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <LeaderboardHeader />
+        <LeaderboardStats />
+        <TopUserHighlight />
+        <LeaderboardGrid />
+        <LeaderboardQuickActions />
+      </div>
     </div>
   );
 };
