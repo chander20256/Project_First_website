@@ -20,6 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Now use routes
+app.use("/api/auth", require("./routes/auth")); // ✅ Added auth route
 app.use("/api/wallet", walletRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/user-tasks", userTaskRoutes);

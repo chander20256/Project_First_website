@@ -1,7 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const DashboardHeader = () => {
+  const [userData, setUserData] = useState({
+    username: "User",
+    initial: "U",
+    balance: 0
+  });
+
   useEffect(() => {
     if (!document.getElementById("dashboard-fonts")) {
       const link = document.createElement("link");
@@ -11,6 +17,44 @@ const DashboardHeader = () => {
         "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap";
       document.head.appendChild(link);
     }
+
+    // Try local storage first
+    let initialUser = null;
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) initialUser = JSON.parse(stored);
+    } catch(e) {}
+
+    if (initialUser) {
+      setUserData({
+        username: initialUser.username || "User",
+        initial: (initialUser.username || "U").charAt(0).toUpperCase(),
+        balance: initialUser.creds || 0
+      });
+    }
+
+    // Fetch fresh data
+    const fetchMe = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.user) {
+          setUserData({
+            username: data.user.username || "User",
+            initial: (data.user.username || "U").charAt(0).toUpperCase(),
+            balance: data.user.creds || 0
+          });
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+      } catch (err) {
+        console.error("Failed to fetch user", err);
+      }
+    };
+    fetchMe();
   }, []);
 
   return (
@@ -82,7 +126,7 @@ const DashboardHeader = () => {
             color: "rgba(255,255,255,0.7)",
           }}
         >
-          Balance: <span style={{ color: "#FF6B00" }}>$124</span>
+          Balance: <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
         </div>
 
         {/* Divider */}
@@ -99,7 +143,7 @@ const DashboardHeader = () => {
               boxShadow: "0 4px 14px rgba(255,107,0,0.32)",
             }}
           >
-            U
+            {userData.initial}
           </div>
           <span
             className="text-sm font-medium"
@@ -108,7 +152,7 @@ const DashboardHeader = () => {
               color: "rgba(255,255,255,0.7)",
             }}
           >
-            User
+            {userData.username}
           </span>
         </div>
       </div>
