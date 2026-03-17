@@ -1,5 +1,16 @@
+import { useEffect, useState } from "react";
+
 const ReferralLinkCard = () => {
-  const referralLink = "https://reevadoo.com/ref/YourUsername";
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/user/me")
+      .then((res) => res.json())
+      .then((data) => setUsername(data.username))
+      .catch((err) => console.error(err));
+  }, []);
+
+  const referralLink = `https://reevadoo.com/ref/${username}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -10,7 +21,9 @@ const ReferralLinkCard = () => {
     <div className="bg-white p-6 rounded-xl shadow border flex items-center justify-between">
       <div>
         <h2 className="font-semibold text-lg">Your Referral Link</h2>
-        <p className="text-gray-500 text-sm">{referralLink}</p>
+        <p className="text-gray-500 text-sm">
+          {username ? referralLink : "Loading..."}
+        </p>
       </div>
       <button
         onClick={copyLink}
