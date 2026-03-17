@@ -1,299 +1,464 @@
-import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from "react";
+import { createClient } from "@sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
+import BlogPost from "./Blogpost";
 
-const posts = [
-  {
-    id: 1, tag: 'EARN GUIDE', tagColor: '#FF6B00',
-    title: 'How to Earn ₹500 Daily Playing Mini Games',
-    desc: 'Discover the top-rated mini games that pay the most Creds per minute. We break down which games give the best return on your time.',
-    author: 'Aryan Sharma',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
-    date: 'Feb 28, 2026', readTime: '5 min',
-    image: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=600&h=400&fit=crop',
-  },
-  {
-    id: 2, tag: 'DAILY TASKS', tagColor: '#3B82F6',
-    title: '7 Daily Tasks Our Top Earners Never Skip',
-    desc: 'The exact morning routine that the highest-earning EarnFlow users follow every day to stack Creds before noon.',
-    author: 'Priya Mehta',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face',
-    date: 'Feb 25, 2026', readTime: '4 min',
-    image: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=600&h=400&fit=crop',
-  },
-  {
-    id: 3, tag: 'WATCH & EARN', tagColor: '#10B981',
-    title: 'Watch Videos and Earn Real Rewards — The Complete Guide',
-    desc: "EarnFlow's video earning feature lets you accumulate Creds while watching sponsored content and educational videos.",
-    author: 'Rahul Verma',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
-    date: 'Feb 20, 2026', readTime: '3 min',
-    image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=600&h=400&fit=crop',
-  },
-  {
-    id: 4, tag: 'REWARDS', tagColor: '#8B5CF6',
-    title: 'Turn Your Creds into Amazon Gift Cards & UPI Cash',
-    desc: 'A full breakdown of every reward in our store — from ₹10 gift cards to ₹5000 UPI transfers.',
-    author: 'Sneha Kapoor',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face',
-    date: 'Feb 15, 2026', readTime: '6 min',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=400&fit=crop',
-  },
-  {
-    id: 5, tag: 'COMING SOON', tagColor: '#EF4444',
-    title: 'Your Creds Are Becoming Stocks — The Future of EarnFlow',
-    desc: "Soon your earned Creds will convert into real fractional stocks from NSE & BSE. Start earning now, invest later.",
-    author: 'EarnFlow Team',
-    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face',
-    date: 'Mar 1, 2026', readTime: '7 min',
-    image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop',
-    comingSoon: true,
-  },
-  {
-    id: 6, tag: 'COMING SOON', tagColor: '#F59E0B',
-    title: 'EarnFlow Loans — Borrow Against Your Creds Balance',
-    desc: 'Use your lifetime Creds as collateral for instant micro-loans. No credit score. Zero paperwork.',
-    author: 'EarnFlow Team',
-    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face',
-    date: 'Mar 1, 2026', readTime: '5 min',
-    image: 'https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=600&h=400&fit=crop',
-    comingSoon: true,
-  },
-]
+// ─── SANITY SETUP ──────────────────────────────────────────────────────────────
+const client = createClient({
+  projectId:  "os6cjfhs",
+  dataset:    "production",
+  apiVersion: "2024-01-01",
+  useCdn:     false,
+  token:      import.meta.env.VITE_SANITY_TOKEN || "",
+});
+const builder = imageUrlBuilder(client);
+const urlFor  = (src) => src ? builder.image(src) : null;
 
-const categories = ['ALL', 'EARN GUIDE', 'DAILY TASKS', 'WATCH & EARN', 'REWARDS', 'COMING SOON']
+const QUERY = `*[_type == "post"] | order(publishedAt desc) {
+  _id, title,
+  "slug": slug.current,
+  desc, mainImage, publishedAt,
+  author, avatar,
+  tag, tagColor, readTime,
+  comingSoon, featured
+}`;
 
+// ─── HELPERS ───────────────────────────────────────────────────────────────────
+const getImage = (p, w = 800, h = 500) =>
+  p.mainImage
+    ? urlFor(p.mainImage).width(w).height(h).fit("crop").url()
+    : p.img || `https://images.unsplash.com/photo-1551434678-e076c223a692?w=${w}&h=${h}&fit=crop`;
+
+const fmtDate = (iso) =>
+  iso ? new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
+
+// ─── FALLBACK DATA ─────────────────────────────────────────────────────────────
+const FALLBACK_POSTS = [
+  { id:1, category:"Getting Started", tag:"Beginner Guide",  title:"How to Earn Your First 1,000 Points in Just 3 Days",            excerpt:"New to the rewards program? This complete walkthrough shows exactly which tasks to hit first, how to set up your daily streak, and the fastest path to your first real reward redemption.", author:"Riya Sharma",  date:"March 6, 2026",  readTime:"5 min read", img:"https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80",  featured:true,  accent:"#ff5722" },
+  { id:2, category:"Tips & Tricks",   tag:"Power User",      title:"The 7-Day Streak Secret That Triples Your Daily Points",         excerpt:"Most members miss this one multiplier. Maintaining a 7-day login and search streak quietly stacks a 3× bonus that almost nobody talks about. Here's how to never break it.", author:"James Okafor", date:"March 4, 2026",  readTime:"4 min read", img:"https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80", featured:false, accent:"#ff7043" },
+  { id:3, category:"Redeem",          tag:"Gift Cards",       title:"Amazon vs Xbox vs Starbucks: Which Reward Is Actually Worth It?", excerpt:"We broke down every major reward option by points-to-value ratio, redemption speed, and real-world usability so you never waste a single point on a low-value trade-in again.", author:"Priya Nair",   date:"March 2, 2026",  readTime:"6 min read", img:"https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",  featured:false, accent:"#e64a19" },
+  { id:4, category:"Quizzes",         tag:"Weekly Challenge", title:"Inside the Daily Quiz: How to Score 100% Every Single Time",    excerpt:"The daily quiz isn't random — it follows patterns. After analyzing 90 days of questions, we found the topics that repeat most, the trick answers to watch out for, and the best time of day to attempt them.", author:"Marcus Lee",   date:"Feb 28, 2026",   readTime:"7 min read", img:"https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=800&q=80", featured:false, accent:"#ff5722" },
+  { id:5, category:"Mobile",          tag:"App Update",       title:"The Mobile App Just Got Faster — And Added 3 New Earning Modes", excerpt:"The latest update rolls out background task tracking, push-alert quizzes, and a new partner scan feature. Here's every new thing you can do to earn more on your phone starting today.", author:"Sneha Kapoor", date:"Feb 25, 2026",   readTime:"4 min read", img:"https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80", featured:false, accent:"#ff7043" },
+  { id:6, category:"Deep Dive",       tag:"Analysis",         title:"We Tracked 30 Days of Tasks — Here's the Exact Earning Schedule",excerpt:"We logged every available task across 30 consecutive days and mapped the optimal daily schedule. Spend just 12 minutes a day on this exact routine to max out your monthly points cap.", author:"Riya Sharma",  date:"Feb 22, 2026",   readTime:"9 min read", img:"https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80", featured:false, accent:"#e64a19" },
+  { id:7, category:"Redeem",          tag:"Sweepstakes",      title:"Sweepstakes Entries: The Highest-ROI Way to Spend Your Points?", excerpt:"Gift cards feel safe, but sweepstakes entries can return 50× the value if you time them right. We dug into the odds, prize history, and entry strategy that maximizes your shot at big wins.", author:"James Okafor", date:"Feb 18, 2026",   readTime:"5 min read", img:"https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80", featured:false, accent:"#ff5722" },
+  { id:8, category:"Community",       tag:"Member Story",     title:"How This Member Earned $800 in Gift Cards Last Year Without Spending a Penny", excerpt:"Arjun from Bengaluru turned his daily 15-minute reward routine into $800 of real value across Amazon, Starbucks, and Xbox. He breaks down every single habit in this exclusive interview.", author:"Priya Nair",   date:"Feb 14, 2026",   readTime:"8 min read", img:"https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80",  featured:false, accent:"#ff7043" },
+  { id:9, category:"Shopping",        tag:"Bonus Points",     title:"Shop & Earn: Every Store That Gives Bonus Points Right Now",    excerpt:"The shopping tab is the most underused earning source in the entire program. This updated list covers every partner store currently offering bonus points, and how to stack them with existing discounts.", author:"Marcus Lee",   date:"Feb 10, 2026",   readTime:"6 min read", img:"https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80", featured:false, accent:"#e64a19" },
+];
+
+// ─── SANITY HOOK ───────────────────────────────────────────────────────────────
+function useSanityPosts() {
+  const [sanityPosts, setSanityPosts] = useState(null);
+  const [error,       setError]       = useState(null);
+  const [liveEvent,   setLiveEvent]   = useState(null);
+  const subRef = useRef(null);
+
+  useEffect(() => {
+    client.fetch(QUERY)
+      .then((data) => setSanityPosts(data.length ? data : []))
+      .catch((err) => { setError(err.message); setSanityPosts([]); });
+
+    subRef.current = client.listen(QUERY).subscribe({
+      next: (update) => {
+        setLiveEvent({ type: update.transition, time: new Date().toLocaleTimeString() });
+        client.fetch(QUERY).then((data) => setSanityPosts(data.length ? data : []));
+      },
+      error: (err) => setError(err.message),
+    });
+
+    return () => subRef.current?.unsubscribe();
+  }, []);
+
+  return { sanityPosts, error, liveEvent };
+}
+
+// ─── NORMALIZE SANITY → UNIFIED SHAPE ─────────────────────────────────────────
+function normalizeSanity(post, idx) {
+  return {
+    _isSanity: true,
+    id:        post._id,
+    slug:      post.slug,
+    category:  post.tag || "General",
+    tag:       post.tag || "General",
+    title:     post.title,
+    excerpt:   post.desc || "",
+    author:    post.author || "EarnFlow Team",
+    _avatar:   post.avatar ? urlFor(post.avatar).width(80).height(80).fit("crop").url() : null,
+    date:      fmtDate(post.publishedAt),
+    readTime:  post.readTime || "3 min read",
+    img:       getImage(post),
+    featured:  post.featured || idx === 0,
+    accent:    post.tagColor || "#ff5722",
+  };
+}
+
+// ─── LIVE TOAST ────────────────────────────────────────────────────────────────
+function LiveToast({ event }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!event) return;
+    setVisible(true);
+    const t = setTimeout(() => setVisible(false), 4000);
+    return () => clearTimeout(t);
+  }, [event]);
+  const labels = { appear: "✦ New post published", update: "↻ Post updated", disappear: "✕ Post removed" };
+  return (
+    <div style={{
+      position:"fixed", bottom:28, right:28, zIndex:9999,
+      display:"flex", alignItems:"center", gap:10,
+      background:"#111", border:"1px solid rgba(255,87,34,0.5)", borderRadius:100,
+      padding:"10px 20px", fontFamily:"Syne", fontWeight:700, fontSize:12, color:"#ff5722",
+      letterSpacing:"0.06em", boxShadow:"0 8px 32px rgba(0,0,0,0.6)",
+      transform: visible ? "translateY(0)" : "translateY(80px)",
+      opacity:   visible ? 1 : 0,
+      transition:"all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+      pointerEvents:"none",
+    }}>
+      <span style={{ width:7, height:7, borderRadius:"50%", background:"#22c55e", flexShrink:0 }} />
+      {event ? (labels[event.type] || "Blog updated") : ""}
+      {event && <span style={{ color:"rgba(255,255,255,0.3)", fontSize:11, marginLeft:4 }}>{event.time}</span>}
+    </div>
+  );
+}
+
+// ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function Blog() {
-  const [active, setActive] = useState('ALL')
-  const [hovered, setHovered] = useState(null)
+  const { sanityPosts, error, liveEvent } = useSanityPosts();
+  const [active,      setActive]      = useState("All");
+  const [hovered,     setHovered]     = useState(null);
+  const [scrollRatio, setScrollRatio] = useState(0);
+  const [currentPost, setCurrentPost] = useState(null);
+  const riyaRef = useRef(null);
 
-  const filtered = active === 'ALL' ? posts : posts.filter(p => p.tag === active)
+  const loading   = sanityPosts === null;
+  const hasSanity = sanityPosts && sanityPosts.length > 0;
+  const posts     = hasSanity ? sanityPosts.map(normalizeSanity) : FALLBACK_POSTS;
+  const isSanity  = hasSanity;
+
+  const allCats  = ["All", ...new Set(posts.map(p => p.category))];
+  const featured = posts[0];
+  const rest     = posts.slice(1);
+  const filtered = active === "All" ? rest : rest.filter(p => p.category === active);
+
+  const openBySlug = (slug) => {
+    const found = posts.find(p => p.slug === slug);
+    if (found) setCurrentPost(found);
+  };
+
+  useEffect(() => {
+    if (currentPost) return;
+    const onScroll = () => {
+      if (!riyaRef.current) return;
+      const rect  = riyaRef.current.getBoundingClientRect();
+      const start = window.innerHeight * 0.5;
+      const ratio = Math.min(1, Math.max(0, (start - rect.top) / 300));
+      setScrollRatio(ratio);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [currentPost]);
+
+  if (currentPost) {
+    return (
+      <BlogPost
+        post={currentPost}
+        onBack={() => { setCurrentPost(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+        onReadRelated={openBySlug}
+      />
+    );
+  }
+
+  const lerp    = (a, b, t) => Math.round(a + (b - a) * t);
+  const cardsBg = `rgb(${lerp(10,255,scrollRatio)},${lerp(10,255,scrollRatio)},${lerp(10,255,scrollRatio)})`;
+  const textIsDark = scrollRatio > 0.5;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0C0C0C', fontFamily: "'DM Sans', sans-serif", paddingTop: '70px', overflowX: 'hidden' }}>
+    <div style={{ fontFamily:"'Syne', sans-serif", background:cardsBg, color:textIsDark?"#0a0a0a":"#f0ede8", minHeight:"100vh", transition:"color 0.3s ease" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.6)} }
-        @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes pulse-glow { 0%,100%{box-shadow:0 0 20px rgba(255,107,0,0.1)} 50%{box-shadow:0 0 40px rgba(255,107,0,0.25)} }
-        .blog-card{transition:transform 0.4s cubic-bezier(0.16,1,0.3,1),box-shadow 0.4s ease}
-        .blog-card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,0,0,0.6)!important}
-        .blog-card img{transition:transform 0.6s cubic-bezier(0.16,1,0.3,1)}
-        .blog-card:hover img{transform:scale(1.06)}
-        .cat-pill{transition:all 0.2s ease}
-        .cat-pill:hover{background:rgba(255,107,0,0.15)!important;color:#FF6B00!important;border-color:rgba(255,107,0,0.4)!important}
-        .read-btn{transition:all 0.2s ease}
-        .read-btn:hover{background:#FF6B00!important;color:#fff!important;border-color:#FF6B00!important}
-        .coming-glow{animation:pulse-glow 3s ease-in-out infinite}
-        .ticker-track{animation:marquee 28s linear infinite}
-        .hero-a{animation:fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) forwards}
-        .hero-b{animation:fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both}
-        .hero-c{animation:fadeUp 0.9s 0.3s cubic-bezier(0.16,1,0.3,1) both}
-        .hero-d{animation:fadeUp 0.9s 0.45s cubic-bezier(0.16,1,0.3,1) both}
-        .shimmer-text{background:linear-gradient(90deg,#FF6B00 0%,#ffb347 40%,#FF6B00 60%,#ff8c00 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
-        @media(max-width:768px){.hide-mobile{display:none!important}.feat-grid{grid-template-columns:1fr!important}}
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::selection { background: #ff5722; color: #fff; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #ff5722; border-radius: 2px; }
+        .img-scale { overflow: hidden; }
+        .img-scale img { transition: transform 0.6s cubic-bezier(.22,.68,0,1.2); }
+        .img-scale:hover img { transform: scale(1.07); }
+        .cat-pill { transition: all 0.2s ease; cursor: pointer; }
+        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-33.33%)} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.5)} }
+        @keyframes shimmer { 0%{background-position:-200% center}100%{background-position:200% center} }
+        .skeleton { background:linear-gradient(90deg,#1a1a1a 25%,#222 50%,#1a1a1a 75%); background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; }
+        .read-btn { transition: all 0.25s ease !important; }
+        .read-btn:hover { background: #ff3d00 !important; transform: scale(1.04) !important; }
       `}</style>
 
-      {/* ── HERO ── */}
-      <section style={{ position:'relative', minHeight:'88vh', display:'flex', alignItems:'center', overflow:'hidden' }}>
-        <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1800&fit=crop)', backgroundSize:'cover', backgroundPosition:'center', filter:'brightness(0.15) saturate(1.2)' }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,rgba(12,12,12,0.95) 0%,rgba(12,12,12,0.6) 60%,rgba(255,107,0,0.06) 100%)' }} />
-        <div style={{ position:'absolute', inset:0, pointerEvents:'none', backgroundImage:'linear-gradient(rgba(255,107,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,0,0.04) 1px,transparent 1px)', backgroundSize:'60px 60px' }} />
-        <div style={{ position:'absolute', left:0, top:0, bottom:0, width:'4px', background:'linear-gradient(180deg,transparent,#FF6B00,transparent)' }} />
+      <LiveToast event={liveEvent} />
 
-        <div style={{ position:'relative', zIndex:2, maxWidth:'1280px', margin:'0 auto', padding:'80px 48px', width:'100%' }}>
-          <div className="hero-a" style={{ display:'inline-flex', alignItems:'center', gap:'8px', border:'1px solid rgba(255,107,0,0.3)', borderRadius:'3px', padding:'7px 16px', marginBottom:'32px', background:'rgba(255,107,0,0.08)' }}>
-            <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#FF6B00', display:'inline-block', animation:'pulse-dot 2s infinite' }} />
-            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.68rem', color:'#FF6B00', letterSpacing:'0.14em' }}>EARNFLOW BLOG — TIPS, STRATEGIES & FUTURE UPDATES</span>
+      {/* STATUS BAR */}
+      {!loading && (isSanity ? (
+        <div style={{ background:"rgba(34,197,94,0.08)", borderBottom:"1px solid rgba(34,197,94,0.15)", padding:"7px 56px", display:"flex", alignItems:"center", justifyContent:"center", gap:8, fontFamily:"Barlow", fontSize:12, color:"#22c55e", letterSpacing:"0.08em" }}>
+          <span style={{ width:6, height:6, borderRadius:"50%", background:"#22c55e", animation:"pulse-dot 2s infinite" }} />
+          CONNECTED TO SANITY CMS · REAL-TIME ACTIVE · {posts.length} POSTS LOADED
+        </div>
+      ) : (
+        <div style={{ background:"rgba(255,87,34,0.08)", borderBottom:"1px solid rgba(255,87,34,0.15)", padding:"7px 56px", textAlign:"center", fontFamily:"Barlow", fontSize:12, color:"#ff7043", letterSpacing:"0.08em" }}>
+          {error ? `❌ SANITY ERROR: ${error}` : "⚠ SHOWING FALLBACK DATA — Publish posts in Sanity Studio and they'll appear here instantly"}
+        </div>
+      ))}
+
+      {/* HERO */}
+      <section style={{ position:"relative", overflow:"hidden", minHeight:"100vh", display:"flex", flexDirection:"column" }}>
+        <div style={{ position:"absolute", top:-120, left:-120, width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle,rgba(255,87,34,0.18) 0%,transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", top:80, right:-200, width:700, height:700, borderRadius:"50%", background:"radial-gradient(circle,rgba(255,61,0,0.1) 0%,transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", bottom:-100, left:"40%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle,rgba(255,120,34,0.08) 0%,transparent 70%)", pointerEvents:"none" }} />
+
+        {/* Top bar */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"32px 56px", position:"relative", zIndex:2, borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:8, height:8, borderRadius:"50%", background:"#ff5722", boxShadow:"0 0 12px #ff5722" }} />
+            <span style={{ fontFamily:"Syne", fontWeight:700, fontSize:13, letterSpacing:"0.12em", color:"rgba(255,255,255,0.5)", textTransform:"uppercase" }}>Rewards Blog</span>
           </div>
-
-          <div className="hero-b" style={{ marginBottom:'28px' }}>
-            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(3.5rem,9vw,7.5rem)', color:'#fff', lineHeight:0.92, fontWeight:900, letterSpacing:'-0.02em' }}>
-              Play Games.<br />Do Tasks.<br /><em className="shimmer-text" style={{ fontStyle:'italic' }}>Get Paid.</em>
-            </h1>
-          </div>
-
-          <p className="hero-c" style={{ fontSize:'1.1rem', color:'rgba(255,255,255,0.4)', lineHeight:1.75, maxWidth:'520px', marginBottom:'44px', fontWeight:300 }}>
-            Guides, strategies, and news from the world's most rewarding earning platform. Turn your screen time into real money, gift cards, and soon — real stocks.
-          </p>
-
-          <div className="hero-d" style={{ display:'flex', gap:'14px', flexWrap:'wrap', alignItems:'center' }}>
-            <Link to="/earn" style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'#FF6B00', color:'#fff', textDecoration:'none', padding:'14px 32px', borderRadius:'3px', fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:'0.9rem', letterSpacing:'0.06em', textTransform:'uppercase', boxShadow:'0 8px 32px rgba(255,107,0,0.4)' }}>
-              Start Earning Free
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </Link>
-            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.7rem', color:'rgba(255,255,255,0.25)', letterSpacing:'0.1em' }}>2.4M+ ACTIVE EARNERS</span>
+          <div style={{ display:"flex", gap:32 }}>
+            {[`${posts.length} Articles`, isSanity ? "Live · Sanity CMS" : "4 Authors", "Updated Weekly"].map((s,i) => (
+              <span key={i} style={{ fontFamily:"Barlow", fontSize:12, color: i===1 && isSanity ? "#22c55e" : "rgba(255,255,255,0.3)", letterSpacing:"0.06em" }}>{s}</span>
+            ))}
           </div>
         </div>
 
-        {/* Floating stat cards */}
-        <div className="hide-mobile" style={{ position:'absolute', right:'6%', top:'50%', transform:'translateY(-50%)', display:'flex', flexDirection:'column', gap:'16px', zIndex:3 }}>
-          {[{icon:'🎮',label:'MINI GAMES',val:'200+'},{icon:'✅',label:'DAILY TASKS',val:'50+'},{icon:'📺',label:'VIDEOS/DAY',val:'∞'},{icon:'💸',label:'AVG EARNING',val:'₹300'}].map(({icon,label,val},i)=>(
-            <div key={label} style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', padding:'14px 20px', display:'flex', alignItems:'center', gap:'12px', animation:`fadeUp 0.7s ${0.5+i*0.1}s both` }}>
-              <span style={{ fontSize:'22px' }}>{icon}</span>
-              <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'1.4rem', color:'#FF6B00', lineHeight:1 }}>{val}</div>
-                <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.6rem', color:'rgba(255,255,255,0.3)', letterSpacing:'0.08em', marginTop:'2px' }}>{label}</div>
+        {/* Featured */}
+        {loading ? (
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"80px 56px" }}>
+            <div className="skeleton" style={{ width:"100%", maxWidth:1100, height:460, borderRadius:24 }} />
+          </div>
+        ) : featured && (
+          <div style={{ flex:1, display:"grid", gridTemplateColumns:"1fr 1fr", padding:"0 56px", position:"relative", zIndex:2, maxWidth:1280, width:"100%", margin:"0 auto", alignItems:"center" }}>
+            <div style={{ paddingRight:60, paddingTop:40, paddingBottom:60 }}>
+              <div style={{ display:"inline-flex", alignItems:"center", gap:10, border:"1px solid rgba(255,87,34,0.3)", borderRadius:100, padding:"7px 18px", marginBottom:36, background:"rgba(255,87,34,0.07)", backdropFilter:"blur(8px)" }}>
+                <span style={{ width:6, height:6, borderRadius:"50%", background:"#ff5722", display:"inline-block", boxShadow:"0 0 8px #ff5722" }} />
+                <span style={{ fontFamily:"Barlow", fontWeight:600, fontSize:12, color:"#ff7043", letterSpacing:"0.14em", textTransform:"uppercase" }}>{isSanity ? "Latest · Live from Sanity" : "Featured Article"}</span>
+                <span style={{ fontFamily:"Barlow", fontSize:12, color:"rgba(255,255,255,0.35)" }}>{featured.readTime}</span>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* ── TICKER ── */}
-      <div style={{ background:'#FF6B00', padding:'13px 0', overflow:'hidden' }}>
-        <div className="ticker-track" style={{ display:'flex', whiteSpace:'nowrap' }}>
-          {[...Array(2)].map((_,ri)=>(
-            <div key={ri} style={{ display:'flex' }}>
-              {['🎮 PLAY GAMES','✅ DAILY TASKS','📺 WATCH VIDEOS','🎁 EARN REWARDS','📈 COMING: INVEST IN STOCKS','🏦 COMING: CREDS LOANS','💸 REAL CASH PAYOUTS'].map((item,i)=>(
-                <span key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.72rem', letterSpacing:'0.12em', color:'#fff', padding:'0 40px', borderRight:'1px solid rgba(255,255,255,0.25)', fontWeight:500 }}>{item}</span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+              <h1 style={{ fontFamily:"Syne", fontWeight:800, fontSize:"clamp(36px,4.5vw,64px)", letterSpacing:"-0.04em", lineHeight:1.05, margin:"0 0 28px" }}>
+                {featured.title.split(" ").slice(0,4).join(" ")}{" "}
+                <span style={{ WebkitTextStroke:"1.5px rgba(255,87,34,0.7)", WebkitTextFillColor:"transparent" }}>
+                  {featured.title.split(" ").slice(4).join(" ")}
+                </span>
+              </h1>
 
-      {/* ── FEATURED STORY ── */}
-      <section style={{ maxWidth:'1280px', margin:'0 auto', padding:'80px 48px 0' }}>
-        <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'32px' }}>
-          <div style={{ width:'32px', height:'2px', background:'#FF6B00' }} />
-          <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.68rem', color:'#FF6B00', letterSpacing:'0.14em' }}>FEATURED STORY</span>
-        </div>
+              <p style={{ fontFamily:"Barlow", fontWeight:400, fontSize:17, lineHeight:1.8, color:"rgba(240,237,232,0.5)", marginBottom:40, maxWidth:480 }}>{featured.excerpt}</p>
 
-        <div className="blog-card feat-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderRadius:'16px', overflow:'hidden', border:'1px solid rgba(255,255,255,0.07)', background:'#141414', minHeight:'460px' }}>
-          <div style={{ position:'relative', overflow:'hidden', minHeight:'400px' }}>
-            <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=900&h=700&fit=crop" alt="Featured" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg,transparent 50%,#141414 100%)' }} />
-            <div style={{ position:'absolute', bottom:'24px', left:'24px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.62rem', background:'#FF6B00', color:'#fff', padding:'5px 14px', borderRadius:'3px', letterSpacing:'0.12em' }}>EARN GUIDE</div>
-          </div>
-          <div style={{ padding:'52px 48px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
-            <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.65rem', color:'rgba(255,255,255,0.3)', letterSpacing:'0.1em', marginBottom:'20px' }}>MAR 01, 2026 · 8 MIN READ</div>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(1.8rem,3vw,2.8rem)', color:'#fff', lineHeight:1.1, fontWeight:900, marginBottom:'20px', letterSpacing:'-0.01em' }}>
-              How 1 Hour a Day on EarnFlow Can Replace Your Side Hustle
-            </h2>
-            <p style={{ color:'rgba(255,255,255,0.4)', lineHeight:1.8, fontSize:'0.93rem', marginBottom:'36px', fontWeight:300 }}>
-              Real users. Real numbers. We analyzed 500 top earners and found the exact combination of tasks, games, and videos that yields the highest Creds per hour — and how to convert them into real money.
-            </p>
-            <div style={{ display:'flex', alignItems:'center', gap:'20px' }}>
-              <a href="#" className="read-btn" style={{ display:'inline-flex', alignItems:'center', gap:'8px', border:'1.5px solid rgba(255,255,255,0.2)', color:'#fff', textDecoration:'none', padding:'11px 24px', borderRadius:'3px', fontFamily:"'DM Sans',sans-serif", fontWeight:600, fontSize:'0.82rem', letterSpacing:'0.06em', textTransform:'uppercase' }}>
-                Read Article
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </a>
-              <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" style={{ width:'32px', height:'32px', borderRadius:'50%', objectFit:'cover' }} alt="author" />
-                <span style={{ fontSize:'0.78rem', color:'rgba(255,255,255,0.35)' }}>Aryan Sharma</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FILTER ── */}
-      <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'56px 48px 32px' }}>
-        <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
-          <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.65rem', color:'rgba(255,255,255,0.25)', letterSpacing:'0.1em', marginRight:'8px' }}>FILTER:</span>
-          {categories.map(cat=>(
-            <button key={cat} onClick={()=>setActive(cat)} className="cat-pill" style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.65rem', letterSpacing:'0.1em', padding:'8px 18px', borderRadius:'3px', cursor:'pointer', border: active===cat ? '1px solid #FF6B00' : '1px solid rgba(255,255,255,0.1)', background: active===cat ? '#FF6B00' : 'transparent', color: active===cat ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight:500 }}>{cat}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── POSTS GRID ── */}
-      <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'0 48px 80px' }}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))', gap:'24px' }}>
-          {filtered.map((post)=>(
-            <article key={post.id} className="blog-card" onMouseEnter={()=>setHovered(post.id)} onMouseLeave={()=>setHovered(null)} style={{ background:'#141414', borderRadius:'12px', overflow:'hidden', border: post.comingSoon ? `1px dashed ${post.tagColor}50` : '1px solid rgba(255,255,255,0.07)', cursor:'pointer' }}>
-              <div style={{ position:'relative', overflow:'hidden', height:'220px' }}>
-                <img src={post.image} alt={post.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                <div style={{ position:'absolute', inset:0, background: hovered===post.id ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)', transition:'background 0.3s' }} />
-                <div style={{ position:'absolute', top:'16px', left:'16px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.6rem', background:post.tagColor, color:'#fff', padding:'4px 12px', borderRadius:'3px', letterSpacing:'0.1em' }}>{post.tag}</div>
-                {post.comingSoon && <div style={{ position:'absolute', top:'16px', right:'16px', background:'rgba(0,0,0,0.8)', border:`1px solid ${post.tagColor}60`, color:post.tagColor, fontFamily:"'JetBrains Mono',monospace", fontSize:'0.58rem', letterSpacing:'0.1em', padding:'4px 10px', borderRadius:'3px' }}>SOON</div>}
-                <div style={{ position:'absolute', bottom:'14px', right:'14px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.6rem', background:'rgba(0,0,0,0.7)', color:'rgba(255,255,255,0.6)', padding:'4px 10px', borderRadius:'3px', letterSpacing:'0.06em' }}>{post.readTime} READ</div>
-              </div>
-              <div style={{ padding:'24px 24px 28px' }}>
-                <h3 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.18rem', color:'#fff', lineHeight:1.3, fontWeight:700, marginBottom:'10px', letterSpacing:'-0.01em' }}>{post.title}</h3>
-                <p style={{ fontSize:'0.83rem', color:'rgba(255,255,255,0.35)', lineHeight:1.7, marginBottom:'20px', fontWeight:300 }}>{post.desc}</p>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                    <img src={post.avatar} alt={post.author} style={{ width:'30px', height:'30px', borderRadius:'50%', objectFit:'cover', border:'1.5px solid rgba(255,255,255,0.1)' }} />
-                    <div>
-                      <div style={{ fontSize:'0.75rem', color:'rgba(255,255,255,0.6)', fontWeight:600 }}>{post.author}</div>
-                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.6rem', color:'rgba(255,255,255,0.25)', letterSpacing:'0.06em' }}>{post.date}</div>
-                    </div>
+              <div style={{ display:"flex", alignItems:"center", gap:16, paddingBottom:40, borderBottom:"1px solid rgba(255,255,255,0.07)", marginBottom:40 }}>
+                {featured._avatar ? (
+                  <img src={featured._avatar} alt={featured.author} style={{ width:44, height:44, borderRadius:"50%", objectFit:"cover", flexShrink:0, border:"2px solid rgba(255,87,34,0.4)" }} />
+                ) : (
+                  <div style={{ width:44, height:44, borderRadius:"50%", flexShrink:0, background:"linear-gradient(135deg,#ff5722,#ff9800)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"Syne", fontWeight:800, fontSize:16, boxShadow:"0 0 20px rgba(255,87,34,0.4)" }}>
+                    {featured.author[0]}
                   </div>
-                  <div style={{ width:'34px', height:'34px', borderRadius:'50%', border:`1.5px solid ${hovered===post.id ? post.tagColor : 'rgba(255,255,255,0.1)'}`, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s', background: hovered===post.id ? post.tagColor : 'transparent' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={hovered===post.id ? '#fff' : 'rgba(255,255,255,0.3)'} strokeWidth="2.5" style={{ transition:'stroke 0.2s' }}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                )}
+                <div>
+                  <div ref={riyaRef} style={{ fontFamily:"Syne", fontWeight:700, fontSize:14 }}>{featured.author}</div>
+                  <div style={{ fontFamily:"Barlow", fontSize:12, color:"rgba(255,255,255,0.35)", marginTop:2 }}>{featured.date} · {featured.category}</div>
+                </div>
+                <button className="read-btn" onClick={() => setCurrentPost(featured)}
+                  style={{ marginLeft:"auto", background:"#ff5722", border:"none", borderRadius:100, padding:"13px 30px", color:"#fff", fontFamily:"Syne", fontWeight:700, fontSize:13, cursor:"pointer", display:"flex", alignItems:"center", gap:8, boxShadow:"0 8px 32px rgba(255,87,34,0.4)" }}>
+                  Read Article <span style={{ fontSize:16 }}>→</span>
+                </button>
+              </div>
+
+              <div style={{ display:"flex", gap:36 }}>
+                {[["128K+","Monthly Readers"],[`${posts.length}`,"Articles"],["40K+","Newsletter Subs"]].map(([val,label]) => (
+                  <div key={label}>
+                    <div style={{ fontFamily:"Syne", fontWeight:800, fontSize:22, color:"#ff5722" }}>{val}</div>
+                    <div style={{ fontFamily:"Barlow", fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:2 }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ position:"relative", height:620, paddingTop:40, paddingBottom:40 }}>
+              <div className="img-scale" onClick={() => setCurrentPost(featured)}
+                style={{ position:"absolute", right:0, top:"50%", transform:"translateY(-50%)", width:"88%", height:"82%", borderRadius:24, overflow:"hidden", border:"1px solid rgba(255,255,255,0.08)", boxShadow:"0 40px 120px rgba(0,0,0,0.7)", cursor:"pointer" }}>
+                <img src={featured.img} alt={featured.title} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                <div style={{ position:"absolute", inset:0, background:"linear-gradient(135deg,rgba(10,10,10,0.4) 0%,transparent 60%)" }} />
+                <div style={{ position:"absolute", top:20, left:20, background:"#ff5722", borderRadius:100, padding:"5px 16px", fontFamily:"Syne", fontWeight:700, fontSize:10, letterSpacing:"0.14em" }}>
+                  {isSanity ? featured.category.toUpperCase() : "FEATURED"}
+                </div>
+                <div style={{ position:"absolute", inset:0, background:"rgba(255,87,34,0)", transition:"background 0.3s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,87,34,0.15)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,87,34,0)"} />
+              </div>
+
+              <div style={{ position:"absolute", left:-10, top:"8%", background:"rgba(17,17,17,0.92)", backdropFilter:"blur(16px)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:16, padding:"14px 18px", boxShadow:"0 20px 60px rgba(0,0,0,0.5)", zIndex:3, minWidth:170 }}>
+                <div style={{ fontFamily:"Barlow", fontSize:10, color:"rgba(255,255,255,0.35)", marginBottom:6, letterSpacing:"0.1em", textTransform:"uppercase" }}>Today's Streak</div>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontSize:20 }}>🔥</span>
+                  <span style={{ fontFamily:"Syne", fontWeight:800, fontSize:24, color:"#ff5722" }}>7 Days</span>
+                </div>
+                <div style={{ marginTop:8, height:4, borderRadius:2, background:"rgba(255,255,255,0.06)", overflow:"hidden" }}>
+                  <div style={{ width:"70%", height:"100%", background:"linear-gradient(to right,#ff5722,#ff9800)", borderRadius:2 }} />
+                </div>
+              </div>
+
+              <div style={{ position:"absolute", left:-20, bottom:"10%", background:"rgba(17,17,17,0.92)", backdropFilter:"blur(16px)", border:"1px solid rgba(255,87,34,0.2)", borderRadius:16, padding:"14px 20px", boxShadow:"0 20px 60px rgba(0,0,0,0.5)", zIndex:3 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:"linear-gradient(135deg,#ff5722,#ff9800)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🏆</div>
+                  <div>
+                    <div style={{ fontFamily:"Syne", fontWeight:700, fontSize:15 }}>+500 pts</div>
+                    <div style={{ fontFamily:"Barlow", fontSize:11, color:"rgba(255,255,255,0.35)" }}>Weekly bonus unlocked</div>
                   </div>
                 </div>
               </div>
-            </article>
+
+              {posts[1] && (
+                <div className="img-scale" onClick={() => setCurrentPost(posts[1])} style={{ position:"absolute", right:-16, top:"6%", width:120, height:120, borderRadius:18, overflow:"hidden", border:"2px solid rgba(255,255,255,0.08)", boxShadow:"0 16px 48px rgba(0,0,0,0.6)", zIndex:4, cursor:"pointer" }}>
+                  <img src={posts[1].img} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", filter:"grayscale(40%)" }} />
+                </div>
+              )}
+              {posts[2] && (
+                <div className="img-scale" onClick={() => setCurrentPost(posts[2])} style={{ position:"absolute", right:-16, bottom:"8%", width:100, height:100, borderRadius:16, overflow:"hidden", border:"2px solid rgba(255,255,255,0.06)", boxShadow:"0 16px 48px rgba(0,0,0,0.6)", zIndex:4, cursor:"pointer" }}>
+                  <img src={posts[2].img} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", filter:"grayscale(40%)" }} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Ticker */}
+        <div style={{ borderTop:"1px solid rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(255,255,255,0.06)", background:"rgba(255,87,34,0.04)", overflow:"hidden", whiteSpace:"nowrap", position:"relative", zIndex:2 }}>
+          <div style={{ display:"inline-flex", gap:0, animation:"ticker 22s linear infinite" }}>
+            {[...Array(3)].map((_,rep) => (
+              <span key={rep} style={{ display:"inline-flex", alignItems:"center" }}>
+                {allCats.filter(c=>c!=="All").map((t,i) => (
+                  <span key={i} style={{ display:"inline-flex", alignItems:"center" }}>
+                    <span style={{ fontFamily:"Syne", fontWeight:700, fontSize:11, letterSpacing:"0.1em", color:"rgba(247,14,14,0.25)", padding:"14px 28px", textTransform:"uppercase" }}>{t}</span>
+                    <span style={{ color:"#ff5722", opacity:0.4, fontSize:8 }}>◆</span>
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Category pills */}
+        <div style={{ padding:"28px 56px", display:"flex", gap:10, flexWrap:"wrap", position:"relative", zIndex:2, maxWidth:1280, margin:"0 auto", width:"100%" }}>
+          {allCats.map(cat => (
+            <button key={cat} className="cat-pill" onClick={() => setActive(cat)} style={{
+              border:     active===cat ? "none" : "1px solid rgba(0,0,0,0.2)",
+              background: active===cat ? "#ff5722" : "transparent",
+              color:      active===cat ? "#fff" : "rgba(35,4,4,0.4)",
+              borderRadius:100, padding:"9px 22px",
+              fontFamily:"Syne", fontWeight:700, fontSize:12, letterSpacing:"0.04em", cursor:"pointer",
+              boxShadow: active===cat ? "0 4px 20px rgba(255,87,34,0.35)" : "none",
+            }}>{cat}</button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* ── COMING SOON ── */}
-      <section style={{ maxWidth:'1280px', margin:'0 auto', padding:'0 48px 80px' }}>
-        <div className="coming-glow" style={{ position:'relative', borderRadius:'20px', overflow:'hidden', background:'#0F0F0F', border:'1px solid rgba(255,107,0,0.15)' }}>
-          <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&fit=crop)', backgroundSize:'cover', backgroundPosition:'center', opacity:0.07 }} />
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#0F0F0F 40%,rgba(255,107,0,0.04) 100%)' }} />
-          <div style={{ position:'relative', zIndex:2, padding:'72px 64px' }}>
-            <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'32px' }}>
-              <div style={{ width:'32px', height:'2px', background:'#FF6B00' }} />
-              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.68rem', color:'#FF6B00', letterSpacing:'0.14em' }}>COMING SOON — EARNFLOW 2.0</span>
-            </div>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(2.2rem,5vw,4.5rem)', color:'#fff', lineHeight:1, fontWeight:900, letterSpacing:'-0.02em', marginBottom:'20px' }}>
-              Your Creds.<br /><em style={{ color:'#FF6B00', fontStyle:'italic' }}>Real Stocks.</em>
-            </h2>
-            <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'1rem', lineHeight:1.8, maxWidth:'580px', marginBottom:'52px', fontWeight:300 }}>
-              Soon your Creds will convert into fractional shares on NSE & BSE. And if you need instant cash, borrow against your balance with zero credit checks — no bank, no paperwork.
-            </p>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'20px', marginBottom:'48px' }}>
-              {[
-                { icon:'📈', color:'#EF4444', title:'Creds → Fractional Stocks', items:['Convert Creds to NSE/BSE shares','Start investing with ₹0','Real-time portfolio tracking','SEBI-registered broker backed'] },
-                { icon:'🏦', color:'#F59E0B', title:'EarnFlow Instant Loans', items:['Borrow against Creds balance','No CIBIL score required','Instant disbursal to UPI','Repay via future earnings'] },
-              ].map(({icon,color,title,items})=>(
-                <div key={title} style={{ background:'rgba(255,255,255,0.03)', border:`1px dashed ${color}40`, borderRadius:'12px', padding:'32px 28px' }}>
-                  <div style={{ fontSize:'40px', marginBottom:'16px' }}>{icon}</div>
-                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.3rem', color:'#fff', fontWeight:700, marginBottom:'20px', lineHeight:1.2 }}>{title}</div>
-                  {items.map(item=>(
-                    <div key={item} style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'10px' }}>
-                      <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:color, flexShrink:0 }} />
-                      <span style={{ fontSize:'0.82rem', color:'rgba(255,255,255,0.4)', fontWeight:300 }}>{item}</span>
-                    </div>
+      {/* CARD GRID */}
+      <div style={{ padding:"48px 56px 120px", maxWidth:1280, margin:"0 auto" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:32 }}>
+          <div style={{ width:24, height:2, background:"#ff5722" }} />
+          <span style={{ fontFamily:"Syne", fontWeight:700, fontSize:11, letterSpacing:"0.12em", color:"rgba(0,0,0,0.4)", textTransform:"uppercase" }}>
+            {isSanity ? `${filtered.length} Posts · Live from Sanity` : "All Articles · Fallback Data"}
+          </span>
+          {isSanity && <span style={{ width:6, height:6, borderRadius:"50%", background:"#22c55e", animation:"pulse-dot 2s infinite" }} />}
+        </div>
+
+        {loading && (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:28 }}>
+            {[0,1,2,3,4,5].map(i => (
+              <div key={i} style={{ borderRadius:20, overflow:"hidden" }}>
+                <div className="skeleton" style={{ height:210 }} />
+                <div style={{ background:"#111", padding:24 }}>
+                  {[40,90,70,100,60].map((w,j) => (
+                    <div key={j} className="skeleton" style={{ height:12, borderRadius:4, marginBottom:12, width:`${w}%` }} />
                   ))}
-                  <div style={{ marginTop:'20px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.62rem', color:color, background:`${color}12`, border:`1px solid ${color}30`, padding:'6px 14px', borderRadius:'3px', letterSpacing:'0.1em', display:'inline-block' }}>GET EARLY ACCESS →</div>
                 </div>
-              ))}
-            </div>
-            <div style={{ display:'flex', gap:'0', maxWidth:'440px' }}>
-              <input placeholder="your@email.com" style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRight:'none', outline:'none', padding:'14px 20px', color:'#fff', fontSize:'0.88rem', fontFamily:"'DM Sans',sans-serif", borderRadius:'3px 0 0 3px' }} />
-              <button style={{ background:'#FF6B00', border:'none', padding:'14px 24px', color:'#fff', fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:'0.82rem', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', borderRadius:'0 3px 3px 0' }}>Notify Me</button>
-            </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
+        )}
 
-      {/* ── BOTTOM CTA ── */}
-      <section style={{ maxWidth:'1280px', margin:'0 auto', padding:'0 48px 100px' }}>
-        <div style={{ position:'relative', borderRadius:'16px', overflow:'hidden', background:'linear-gradient(135deg,#FF6B00 0%,#e85d00 100%)' }}>
-          <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=1400&fit=crop)', backgroundSize:'cover', backgroundPosition:'center', opacity:0.1, mixBlendMode:'overlay' }} />
-          <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px)', backgroundSize:'40px 40px', pointerEvents:'none' }} />
-          <div style={{ position:'relative', zIndex:2, padding:'72px 64px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'40px', flexWrap:'wrap' }}>
-            <div>
-              <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.68rem', color:'rgba(255,255,255,0.6)', letterSpacing:'0.14em', marginBottom:'16px' }}>FREE TO JOIN — NO CREDIT CARD</div>
-              <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(2rem,4vw,3.5rem)', color:'#fff', lineHeight:1, fontWeight:900, letterSpacing:'-0.02em', marginBottom:'12px' }}>
-                Start Earning<br /><em style={{ fontStyle:'italic' }}>Today.</em>
-              </h2>
-              <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'1rem', fontWeight:300 }}>Join 2.4M+ users already earning through games, tasks & videos.</p>
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:'14px', minWidth:'220px' }}>
-              <Link to="/earn" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', background:'#fff', color:'#FF6B00', textDecoration:'none', padding:'16px 36px', borderRadius:'3px', fontFamily:"'DM Sans',sans-serif", fontWeight:800, fontSize:'0.92rem', letterSpacing:'0.04em', textTransform:'uppercase', boxShadow:'0 8px 24px rgba(0,0,0,0.2)' }}>🚀 Start Free</Link>
-              <Link to="/blog" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.15)', color:'#fff', textDecoration:'none', padding:'14px 36px', borderRadius:'3px', fontFamily:"'DM Sans',sans-serif", fontWeight:600, fontSize:'0.88rem', border:'1.5px solid rgba(255,255,255,0.3)' }}>Read More Articles →</Link>
-            </div>
+        {!loading && filtered.length === 0 && (
+          <div style={{ textAlign:"center", padding:"80px 0", fontFamily:"Barlow", fontSize:16, opacity:0.35 }}>
+            No posts in this category yet.{isSanity && " Publish one in Sanity Studio — it'll appear here instantly."}
           </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:28 }}>
+            {filtered.map((post) => {
+              const isHov = hovered === post.id;
+              return (
+                <article key={post.id} onClick={() => setCurrentPost(post)}
+                  onMouseEnter={() => setHovered(post.id)} onMouseLeave={() => setHovered(null)}
+                  style={{
+                    background:"#0a0a0a", border:`1px solid ${isHov?"rgba(255,255,255,0.25)":"rgba(255,255,255,0.08)"}`,
+                    borderRadius:20, overflow:"hidden", cursor:"pointer", display:"flex", flexDirection:"column",
+                    transform: isHov ? "translateY(-6px)" : "translateY(0)",
+                    boxShadow: isHov ? "0 24px 60px rgba(0,0,0,0.3)" : "0 4px 20px rgba(0,0,0,0.15)",
+                    transition:"all 0.35s cubic-bezier(.22,.68,0,1.2)",
+                  }}>
+                  <div style={{ height:210, overflow:"hidden", position:"relative", flexShrink:0 }}>
+                    <img src={post.img} alt={post.title} style={{ width:"100%", height:"100%", objectFit:"cover", display:"block", transform:isHov?"scale(1.06)":"scale(1)", transition:"transform 0.55s cubic-bezier(.22,.68,0,1.2)" }} />
+                    <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 60%)" }} />
+                    <span style={{ position:"absolute", top:14, left:14, background:post.accent, borderRadius:100, padding:"4px 14px", fontFamily:"Syne", fontWeight:700, fontSize:10, letterSpacing:"0.08em", color:"#fff" }}>{post.tag}</span>
+                    <span style={{ position:"absolute", top:14, right:14, background:"rgba(0,0,0,0.5)", backdropFilter:"blur(6px)", borderRadius:100, padding:"4px 12px", fontFamily:"Barlow", fontSize:11, color:"rgba(255,255,255,0.8)" }}>{post.readTime}</span>
+                  </div>
+                  <div style={{ padding:"24px 24px 28px", flex:1, display:"flex", flexDirection:"column" }}>
+                    <span style={{ fontFamily:"Syne", fontWeight:700, fontSize:10, color:post.accent, letterSpacing:"0.14em", textTransform:"uppercase", display:"block", marginBottom:10 }}>{post.category}</span>
+                    <h3 style={{ fontFamily:"Syne", fontWeight:700, fontSize:18, letterSpacing:"-0.02em", lineHeight:1.3, margin:"0 0 12px", color:"#fff" }}>{post.title}</h3>
+                    <p style={{ fontFamily:"Barlow", fontSize:14, lineHeight:1.75, color:"rgba(255,255,255,0.55)", flex:1, marginBottom:24 }}>{post.excerpt}</p>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:18 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        {post._avatar ? (
+                          <img src={post._avatar} alt={post.author} style={{ width:32, height:32, borderRadius:"50%", objectFit:"cover", flexShrink:0, border:`2px solid ${post.accent}50` }} />
+                        ) : (
+                          <div style={{ width:32, height:32, borderRadius:"50%", flexShrink:0, background:`linear-gradient(135deg,${post.accent},#ff9800)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"Syne", fontWeight:800, fontSize:12, color:"#fff" }}>{post.author[0]}</div>
+                        )}
+                        <div>
+                          <div style={{ fontFamily:"Barlow", fontWeight:600, fontSize:13, color:"#fff" }}>{post.author}</div>
+                          <div style={{ fontFamily:"Barlow", fontSize:11, color:"rgba(255,255,255,0.4)" }}>{post.date}</div>
+                        </div>
+                      </div>
+                      <span style={{ fontFamily:"Syne", fontWeight:700, fontSize:13, color:isHov?"#fff":post.accent, transition:"color 0.2s" }}>Read →</span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <div style={{ textAlign:"center", marginTop:64 }}>
+            <button
+              style={{ background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.2)", borderRadius:100, padding:"14px 52px", fontFamily:"Syne", fontWeight:700, fontSize:14, color:"#fff", cursor:"pointer", transition:"all 0.25s" }}
+              onMouseEnter={e=>{ e.currentTarget.style.background="#ff5722"; e.currentTarget.style.borderColor="#ff5722"; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"; }}
+            >Load More Articles</button>
+          </div>
+        )}
+      </div>
+
+      {/* NEWSLETTER */}
+      <div style={{ margin:"0 56px 80px", background:"linear-gradient(125deg,#ff5722 0%,#ff3d00 60%,#bf360c 100%)", borderRadius:24, padding:"60px 60px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:32, position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", right:-60, top:-60, width:280, height:280, borderRadius:"50%", background:"rgba(255,255,255,0.05)" }} />
+        <div style={{ position:"relative", zIndex:1 }}>
+          <h3 style={{ fontFamily:"Syne", fontWeight:800, fontSize:"clamp(24px,3vw,38px)", letterSpacing:"-0.03em", margin:"0 0 10px" }}>New tips every week. Free.</h3>
+          <p style={{ fontFamily:"Barlow", fontSize:15, opacity:0.8, margin:0 }}>Join 40,000+ members getting the best reward strategies in their inbox.</p>
         </div>
-      </section>
+        <div style={{ display:"flex", gap:12, zIndex:1, flexWrap:"wrap" }}>
+          <input placeholder="your@email.com" style={{ background:"rgba(0,0,0,0.3)", border:"1px solid rgba(255,255,255,0.25)", borderRadius:100, padding:"14px 24px", fontFamily:"Barlow", fontSize:14, color:"#fff", outline:"none", minWidth:240 }} />
+          <button
+            style={{ background:"#0a0a0a", border:"none", borderRadius:100, padding:"14px 32px", fontFamily:"Syne", fontWeight:700, fontSize:14, color:"#ff5722", cursor:"pointer", whiteSpace:"nowrap", transition:"background 0.2s" }}
+            onMouseEnter={e=>e.target.style.background="#fff"}
+            onMouseLeave={e=>e.target.style.background="#0a0a0a"}
+          >Subscribe →</button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
