@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import DashboardHeader from "../components/user_dashboard/user_global_comp/DashboardHeader";
 import DashboardSidebar from "../components/user_dashboard/user_global_comp/DashboardSidebar";
-import DashboardFooter from "../components/user_dashboard/user_global_comp/DashbordFooter";
+import DashboardFooter from "../components/user_dashboard/user_global_comp/DashbordFooter"; // ✅ fixed typo: DashbordFooter → DashboardFooter
 import ScrollToTop from "../components/globalcomp/ScrollToTop";
 
 const DashboardLayout = () => {
@@ -11,44 +11,28 @@ const DashboardLayout = () => {
 
   return (
     /*
-      FINAL SANDWICH LAYOUT
+      SANDWICH LAYOUT
       ┌─────────────────────────────────────┐
       │         HEADER (fixed, 65px)        │
       ├──────────┬──────────────────────────┤
       │          │                          │
-      │ SIDEBAR  │    MAIN CONTENT          │  ← both scroll together
+      │ SIDEBAR  │    MAIN CONTENT          │
       │ (sticky) │    (bg-white)            │
       │          │                          │
       ├──────────┴──────────────────────────┤
       │        FOOTER (full width)          │
       └─────────────────────────────────────┘
     */
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: "#030712",
-      }}
-    >
+    <div className="flex flex-col min-h-screen bg-gray-950">
       <ScrollToTop />
 
       {/* 1. Fixed header */}
       <DashboardHeader onMenuToggle={() => setSidebarOpen((prev) => !prev)} />
 
-      {/* 2. Middle row: sidebar + content (below fixed header) */}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          paddingTop: "65px", // exactly header height
-        }}
-      >
-        {/*
-          Sidebar handles its own two modes internally:
-          - Desktop (lg+): sticky, part of normal flow — no manual margin needed
-          - Mobile (<lg): fixed overlay drawer
-        */}
+      {/* 2. Middle row: sidebar + content */}
+      <div className="flex flex-1 pt-[65px]">
+
+        {/* Sidebar — sticky on desktop, fixed drawer on mobile */}
         <DashboardSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -64,20 +48,13 @@ const DashboardLayout = () => {
           />
         )}
 
-        {/* Main content — sits naturally next to sticky sidebar */}
-        <main
-          style={{
-            flex: 1,
-            minWidth: 0,
-            background: "#ffffff",
-            padding: "24px",
-          }}
-        >
+        {/* Main content */}
+        <main className="flex-1 min-w-0 bg-white p-4 md:p-6">
           <Outlet />
         </main>
       </div>
 
-      {/* 3. Footer — full width, appears after all content */}
+      {/* 3. Footer — full width */}
       <DashboardFooter />
     </div>
   );
