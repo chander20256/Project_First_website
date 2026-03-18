@@ -10,6 +10,7 @@ require("dotenv").config();
 const walletRoutes = require("./routes/walletRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const userTaskRoutes = require("./routes/userTaskRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // ✅ Initialize app FIRST
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/user", require("./routes/user"));
 app.use("/api/referrals", require("./routes/referral"));
 app.use("/api/referrals/stats", require("./routes/referralStats"));
 app.use("/api/top-referrer", require("./routes/topReferrer")); // ✅ moved here
+app.use("/api/user", userRoutes);
 
 // Test route
 app.get("/", (req, res) => {

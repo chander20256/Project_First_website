@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 const ReferralLinkCard = () => {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/user/me")
-      .then((res) => res.json())
-      .then((data) => setUsername(data.username))
-      .catch((err) => console.error(err));
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get("http://localhost:5000/api/auth/me", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+console.log("TOKEN:", token);
+
+        setUsername(res.data.username);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const referralLink = `https://reevadoo.com/ref/${username}`;
