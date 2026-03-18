@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const DashboardHeader = ({ onMenuToggle }) => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState({
     username: "User",
     initial: "U",
@@ -26,7 +27,6 @@ const DashboardHeader = ({ onMenuToggle }) => {
         if (stored) initialUser = JSON.parse(stored);
       } catch (e) {}
 
-      // Read avatar separately (can be updated from settings)
       let avatar = null;
       try {
         avatar = localStorage.getItem("userAvatar") || null;
@@ -44,13 +44,11 @@ const DashboardHeader = ({ onMenuToggle }) => {
 
     loadUser();
 
-    // Listen for avatar updates from Settings page
     const handleAvatarUpdate = (e) => {
       setUserData((prev) => ({ ...prev, avatar: e.detail.avatar }));
     };
     window.addEventListener("avatarUpdated", handleAvatarUpdate);
 
-    // Fetch fresh data
     const fetchMe = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -97,7 +95,6 @@ const DashboardHeader = ({ onMenuToggle }) => {
     >
       {/* Left: Hamburger (mobile only) + Logo */}
       <div className="flex items-center gap-3">
-        {/* Hamburger button — hidden on lg and above */}
         <button
           onClick={onMenuToggle}
           className="lg:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg gap-1.5"
@@ -169,7 +166,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
           </svg>
         </button>
 
-        {/* Balance — hide label on very small screens */}
+        {/* Balance */}
         <div
           className="flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-semibold"
           style={{
@@ -183,18 +180,17 @@ const DashboardHeader = ({ onMenuToggle }) => {
           <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
         </div>
 
-        {/* Divider — hidden on small screens */}
+        {/* Divider */}
         <div
           className="hidden sm:block"
           style={{ width: 1, height: 28, background: "rgba(255,255,255,0.08)" }}
         />
 
-        {/* Profile */}
-        <Link
-          to="/settings"
-          className="flex items-center gap-2 md:gap-3 cursor-pointer no-underline"
+        {/* Profile → navigates to DashboardSettings on click */}
+        <div
+          className="flex items-center gap-2 md:gap-3 cursor-pointer"
+          onClick={() => navigate("/dashboard/profile")}
         >
-          {/* Avatar: image if set, else initial letter */}
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shrink-0"
             style={{
@@ -217,7 +213,6 @@ const DashboardHeader = ({ onMenuToggle }) => {
               </span>
             )}
           </div>
-          {/* Username — hidden on small screens */}
           <span
             className="hidden sm:block text-sm font-medium"
             style={{
@@ -227,7 +222,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
           >
             {userData.username}
           </span>
-        </Link>
+        </div>
       </div>
 
       {/* Orange accent line at bottom */}
