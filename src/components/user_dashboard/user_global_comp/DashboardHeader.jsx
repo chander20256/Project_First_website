@@ -6,6 +6,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
     username: "User",
     initial: "U",
     balance: 0,
+    avatar: null,
   });
 
   useEffect(() => {
@@ -18,20 +19,38 @@ const DashboardHeader = ({ onMenuToggle }) => {
       document.head.appendChild(link);
     }
 
-    let initialUser = null;
-    try {
-      const stored = localStorage.getItem("user");
-      if (stored) initialUser = JSON.parse(stored);
-    } catch (e) {}
+    const loadUser = () => {
+      let initialUser = null;
+      try {
+        const stored = localStorage.getItem("user");
+        if (stored) initialUser = JSON.parse(stored);
+      } catch (e) {}
 
-    if (initialUser) {
-      setUserData({
-        username: initialUser.username || "User",
-        initial: (initialUser.username || "U").charAt(0).toUpperCase(),
-        balance: initialUser.creds || 0,
-      });
-    }
+      // Read avatar separately (can be updated from settings)
+      let avatar = null;
+      try {
+        avatar = localStorage.getItem("userAvatar") || null;
+      } catch (e) {}
 
+      if (initialUser) {
+        setUserData({
+          username: initialUser.username || "User",
+          initial: (initialUser.username || "U").charAt(0).toUpperCase(),
+          balance: initialUser.creds || 0,
+          avatar,
+        });
+      }
+    };
+
+    loadUser();
+
+    // Listen for avatar updates from Settings page
+    const handleAvatarUpdate = (e) => {
+      setUserData((prev) => ({ ...prev, avatar: e.detail.avatar }));
+    };
+    window.addEventListener("avatarUpdated", handleAvatarUpdate);
+
+    // Fetch fresh data
     const fetchMe = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -41,18 +60,27 @@ const DashboardHeader = ({ onMenuToggle }) => {
         });
         const data = await res.json();
         if (data.user) {
+          const avatar = localStorage.getItem("userAvatar") || null;
           setUserData({
             username: data.user.username || "User",
             initial: (data.user.username || "U").charAt(0).toUpperCase(),
             balance: data.user.creds || 0,
+            avatar: data.user.avatar || avatar,
           });
           localStorage.setItem("user", JSON.stringify(data.user));
+          if (data.user.avatar) {
+            localStorage.setItem("userAvatar", data.user.avatar);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch user", err);
       }
     };
     fetchMe();
+
+    return () => {
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+    };
   }, []);
 
   return (
@@ -162,15 +190,32 @@ const DashboardHeader = ({ onMenuToggle }) => {
         />
 
         {/* Profile */}
-        <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
+        <Link
+          to="/settings"
+          className="flex items-center gap-2 md:gap-3 cursor-pointer no-underline"
+        >
+          {/* Avatar: image if set, else initial letter */}
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+            className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shrink-0"
             style={{
-              background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+              background: userData.avatar
+                ? "transparent"
+                : "linear-gradient(135deg, #FF6B00, #FF8C00)",
               boxShadow: "0 4px 14px rgba(255,107,0,0.32)",
+              border: "2px solid rgba(255,107,0,0.5)",
             }}
           >
-            {userData.initial}
+            {userData.avatar ? (
+              <img
+                src={userData.avatar}
+                alt="avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-white text-sm font-bold">
+                {userData.initial}
+              </span>
+            )}
           </div>
           {/* Username — hidden on small screens */}
           <span
@@ -182,7 +227,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
           >
             {userData.username}
           </span>
-        </div>
+        </Link>
       </div>
 
       {/* Orange accent line at bottom */}
