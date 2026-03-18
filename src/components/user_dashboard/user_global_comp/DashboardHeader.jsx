@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const DashboardHeader = () => {
+const DashboardHeader = ({ onMenuToggle }) => {
   const [userData, setUserData] = useState({
     username: "User",
     initial: "U",
-    balance: 0
+    balance: 0,
   });
 
   useEffect(() => {
@@ -18,35 +18,33 @@ const DashboardHeader = () => {
       document.head.appendChild(link);
     }
 
-    // Try local storage first
     let initialUser = null;
     try {
       const stored = localStorage.getItem("user");
       if (stored) initialUser = JSON.parse(stored);
-    } catch(e) {}
+    } catch (e) {}
 
     if (initialUser) {
       setUserData({
         username: initialUser.username || "User",
         initial: (initialUser.username || "U").charAt(0).toUpperCase(),
-        balance: initialUser.creds || 0
+        balance: initialUser.creds || 0,
       });
     }
 
-    // Fetch fresh data
     const fetchMe = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
         const res = await fetch("http://localhost:5000/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         if (data.user) {
           setUserData({
             username: data.user.username || "User",
             initial: (data.user.username || "U").charAt(0).toUpperCase(),
-            balance: data.user.creds || 0
+            balance: data.user.creds || 0,
           });
           localStorage.setItem("user", JSON.stringify(data.user));
         }
@@ -59,7 +57,7 @@ const DashboardHeader = () => {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8"
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8"
       style={{
         background: "rgba(10,10,10,0.98)",
         backdropFilter: "blur(20px)",
@@ -69,23 +67,50 @@ const DashboardHeader = () => {
         height: "65px",
       }}
     >
-      {/* Logo */}
-      <Link
-        to="/dashboard"
-        style={{
-          fontFamily: "'Bebas Neue', sans-serif",
-          fontSize: "1.85rem",
-          letterSpacing: "0.08em",
-          lineHeight: 1,
-          textDecoration: "none",
-          color: "white",
-        }}
-      >
-        REVA<span style={{ color: "#FF6B00" }}>Doo</span>
-      </Link>
+      {/* Left: Hamburger (mobile only) + Logo */}
+      <div className="flex items-center gap-3">
+        {/* Hamburger button — hidden on lg and above */}
+        <button
+          onClick={onMenuToggle}
+          className="lg:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg gap-1.5"
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,107,0,0.2)",
+          }}
+          aria-label="Toggle sidebar"
+        >
+          <span
+            className="block w-4 h-0.5 rounded-full"
+            style={{ background: "#FF6B00" }}
+          />
+          <span
+            className="block w-4 h-0.5 rounded-full"
+            style={{ background: "rgba(255,107,0,0.6)" }}
+          />
+          <span
+            className="block w-3 h-0.5 rounded-full"
+            style={{ background: "rgba(255,107,0,0.35)" }}
+          />
+        </button>
+
+        {/* Logo */}
+        <Link
+          to="/dashboard"
+          style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "1.85rem",
+            letterSpacing: "0.08em",
+            lineHeight: 1,
+            textDecoration: "none",
+            color: "white",
+          }}
+        >
+          REVA<span style={{ color: "#FF6B00" }}>Doo</span>
+        </Link>
+      </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 md:gap-6">
         {/* Notifications */}
         <button
           style={{
@@ -116,9 +141,9 @@ const DashboardHeader = () => {
           </svg>
         </button>
 
-        {/* Balance */}
+        {/* Balance — hide label on very small screens */}
         <div
-          className="flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-semibold"
+          className="flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-semibold"
           style={{
             background: "rgba(255,107,0,0.1)",
             border: "1px solid rgba(255,107,0,0.25)",
@@ -126,18 +151,20 @@ const DashboardHeader = () => {
             color: "rgba(255,255,255,0.7)",
           }}
         >
-          Balance: <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
+          <span className="hidden sm:inline">Balance:</span>
+          <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
         </div>
 
-        {/* Divider */}
+        {/* Divider — hidden on small screens */}
         <div
+          className="hidden sm:block"
           style={{ width: 1, height: 28, background: "rgba(255,255,255,0.08)" }}
         />
 
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer">
+        <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
             style={{
               background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
               boxShadow: "0 4px 14px rgba(255,107,0,0.32)",
@@ -145,8 +172,9 @@ const DashboardHeader = () => {
           >
             {userData.initial}
           </div>
+          {/* Username — hidden on small screens */}
           <span
-            className="text-sm font-medium"
+            className="hidden sm:block text-sm font-medium"
             style={{
               fontFamily: "'DM Sans', sans-serif",
               color: "rgba(255,255,255,0.7)",
