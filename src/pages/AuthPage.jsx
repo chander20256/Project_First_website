@@ -16,7 +16,7 @@ const floatingParticles = Array.from({ length: 18 }, (_, i) => ({
 export default function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "", referral: "" });
   const [focused, setFocused] = useState(null);
   const [shake, setShake] = useState(false);
   const [successPulse, setSuccessPulse] = useState(false);
@@ -34,7 +34,7 @@ export default function AuthPage() {
         : "http://localhost:5000/api/auth/register";
       const body = mode === "login"
         ? { email: form.email, password: form.password }
-        : { username: form.username, email: form.email, password: form.password, confirm: form.confirm };
+        : { username: form.username, email: form.email, password: form.password, confirm: form.confirm, referral: form.referral };
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,6 +113,15 @@ export default function AuthPage() {
         }
         .input-field:focus { border-color: ${ORANGE}; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
         .input-field::placeholder { color: #bbb; }
+        .input-field-referral {
+          width: 100%; background: #fff8f3; border: 2px dashed #ffc299;
+          border-radius: 10px; padding: 14px 18px 14px 44px;
+          font-family: 'Barlow', sans-serif; font-size: 16px; color: #222;
+          outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+          -webkit-appearance: none; appearance: none;
+        }
+        .input-field-referral:focus { border-color: ${ORANGE}; border-style: solid; background: #fff4eb; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
+        .input-field-referral::placeholder { color: #e0b898; }
         .btn-primary {
           width: 100%; background: linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_LIGHT} 100%);
           color: white; border: none; border-radius: 10px; padding: 16px;
@@ -161,7 +170,6 @@ export default function AuthPage() {
           animation: spinLoader 0.6s linear infinite; flex-shrink: 0;
         }
  
-        /* ─── Desktop layout: side by side ─── */
         .page-layout {
           display: flex;
           align-items: flex-start;
@@ -189,13 +197,9 @@ export default function AuthPage() {
  
         .card-body { padding: 36px 36px 32px; }
  
-        /* Mobile logo — hidden on desktop */
         .mobile-logo { display: none; }
- 
-        /* Mobile bottom branding — hidden on desktop */
         .mobile-bottom-branding { display: none; }
  
-        /* ─── Mobile: stacked layout ─── */
         @media (max-width: 900px) {
           .branding-panel { display: none; }
  
@@ -207,7 +211,6 @@ export default function AuthPage() {
             min-height: 100vh;
           }
  
-          /* Logo bar above card */
           .mobile-logo {
             display: block;
             text-align: center;
@@ -221,7 +224,6 @@ export default function AuthPage() {
             width: 100%;
           }
  
-          /* Rewards section below card */
           .mobile-bottom-branding {
             display: block;
             width: 100%;
@@ -307,7 +309,7 @@ export default function AuthPage() {
         {/* ── Auth card column ── */}
         <div className="auth-card-wrap">
  
-          {/* 1. Mobile logo — shown only on mobile, above the card */}
+          {/* Mobile logo */}
           <div className="mobile-logo">
             <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 34, letterSpacing: 2, color: "#111" }}>
               REVA<span style={{ color: ORANGE }}>DOO</span>
@@ -317,7 +319,7 @@ export default function AuthPage() {
             </p>
           </div>
  
-          {/* 2. The auth card — centered on mobile */}
+          {/* Auth card */}
           <div
             className={`card-animate ${shake ? "shake-anim" : ""} ${successPulse ? "success-pulse" : ""}`}
             style={{ background: "#fff", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,107,0,0.08)", overflow: "hidden" }}
@@ -410,6 +412,35 @@ export default function AuthPage() {
                       onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))} />
                   </div>
                 )}
+ 
+                {/* ── Referral Code Field (Register only) ── */}
+                {mode === "register" && (
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                      <label style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, color: "#888", textTransform: "uppercase" }}>
+                        Referral Code
+                      </label>
+                      <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: "#e0956a", background: "#fff4eb", border: "1px dashed #ffc299", borderRadius: 5, padding: "2px 8px", fontWeight: 600 }}>
+                        Optional
+                      </span>
+                    </div>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        className="input-field-referral"
+                        placeholder="Enter a friend's referral code"
+                        value={form.referral}
+                        onFocus={() => setFocused("referral")}
+                        onBlur={() => setFocused(null)}
+                        onChange={e => setForm(f => ({ ...f, referral: e.target.value }))}
+                      />
+                      <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, pointerEvents: "none", lineHeight: 1 }}>🎁</span>
+                    </div>
+                    <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#c4956a", marginTop: 5 }}>
+                      Have a friend's code? Both of you earn bonus creds!
+                    </p>
+                  </div>
+                )}
+ 
                 {mode === "login" && (
                   <div style={{ textAlign: "right", marginTop: -6 }}>
                     <a href="#" style={{ fontFamily: "'Barlow', sans-serif", fontSize: 13, color: ORANGE, textDecoration: "none", fontWeight: 600 }}>Forgot password?</a>
@@ -449,17 +480,14 @@ export default function AuthPage() {
             🔒 Secure login · No spam · Cancel anytime
           </p>
  
-          {/* 3. Mobile rewards/branding section — shown BELOW the card on mobile only */}
+          {/* Mobile bottom branding */}
           <div className="mobile-bottom-branding">
- 
-            {/* Section divider */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 22px" }}>
               <div style={{ flex: 1, height: 1, background: "#e8e0d8" }} />
               <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: 10, color: "#ccc", textTransform: "uppercase", letterSpacing: 1.5, whiteSpace: "nowrap" }}>Why REVADOO?</span>
               <div style={{ flex: 1, height: 1, background: "#e8e0d8" }} />
             </div>
  
-            {/* Hero headline */}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
               <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 44, lineHeight: 1, color: "#111", letterSpacing: -0.5 }}>
                 <span style={{ color: ORANGE }}>GET PAID</span><br />&amp; GET REWARDED
@@ -471,7 +499,6 @@ export default function AuthPage() {
               Browse surveys, games, creative challenges and more — convert your Creds into real gift cards, cash, and premium rewards.
             </p>
  
-            {/* Stats row */}
             <div style={{ display: "flex", marginBottom: 16, background: "#fff", borderRadius: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.07)", border: "1px solid #f0e8e0", overflow: "hidden" }}>
               {[{ val: "2.4M+", label: "Active Users" }, { val: "500+", label: "Daily Tasks" }, { val: "$25", label: "Top Reward" }].map((s, i) => (
                 <div key={s.label} style={{ flex: 1, textAlign: "center", padding: "16px 8px", borderRight: i < 2 ? "1px solid #f0e8e0" : "none" }}>
@@ -481,7 +508,6 @@ export default function AuthPage() {
               ))}
             </div>
  
-            {/* Creds card */}
             <div style={{ background: "#fff", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.07)", border: "1px solid #f0e8e0", marginBottom: 12 }}>
               <div style={{ width: 42, height: 42, borderRadius: 10, background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>⚡</div>
               <div>
@@ -490,7 +516,6 @@ export default function AuthPage() {
               </div>
             </div>
  
-            {/* 7-day tracker */}
             <div style={{ background: "#fff", borderRadius: 14, padding: "16px 18px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", border: "1px solid #f0e8e0" }}>
               <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Daily Tasks</div>
               <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -500,15 +525,11 @@ export default function AuthPage() {
               </div>
               <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 12, color: "#999" }}>7 Day Login Rewards</div>
             </div>
- 
           </div>
-          {/* end mobile-bottom-branding */}
  
         </div>
-        {/* end auth-card-wrap */}
- 
       </div>
-      {/* end page-layout */}
     </div>
   );
 }
+ 
