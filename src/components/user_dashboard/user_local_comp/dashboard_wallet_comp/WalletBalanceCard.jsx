@@ -50,14 +50,14 @@ const WalletBalanceCard = () => {
   };
 
   return (
-    <div className="relative overflow-hidden bg-orange-500 rounded-2xl p-8 mb-4 font-['DM_Sans',sans-serif]">
+    <div className="relative overflow-hidden bg-orange-500 rounded-2xl p-6 sm:p-8 mb-4 font-['DM_Sans',sans-serif] w-full">
       {/* Decorative circles */}
       <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 pointer-events-none" />
       <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
 
       <p className="text-sm font-medium text-white/75 mb-2">Available Balance</p>
 
-      <h2 className="text-5xl font-bold text-white tracking-tight leading-none mb-1">
+      <h2 className="text-4xl sm:text-5xl font-bold text-white tracking-tight leading-none mb-1">
         ${balance.toFixed(2)}
       </h2>
 
