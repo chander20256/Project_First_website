@@ -22,7 +22,7 @@ const WithdrawForm = () => {
   const methods = ["PayPal", "Bank Transfer", "Crypto"];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 font-['DM_Sans',sans-serif]">
+    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 font-['DM_Sans',sans-serif] w-full">
       <h3 className="text-base font-bold text-black mb-4">Withdraw Funds</h3>
 
       <form onSubmit={handleWithdraw} className="space-y-4">
@@ -42,7 +42,7 @@ const WithdrawForm = () => {
               value={withdrawAmount}
               onChange={(e) => setWithdrawAmount(e.target.value)}
               required
-              className="flex-1 px-3 py-2.5 text-sm font-semibold text-black bg-transparent outline-none placeholder:text-gray-300"
+              className="flex-1 px-3 py-2.5 text-sm font-semibold text-black bg-transparent outline-none placeholder:text-gray-300 w-0 min-w-0"
             />
           </div>
         </div>
@@ -52,13 +52,13 @@ const WithdrawForm = () => {
           <label className="block text-xs font-semibold text-gray-500 mb-1.5">
             Payout Method
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {methods.map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setMethod(m)}
-                className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-all duration-150 ${
+                className={`flex-1 min-w-[80px] py-2 text-xs font-semibold rounded-lg border transition-all duration-150 ${
                   method === m
                     ? "bg-orange-500 text-white border-orange-500"
                     : "bg-white text-gray-500 border-gray-200 hover:border-orange-300"
