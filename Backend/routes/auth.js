@@ -2,8 +2,14 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
+const Referral = require('../models/Referral');
 const { protectRoute } = require('../middleware/authMiddleware');
+
+const generateReferralCode = () => {
+  return crypto.randomBytes(3).toString('hex').toUpperCase();
+};
 
 // ─── Helper: generate JWT token ──────────────────────────
 const generateToken = (userId, email) => {
@@ -21,7 +27,7 @@ const generateToken = (userId, email) => {
 // ════════════════════════════════════════════════════════
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, confirm } = req.body;
+    const { username, email, password, confirm, referral } = req.body;
 
     // ── Validation ──────────────────────────────────────
     if (!username || !email || !password || !confirm) {
@@ -51,17 +57,45 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'This username is already taken' });
     }
 
+    let referredBy = null;
+    let referredByCode = null;
+    if (referral && referral.trim()) {
+      const referralCodeInput = referral.trim().toUpperCase();
+      const referrer = await User.findOne({ referralCode: referralCodeInput });
+      if (!referrer) {
+        return res.status(400).json({ message: 'Invalid referral code' });
+      }
+      referredBy = referrer._id;
+      referredByCode = referralCodeInput;
+    }
+
     // ── Hash password ───────────────────────────────────
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ── Create user in MongoDB ──────────────────────────
+    let referralCode = generateReferralCode();
+    while (await User.findOne({ referralCode })) {
+      referralCode = generateReferralCode();
+    }
+
     const newUser = new User({
       username,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
-      // creds defaults to 250 from schema
+      referralCode,
+      referredBy,
+      referredByCode,
     });
     await newUser.save();
+
+    if (referredBy) {
+      await Referral.create({
+        referrer: referredBy,
+        referredUser: newUser._id,
+        status: 'Active',
+        earnings: 50,
+      });
+    }
 
     // ── Generate token ──────────────────────────────────
     const token = generateToken(newUser._id, newUser.email);
@@ -75,6 +109,9 @@ router.post('/register', async (req, res) => {
         username: newUser.username,
         email: newUser.email,
         creds: newUser.creds,
+        referralCode: newUser.referralCode,
+        referredBy: newUser.referredBy,
+        referredByCode: newUser.referredByCode,
         createdAt: newUser.createdAt,
       },
     });
@@ -258,21 +295,5 @@ router.delete('/delete-account', protectRoute, async (req, res) => {
 
 
 
-
-module.exports = function (req, res, next) {
-  const token = req.header("Authorization")?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "No token, access denied" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, "secretkey"); // use env in real app
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
 
 module.exports = router;
