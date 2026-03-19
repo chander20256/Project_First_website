@@ -22,6 +22,7 @@ const ActionCard = ({ icon, label, desc }) => {
         cursor: "pointer", transition: "all 0.15s",
         fontFamily: "'DM Sans', sans-serif",
         textAlign: "left", outline: "none",
+        width: "100%",
       }}
     >
       <span style={{ fontSize: "22px" }}>{icon}</span>
@@ -40,12 +41,24 @@ const ActionCard = ({ icon, label, desc }) => {
 const WalletQuickActions = () => {
   return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+        .wallet-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+        }
+        @media (max-width: 640px) {
+          .wallet-actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      `}</style>
       <div style={{ fontFamily: "'DM Sans', sans-serif", marginTop: "16px" }}>
         <h3 style={{ margin: "0 0 12px", fontSize: "15px", fontWeight: 700, color: "#000" }}>
           Quick Actions
         </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+        <div className="wallet-actions-grid">
           {actions.map((a, i) => (
             <ActionCard key={i} icon={a.icon} label={a.label} desc={a.desc} />
           ))}

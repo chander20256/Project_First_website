@@ -40,6 +40,7 @@ import AdminReferrals from "./pages/admin_dashboard/AdminReferrals";
 import AdminQuizes from "./pages/admin_dashboard/AdminQuizes";
 import AdminSurveys from "./pages/admin_dashboard/AdminSurveys";
 import AdminTask from "./pages/admin_dashboard/AdminTask";
+import DashboardProfile from "./pages/userdashboard/DashboardProfile";
 
 
 function App() {
@@ -68,7 +69,7 @@ function App() {
           <Route path="referrals" element={<DashboardReferrals />} />
           <Route path="quizzes" element={<DashboardQuizzes />} />
           <Route path="settings" element={<DashboardSettings />} />
-          <Route path="profile" element={<DashboardSettings />} />
+          <Route path="profile" element={<DashboardProfile/>} />
           {/* Add more dashboard routes as needed */}
 
         </Route>
