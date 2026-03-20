@@ -20,16 +20,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Now use routes
-app.use("/api/auth", require("./routes/auth")); // ✅ Added auth route
-app.use("/api/wallet", walletRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/user-tasks", userTaskRoutes);
-app.use("/api/user", require("./routes/user"));
-app.use("/api/referrals", require("./routes/referral"));
-app.use("/api/referrals/stats", require("./routes/referralStats"));
-app.use("/api/top-referrer", require("./routes/topReferrer")); // ✅ moved here
-app.use("/api/user", userRoutes);
+// ✅ FIXED server.js — only change these 2 lines order
+app.use("/api/auth",              require("./routes/auth"));
+app.use("/api/wallet",            walletRoutes);
+app.use("/api/tasks",             taskRoutes);
+app.use("/api/user-tasks",        userTaskRoutes);
+app.use("/api/user",              require("./routes/user"));
+app.use("/api/top-referrer",      require("./routes/topReferrer"));
+app.use("/api/user",              userRoutes);
+
+// ⚠️ STATS must come BEFORE /api/referrals
+app.use("/api/referrals/stats",   require("./routes/referralStats"));
+app.use("/api/referrals",         require("./routes/referral"));
 
 // Test route
 app.get("/", (req, res) => {
