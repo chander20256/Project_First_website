@@ -19,19 +19,6 @@ const stats = [
     icon: FiActivity,
     color: "bg-purple-500"
   },
-  {
-    title: "System Alerts",
-    value: "3",
-    icon: FiAlertCircle,
-    color: "bg-red-500"
-  }
-];
-
-const activities = [
-  "New user registered: john@email.com",
-  "Withdrawal request submitted",
-  "Admin updated game settings",
-  "New blog article published"
 ];
 
 const modulesGrid = () => {
@@ -64,34 +51,6 @@ const modulesGrid = () => {
         })}
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h3 className="text-lg font-semibold mb-4">
-          Recent Activity
-        </h3>
-
-        <ul className="space-y-3">
-          {activities.map((item, index) => (
-            <li
-              key={index}
-              className="text-sm text-gray-600 border-b pb-2"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* System Notice */}
-      <div className="bg-yellow-50 border border-yellow-200 p-5 rounded-xl">
-        <h4 className="font-semibold text-yellow-700">
-          System Notice
-        </h4>
-
-        <p className="text-sm text-yellow-600 mt-1">
-          Scheduled maintenance will occur tonight at 2:00 AM.
-        </p>
-      </div>
 
     </div>
   );
