@@ -1,42 +1,28 @@
-// routes/referralStats.js
-const express = require("express");
-const router = express.Router();
-const Referral = require("../models/Referral");
+// routes/referralStats.js — FULL FIXED FILE
+const express    = require("express");
+const router     = express.Router();
+const mongoose   = require("mongoose");
+const Referral   = require("../models/Referral");
+const { protectRoute } = require("../middleware/authMiddleware");
 
-router.get("/", async (req, res) => {
+router.get("/", protectRoute, async (req, res) => {
   try {
-    const userId = req.user?.id; // from JWT (recommended)
+    // ✅ convert string id → ObjectId for aggregate
+    const userId = new mongoose.Types.ObjectId(req.user._id);
 
-    // 1️⃣ Total referrals
-    const totalReferrals = await Referral.countDocuments({
-      referrer: userId,
-    });
+    const totalReferrals  = await Referral.countDocuments({ referrer: userId });
+    const activeReferrals = await Referral.countDocuments({ referrer: userId, status: "Active" });
 
-    // 2️⃣ Active referrals
-    const activeReferrals = await Referral.countDocuments({
-      referrer: userId,
-      status: "Active",
-    });
-
-    // 3️⃣ Total earnings
     const earningsData = await Referral.aggregate([
       { $match: { referrer: userId } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$earnings" },
-        },
-      },
+      { $group: { _id: null, total: { $sum: "$earnings" } } },
     ]);
 
     const totalEarnings = earningsData[0]?.total || 0;
 
-    res.json({
-      totalReferrals,
-      activeReferrals,
-      totalEarnings,
-    });
+    res.json({ totalReferrals, activeReferrals, totalEarnings });
   } catch (err) {
+    console.error("Stats error:", err.message);
     res.status(500).json({ message: "Error fetching stats" });
   }
 });

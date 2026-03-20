@@ -1,3 +1,4 @@
+// middleware/auth.js
 const jwt = require("jsonwebtoken");
 
 module.exports = function (req, res, next) {
@@ -10,7 +11,8 @@ module.exports = function (req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, "secretkey");
+    // ✅ FIXED — was "secretkey", now uses JWT_SECRET from .env
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
