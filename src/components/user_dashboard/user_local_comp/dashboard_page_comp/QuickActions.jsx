@@ -1,19 +1,120 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
 const QuickActions = () => {
+  const navigate = useNavigate();
+
   const actions = [
-    { label: "Spin Wheel", color: "bg-green-500" },
-    { label: "Available Tasks", color: "bg-blue-500" },
-    { label: "Withdraw", color: "bg-orange-500" },
-    { label: "Transaction History", color: "bg-purple-500" },
+    {
+      label: "Games",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="6" width="20" height="12" rx="2" />
+          <path d="M12 12h.01M8 12h.01M16 12h.01M12 8h.01M12 16h.01" />
+        </svg>
+      ),
+      color: "#7C3AED",
+      bg: "rgba(124,58,237,0.08)",
+      border: "rgba(124,58,237,0.2)",
+      route: "/dashboard/games",
+    },
+    {
+      label: "Deposit",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+      ),
+      color: "#16a34a",
+      bg: "rgba(22,163,74,0.08)",
+      border: "rgba(22,163,74,0.2)",
+      route: "/dashboard/wallet",
+    },
+    {
+      label: "Withdraw",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 19V5M5 12l7-7 7 7" />
+        </svg>
+      ),
+      color: "#FF6B00",
+      bg: "rgba(255,107,0,0.08)",
+      border: "rgba(255,107,0,0.2)",
+      route: "/dashboard/wallet",
+    },
+    {
+      label: "View Ads",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      ),
+      color: "#0ea5e9",
+      bg: "rgba(14,165,233,0.08)",
+      border: "rgba(14,165,233,0.2)",
+      route: "/dashboard/ads",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+    <div
+      className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
       {actions.map((action, index) => (
         <button
           key={index}
-          className={`${action.color} text-white py-3 rounded-lg font-medium hover:opacity-90 transition`}
+          onClick={() => navigate(action.route)}
+          className="flex flex-col items-center justify-center gap-2 rounded-xl py-4 px-3 transition-all duration-200"
+          style={{
+            background: "#ffffff",
+            border: `1px solid ${action.border}`,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = `0 6px 20px ${action.bg}`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)";
+          }}
         >
-          {action.label}
+          {/* Icon circle */}
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 40,
+              height: 40,
+              background: action.bg,
+              border: `1px solid ${action.border}`,
+              color: action.color,
+            }}
+          >
+            {action.icon}
+          </div>
+
+          {/* Label */}
+          <span
+            className="text-xs font-semibold"
+            style={{ color: "#0a0a0a" }}
+          >
+            {action.label}
+          </span>
+
+          {/* Arrow */}
+          <span
+            className="text-xs"
+            style={{ color: action.color }}
+          >
+            Go →
+          </span>
         </button>
       ))}
     </div>
