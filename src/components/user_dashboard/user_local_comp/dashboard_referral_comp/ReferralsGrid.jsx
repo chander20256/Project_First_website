@@ -17,15 +17,15 @@ const StatusPill = ({ status }) => {
       <span
         className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider"
         style={{
-          background: active ? "rgba(34,197,94,0.12)"  : "rgba(234,179,8,0.12)",
+          background: active ? "rgba(34,197,94,0.1)"  : "rgba(234,179,8,0.1)",
           border:     active ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(234,179,8,0.3)",
-          color:      active ? "#4ade80" : "#facc15",
+          color:      active ? "#16a34a" : "#ca8a04",
         }}
       >
         <span
           className="h-1.5 w-1.5 rounded-full"
           style={{
-            background: active ? "#4ade80" : "#facc15",
+            background: active ? "#16a34a" : "#ca8a04",
             animation: active ? "pillDot 1.8s ease-in-out infinite" : "none",
           }}
         />
@@ -51,11 +51,15 @@ const ReferralsGrid = () => {
   const [sortDir,   setDir]       = useState("desc");
   const [page,      setPage]      = useState(1);
 
-  const load = () => {
+
+const load = () => {
     setLoading(true);
-    fetch("http://localhost:5000/api/referrals")
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/referrals", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) => res.json())
-      .then((data) => { setReferrals(data); setLoading(false); })
+      .then((data) => { setReferrals(Array.isArray(data) ? data : []); setLoading(false); })
       .catch((err) => { console.error(err); setLoading(false); });
   };
 
@@ -82,12 +86,8 @@ const ReferralsGrid = () => {
     <>
       <style>{`
         @keyframes blobGrid {
-          0%,100% { opacity: .15; transform: scale(1);    }
-          50%      { opacity: .28; transform: scale(1.2);  }
-        }
-        @keyframes rowSlide {
-          0%   { opacity: 0; transform: translateX(-12px); }
-          100% { opacity: 1; transform: translateX(0);     }
+          0%,100% { opacity: .08; transform: scale(1);   }
+          50%      { opacity: .15; transform: scale(1.2); }
         }
       `}</style>
 
@@ -95,41 +95,26 @@ const ReferralsGrid = () => {
         initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.15 }}
-        className="relative overflow-hidden rounded-3xl border border-white/8 bg-black"
-        style={{ boxShadow: "0 0 50px rgba(249,115,22,0.08)" }}
+        className="relative overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm"
       >
         {/* blob */}
         <div
-          className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full bg-orange-500 blur-[70px]"
+          className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full bg-orange-300 blur-3xl"
           style={{ animation: "blobGrid 4.5s ease-in-out infinite" }}
-        />
-        <div
-          className="pointer-events-none absolute -left-8 -bottom-8 h-36 w-36 rounded-full bg-white blur-[80px]"
-          style={{ opacity: 0.03 }}
         />
 
         {/* top bar */}
-        <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+        <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-orange-400 to-transparent" />
 
         {/* header */}
-        <div
-          className="relative z-10 flex flex-col gap-3 border-b border-white/5 px-5 py-4
-            sm:flex-row sm:items-center sm:justify-between sm:px-6"
-          style={{ background: "rgba(249,115,22,0.04)" }}
-        >
+        <div className="relative z-10 flex flex-col gap-3 border-b border-gray-100 bg-orange-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-orange-500/30"
-              style={{ background: "rgba(249,115,22,0.12)" }}
-            >
-              <Users size={14} className="text-orange-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 border border-orange-200">
+              <Users size={14} className="text-orange-500" />
             </div>
-            <span className="font-black text-white">Your Referrals</span>
+            <span className="font-black text-black">Your Referrals</span>
             {referrals.length > 0 && (
-              <span
-                className="rounded-full px-2.5 py-0.5 text-[10px] font-black text-orange-400"
-                style={{ background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.25)" }}
-              >
+              <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-black text-orange-600 border border-orange-200">
                 {referrals.length}
               </span>
             )}
@@ -137,9 +122,7 @@ const ReferralsGrid = () => {
           <motion.button
             whileTap={{ scale: 0.88 }}
             onClick={load}
-            className="flex w-fit items-center gap-1.5 rounded-xl border border-white/10
-              bg-white/5 px-3 py-1.5 text-[10px] font-bold text-gray-500
-              transition-all hover:border-orange-500/40 hover:bg-orange-500/8 hover:text-orange-400"
+            className="flex w-fit items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-[10px] font-bold text-gray-400 shadow-sm transition-all hover:border-orange-300 hover:text-orange-500"
           >
             <RefreshCw size={11} /> Refresh
           </motion.button>
@@ -149,14 +132,12 @@ const ReferralsGrid = () => {
         <div className="relative z-10 overflow-x-auto">
           <table className="min-w-full">
             <thead>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-gray-100">
                 {COLS.map((col) => (
                   <th
                     key={col.field}
                     onClick={() => col.sortable && toggleSort(col.field)}
-                    className={`px-5 py-3 text-left text-[10px] font-black uppercase
-                      tracking-[0.15em] text-gray-600 transition-colors sm:px-6
-                      ${col.sortable ? "cursor-pointer hover:text-orange-400" : ""}`}
+                    className={`px-5 py-3 text-left text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 transition-colors sm:px-6 ${col.sortable ? "cursor-pointer hover:text-orange-500" : ""}`}
                   >
                     <span className="flex items-center gap-1">
                       {col.label}
@@ -165,7 +146,7 @@ const ReferralsGrid = () => {
                           ? sortDir === "asc"
                             ? <ChevronUp   size={11} className="text-orange-500" />
                             : <ChevronDown size={11} className="text-orange-500" />
-                          : <ChevronUp size={11} className="text-white/10" />
+                          : <ChevronUp size={11} className="text-gray-200" />
                       )}
                     </span>
                   </th>
@@ -176,10 +157,10 @@ const ReferralsGrid = () => {
             <tbody>
               {loading ? (
                 [...Array(4)].map((_, i) => (
-                  <tr key={i} className="border-b border-white/5">
+                  <tr key={i} className="border-b border-gray-50">
                     {[...Array(4)].map((_, j) => (
                       <td key={j} className="px-5 py-4 sm:px-6">
-                        <div className="h-3 animate-pulse rounded-lg bg-white/5" />
+                        <div className="h-3 animate-pulse rounded-lg bg-gray-100" />
                       </td>
                     ))}
                   </tr>
@@ -193,37 +174,28 @@ const ReferralsGrid = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: i * 0.05 }}
-                      className="border-b border-white/5 transition-all duration-200"
-                      style={{ }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(249,115,22,0.05)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      className="border-b border-gray-50 transition-all duration-200 hover:bg-orange-50/50"
                     >
                       <td className="px-5 py-3.5 sm:px-6">
                         <div className="flex items-center gap-3">
                           <div
-                            className="flex h-8 w-8 shrink-0 items-center justify-center
-                              rounded-full text-[11px] font-black text-black"
-                            style={{
-                              background: "linear-gradient(135deg,#f97316,#ea580c)",
-                              boxShadow: "0 0 12px rgba(249,115,22,0.4)",
-                            }}
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-white"
+                            style={{ background: "linear-gradient(135deg,#f97316,#ea580c)", boxShadow: "0 0 10px rgba(249,115,22,0.3)" }}
                           >
                             {r.name?.charAt(0)?.toUpperCase()}
                           </div>
-                          <span className="font-semibold text-white">{r.name}</span>
+                          <span className="font-semibold text-black">{r.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-gray-500 sm:px-6">
-                        {new Date(r.joined).toLocaleDateString("en-US", {
-                          year: "numeric", month: "short", day: "numeric",
-                        })}
+                      <td className="px-5 py-3.5 text-xs text-gray-400 sm:px-6">
+                        {new Date(r.joined).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                       </td>
                       <td className="px-5 py-3.5 sm:px-6">
                         <StatusPill status={r.status} />
                       </td>
                       <td className="px-5 py-3.5 sm:px-6">
-                        <span className="font-black text-orange-400">{r.earnings}</span>
-                        <span className="ml-1 text-[10px] text-gray-600">tokens</span>
+                        <span className="font-black text-orange-500">{r.earnings}</span>
+                        <span className="ml-1 text-[10px] text-gray-400">tokens</span>
                       </td>
                     </motion.tr>
                   ))}
@@ -232,14 +204,11 @@ const ReferralsGrid = () => {
                 <tr>
                   <td colSpan="4" className="py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <div
-                        className="flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/20"
-                        style={{ background: "rgba(249,115,22,0.08)" }}
-                      >
-                        <Users size={22} className="text-orange-500/40" />
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-50 border border-orange-100">
+                        <Users size={22} className="text-orange-300" />
                       </div>
-                      <p className="font-bold text-gray-500">No referrals yet</p>
-                      <p className="text-xs text-gray-700">Share your link to start earning</p>
+                      <p className="font-bold text-gray-400">No referrals yet</p>
+                      <p className="text-xs text-gray-300">Share your code to start earning</p>
                     </div>
                   </td>
                 </tr>
@@ -250,11 +219,8 @@ const ReferralsGrid = () => {
 
         {/* pagination */}
         {totalPages > 1 && (
-          <div
-            className="relative z-10 flex items-center justify-between border-t border-white/5 px-5 py-3 sm:px-6"
-            style={{ background: "rgba(249,115,22,0.03)" }}
-          >
-            <p className="text-[10px] text-gray-600">
+          <div className="relative z-10 flex items-center justify-between border-t border-gray-100 bg-orange-50/30 px-5 py-3 sm:px-6">
+            <p className="text-[10px] text-gray-400">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, sorted.length)} of {sorted.length}
             </p>
             <div className="flex gap-1.5">
@@ -265,8 +231,8 @@ const ReferralsGrid = () => {
                   className="h-7 w-7 rounded-lg text-[10px] font-black transition-all duration-200"
                   style={
                     page === i + 1
-                      ? { background: "#f97316", color: "#000", boxShadow: "0 0 12px rgba(249,115,22,0.5)" }
-                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280" }
+                      ? { background: "#f97316", color: "#fff", boxShadow: "0 0 10px rgba(249,115,22,0.4)" }
+                      : { background: "#f3f4f6", color: "#9ca3af" }
                   }
                 >
                   {i + 1}

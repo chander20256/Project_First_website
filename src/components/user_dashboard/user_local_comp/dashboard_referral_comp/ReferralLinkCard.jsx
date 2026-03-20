@@ -18,8 +18,6 @@ const ReferralLinkCard = () => {
         const res = await axios.get("http://localhost:5000/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        // ✅ grab referralCode from response
         setReferralCode(res.data.referralCode || "");
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -31,7 +29,6 @@ const ReferralLinkCard = () => {
     fetchUser();
   }, []);
 
-  // ── Copy just the code ──────────────────────────────
   const copyCode = () => {
     if (!referralCode) return;
     navigator.clipboard.writeText(referralCode);
@@ -42,31 +39,25 @@ const ReferralLinkCard = () => {
   return (
     <>
       <style>{`
-        @keyframes rotateBorder {
-          0%   { transform: rotate(0deg);   }
-          100% { transform: rotate(360deg); }
-        }
         @keyframes shimmerPill {
           0%   { background-position: -200% center; }
           100% { background-position:  200% center; }
         }
         @keyframes blobFloat {
-          0%,100% { transform: scale(1) translate(0,0);         opacity: .20; }
-          50%      { transform: scale(1.25) translate(-6px,6px); opacity: .35; }
-        }
-        @keyframes scanUp {
-          0%   { transform: translateY(100%); opacity: 0;  }
-          20%  { opacity: .5; }
-          80%  { opacity: .5; }
-          100% { transform: translateY(-100%); opacity: 0; }
+          0%,100% { transform: scale(1);    opacity: .08; }
+          50%      { transform: scale(1.25); opacity: .15; }
         }
         @keyframes dotPulse {
           0%,100% { transform: scale(1);   opacity: 1;   }
           50%      { transform: scale(1.6); opacity: 0.6; }
         }
         @keyframes codeGlow {
-          0%,100% { box-shadow: 0 0 10px rgba(249,115,22,0.2); }
-          50%      { box-shadow: 0 0 28px rgba(249,115,22,0.5); }
+          0%,100% { box-shadow: 0 0 0px rgba(249,115,22,0.1); }
+          50%      { box-shadow: 0 0 20px rgba(249,115,22,0.2); }
+        }
+        @keyframes cardPulse {
+          0%,100% { box-shadow: 0 2px 16px rgba(249,115,22,0.08); }
+          50%      { box-shadow: 0 4px 28px rgba(249,115,22,0.18); }
         }
       `}</style>
 
@@ -74,196 +65,161 @@ const ReferralLinkCard = () => {
         initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl bg-black p-px"
-        style={{ boxShadow: "0 0 50px rgba(249,115,22,0.15)" }}
+        className="relative overflow-hidden rounded-3xl bg-white border border-orange-100"
+        style={{ animation: "cardPulse 3s ease-in-out infinite" }}
       >
-        {/* spinning conic border */}
+        {/* top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-transparent via-orange-400 to-transparent" />
+
+        {/* blob */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-3xl"
-          style={{
-            background: "conic-gradient(from 0deg,#f97316,transparent,#f97316,transparent,#f97316)",
-            animation: "rotateBorder 5s linear infinite",
-            opacity: 0.5,
-          }}
+          className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-orange-400 blur-3xl"
+          style={{ animation: "blobFloat 4s ease-in-out infinite" }}
         />
 
-        {/* inner card */}
-        <div className="relative z-10 rounded-3xl bg-[#080808] overflow-hidden">
+        <div className="relative z-10 px-5 py-6 sm:px-7 sm:py-7">
 
-          {/* scan line */}
-          <div
-            className="pointer-events-none absolute inset-x-0 h-24 bg-gradient-to-b from-transparent via-orange-500/8 to-transparent"
-            style={{ animation: "scanUp 5s ease-in-out infinite" }}
-          />
-
-          {/* blobs */}
-          <div
-            className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-orange-500 blur-3xl"
-            style={{ animation: "blobFloat 4s ease-in-out infinite" }}
-          />
-
-          <div className="relative z-10 px-5 py-6 sm:px-7 sm:py-7">
-
-            {/* header row */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-orange-500/30"
-                  style={{ background: "rgba(249,115,22,0.12)" }}
-                >
-                  <Hash size={17} className="text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">
-                    Your Referral Code
-                  </p>
-                  <p className="text-[10px] text-gray-600 mt-0.5">
-                    Share this code — friends enter it on signup
-                  </p>
-                </div>
+          {/* header row */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-orange-200 bg-orange-50">
+                <Hash size={17} className="text-orange-500" />
               </div>
-
-              {/* active pill */}
-              <div
-                className="flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[10px] font-black text-black"
-                style={{
-                  background: "linear-gradient(90deg,#f97316 0%,#fb923c 40%,#f97316 60%,#ea580c 100%)",
-                  backgroundSize: "200% auto",
-                  animation: "shimmerPill 2.5s linear infinite",
-                }}
-              >
-                <span
-                  className="h-1.5 w-1.5 rounded-full bg-black"
-                  style={{ animation: "dotPulse 1.5s ease-in-out infinite" }}
-                />
-                ACTIVE
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-orange-500">
+                  Your Referral Code
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  Share this code — friends enter it on signup
+                </p>
               </div>
             </div>
 
-            {/* CODE display — big and centered */}
-            <AnimatePresence mode="wait">
-              {loading ? (
-                <motion.div
-                  key="ld"
-                  className="mb-6 h-20 w-full animate-pulse rounded-2xl"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                />
-              ) : error ? (
-                <motion.div
-                  key="er"
-                  className="mb-6 flex items-center justify-center gap-2 rounded-2xl border border-red-500/20 py-6"
-                  style={{ background: "rgba(239,68,68,0.05)" }}
-                >
-                  <AlertCircle size={14} className="text-red-400" />
-                  <p className="text-sm text-red-400">Failed to load — check your token</p>
-                </motion.div>
-              ) : referralCode ? (
-                <motion.div
-                  key="code"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-orange-500/25 py-7"
+            {/* active pill */}
+            <div
+              className="flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-[10px] font-black text-white"
+              style={{
+                background: "linear-gradient(90deg,#f97316 0%,#fb923c 40%,#f97316 60%,#ea580c 100%)",
+                backgroundSize: "200% auto",
+                animation: "shimmerPill 2.5s linear infinite",
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-white"
+                style={{ animation: "dotPulse 1.5s ease-in-out infinite" }}
+              />
+              ACTIVE
+            </div>
+          </div>
+
+          {/* CODE display */}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="ld"
+                className="mb-6 h-20 w-full animate-pulse rounded-2xl bg-gray-100"
+              />
+            ) : error ? (
+              <motion.div
+                key="er"
+                className="mb-6 flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 py-6"
+              >
+                <AlertCircle size={14} className="text-red-400" />
+                <p className="text-sm text-red-400">Failed to load — check your token</p>
+              </motion.div>
+            ) : referralCode ? (
+              <motion.div
+                key="code"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-orange-200 bg-orange-50 py-7"
+                style={{ animation: "codeGlow 3s ease-in-out infinite" }}
+              >
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-2">
+                  Your Code
+                </p>
+                <p
+                  className="text-4xl font-black tracking-[0.3em] sm:text-5xl"
                   style={{
-                    background: "rgba(249,115,22,0.05)",
-                    animation: "codeGlow 3s ease-in-out infinite",
+                    background: "linear-gradient(135deg,#f97316,#ea580c,#f97316)",
+                    backgroundSize: "200% auto",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    animation: "shimmerPill 3s linear infinite",
                   }}
                 >
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-600 mb-2">
-                    Your Code
-                  </p>
-                  {/* BIG code display */}
-                  <p
-                    className="text-4xl font-black tracking-[0.3em] sm:text-5xl"
-                    style={{
-                      background: "linear-gradient(135deg,#f97316,#fb923c,#ffffff,#fb923c,#f97316)",
-                      backgroundSize: "200% auto",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      animation: "shimmerPill 3s linear infinite",
-                    }}
-                  >
-                    {referralCode}
-                  </p>
-                </motion.div>
-              ) : (
-                /* No code yet — show generate prompt */
-                <motion.div
-                  key="nocode"
-                  className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-white/5 py-7 gap-2"
-                  style={{ background: "rgba(255,255,255,0.02)" }}
+                  {referralCode}
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="nocode"
+                className="mb-6 flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50 py-7 gap-2"
+              >
+                <RefreshCw size={20} className="text-gray-300" />
+                <p className="text-sm text-gray-400">No code yet — re-register or contact support</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* copy button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={copyCode}
+            disabled={loading || error || !referralCode}
+            className="relative w-full overflow-hidden flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black transition-all duration-300 disabled:opacity-40"
+            style={
+              copied
+                ? { background: "#22c55e", boxShadow: "0 0 24px rgba(34,197,94,0.4)", color: "#fff" }
+                : { background: "linear-gradient(135deg,#ea580c,#f97316,#fb923c)", boxShadow: "0 0 24px rgba(249,115,22,0.35)", color: "#fff" }
+            }
+          >
+            {!copied && (
+              <div
+                className="pointer-events-none absolute inset-0 opacity-30"
+                style={{
+                  background: "linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%)",
+                  backgroundSize: "200% auto",
+                  animation: "shimmerPill 2s linear infinite",
+                }}
+              />
+            )}
+            <AnimatePresence mode="wait">
+              {copied ? (
+                <motion.span
+                  key="y"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="relative z-10 flex items-center gap-2"
                 >
-                  <RefreshCw size={20} className="text-orange-500/40" />
-                  <p className="text-sm text-gray-600">No code yet — re-register or contact support</p>
-                </motion.div>
+                  <CheckCheck size={16} /> Code Copied!
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="n"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="relative z-10 flex items-center gap-2"
+                >
+                  <Copy size={16} /> Copy Code
+                </motion.span>
               )}
             </AnimatePresence>
+          </motion.button>
 
-            {/* copy button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={copyCode}
-              disabled={loading || error || !referralCode}
-              className="relative w-full overflow-hidden flex items-center justify-center gap-2
-                rounded-2xl px-5 py-3.5 text-sm font-black transition-all duration-300 disabled:opacity-40"
-              style={
-                copied
-                  ? { background: "#22c55e", boxShadow: "0 0 30px rgba(34,197,94,0.5)", color: "#fff" }
-                  : {
-                      background: "linear-gradient(135deg,#ea580c,#f97316,#fb923c)",
-                      boxShadow: "0 0 30px rgba(249,115,22,0.5)",
-                      color: "#000",
-                    }
-              }
-            >
-              {/* shimmer overlay */}
-              {!copied && (
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-30"
-                  style={{
-                    background: "linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%)",
-                    backgroundSize: "200% auto",
-                    animation: "shimmerPill 2s linear infinite",
-                  }}
-                />
-              )}
-
-              <AnimatePresence mode="wait">
-                {copied ? (
-                  <motion.span
-                    key="y"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    className="relative z-10 flex items-center gap-2"
-                  >
-                    <CheckCheck size={16} /> Code Copied!
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="n"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    className="relative z-10 flex items-center gap-2"
-                  >
-                    <Copy size={16} /> Copy Code
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-
-            {/* hint */}
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-orange-500/20" />
-              <p className="flex items-center gap-1.5 text-[10px] text-gray-600">
-                <Sparkles size={10} className="text-orange-500" />
-                Friend enters this code on signup — you earn automatically
-              </p>
-              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-orange-500/20" />
-            </div>
-
+          {/* hint */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-orange-200" />
+            <p className="flex items-center gap-1.5 text-[10px] text-gray-400">
+              <Sparkles size={10} className="text-orange-400" />
+              Friend enters this code on signup — you earn automatically
+            </p>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-orange-200" />
           </div>
+
         </div>
       </motion.div>
     </>
