@@ -25,49 +25,27 @@ const useCountUp = (target, delayMs = 0) => {
 };
 
 const CARDS = [
-  {
-    key:      "totalReferrals",
-    title:    "Friends Referred",
-    Icon:     Users,
-    suffix:   "",
-    accent:   "orange",
-  },
-  {
-    key:      "totalEarnings",
-    title:    "Tokens Earned",
-    Icon:     Coins,
-    suffix:   " TKN",
-    accent:   "white",
-  },
-  {
-    key:      "activeReferrals",
-    title:    "Active Referrals",
-    Icon:     UserCheck,
-    suffix:   "",
-    accent:   "orange",
-  },
+  { key: "totalReferrals",  title: "Friends Referred", Icon: Users,     suffix: "",     accent: "orange" },
+  { key: "totalEarnings",   title: "Tokens Earned",    Icon: Coins,     suffix: " TKN", accent: "black"  },
+  { key: "activeReferrals", title: "Active Referrals", Icon: UserCheck, suffix: "",     accent: "orange" },
 ];
 
 const FALLBACK = { totalReferrals: 0, totalEarnings: 0, activeReferrals: 0 };
 
 const StatCard = ({ cfg, raw, idx }) => {
-  const val     = useCountUp(raw ?? 0, idx * 150);
+  const val      = useCountUp(raw ?? 0, idx * 150);
   const isOrange = cfg.accent === "orange";
 
   return (
     <>
       <style>{`
-        @keyframes blob${idx} {
-          0%,100% { transform: scale(1) translate(0,0);    opacity: .18; }
-          50%      { transform: scale(1.3) translate(4px,-4px); opacity: .32; }
+        @keyframes blobStat${idx} {
+          0%,100% { transform: scale(1);    opacity: .10; }
+          50%      { transform: scale(1.3);  opacity: .18; }
         }
-        @keyframes tickerLine {
-          0%   { width: 0%; }
-          100% { width: 70%; }
-        }
-        @keyframes cardShimmer${idx} {
-          0%,100% { box-shadow: 0 0 20px rgba(249,115,22,0.${10 + idx * 5}); }
-          50%      { box-shadow: 0 0 40px rgba(249,115,22,0.${25 + idx * 5}); }
+        @keyframes cardGlow${idx} {
+          0%,100% { box-shadow: 0 2px 12px rgba(249,115,22,0.08); }
+          50%      { box-shadow: 0 4px 24px rgba(249,115,22,0.18); }
         }
       `}</style>
 
@@ -75,28 +53,20 @@ const StatCard = ({ cfg, raw, idx }) => {
         initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: idx * 0.1, duration: 0.5, type: "spring", stiffness: 160 }}
-        whileHover={{ y: -6, scale: 1.02 }}
-        className="relative overflow-hidden rounded-3xl border bg-black p-6"
+        whileHover={{ y: -5, scale: 1.02 }}
+        className="relative overflow-hidden rounded-3xl border bg-white p-6"
         style={{
-          borderColor: isOrange ? "rgba(249,115,22,0.35)" : "rgba(255,255,255,0.1)",
-          animation: isOrange ? `cardShimmer${idx} 3s ease-in-out infinite` : "none",
+          borderColor: isOrange ? "rgba(249,115,22,0.2)" : "rgba(0,0,0,0.08)",
+          animation: isOrange ? `cardGlow${idx} 3s ease-in-out infinite` : "none",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
         }}
       >
         {/* bg blob */}
         <div
           className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl"
           style={{
-            background: isOrange ? "#f97316" : "#ffffff",
-            animation: `blob${idx} ${3.5 + idx * 0.5}s ease-in-out infinite`,
-          }}
-        />
-
-        {/* diagonal stripes */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(135deg,#f97316 0px,#f97316 1px,transparent 1px,transparent 18px)",
+            background: isOrange ? "#f97316" : "#1f2937",
+            animation: `blobStat${idx} ${3.5 + idx * 0.5}s ease-in-out infinite`,
           }}
         />
 
@@ -106,27 +76,20 @@ const StatCard = ({ cfg, raw, idx }) => {
           style={{
             background: isOrange
               ? "linear-gradient(90deg,transparent,#f97316,transparent)"
-              : "linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)",
+              : "linear-gradient(90deg,transparent,rgba(0,0,0,0.15),transparent)",
           }}
         />
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
               {cfg.title}
             </p>
             <div
               className="flex h-9 w-9 items-center justify-center rounded-2xl"
-              style={{
-                background: isOrange
-                  ? "rgba(249,115,22,0.15)"
-                  : "rgba(255,255,255,0.08)",
-              }}
+              style={{ background: isOrange ? "rgba(249,115,22,0.1)" : "rgba(0,0,0,0.06)" }}
             >
-              <cfg.Icon
-                size={16}
-                className={isOrange ? "text-orange-400" : "text-white"}
-              />
+              <cfg.Icon size={16} className={isOrange ? "text-orange-500" : "text-gray-700"} />
             </div>
           </div>
 
@@ -135,8 +98,8 @@ const StatCard = ({ cfg, raw, idx }) => {
             className="text-4xl font-black sm:text-5xl"
             style={{
               background: isOrange
-                ? "linear-gradient(135deg,#f97316,#fb923c,#fed7aa)"
-                : "linear-gradient(135deg,#ffffff,#d1d5db)",
+                ? "linear-gradient(135deg,#f97316,#ea580c)"
+                : "linear-gradient(135deg,#111827,#374151)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -146,7 +109,7 @@ const StatCard = ({ cfg, raw, idx }) => {
           </motion.p>
 
           {/* progress bar */}
-          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "70%" }}
@@ -155,7 +118,7 @@ const StatCard = ({ cfg, raw, idx }) => {
               style={{
                 background: isOrange
                   ? "linear-gradient(90deg,#ea580c,#f97316,#fb923c)"
-                  : "linear-gradient(90deg,rgba(255,255,255,0.3),rgba(255,255,255,0.8))",
+                  : "linear-gradient(90deg,#374151,#1f2937)",
               }}
             />
           </div>
@@ -184,10 +147,7 @@ const ReferralsStats = () => {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-32 animate-pulse rounded-3xl border border-orange-500/10 bg-black"
-          />
+          <div key={i} className="h-32 animate-pulse rounded-3xl border border-orange-100 bg-white shadow-sm" />
         ))}
       </div>
     );
