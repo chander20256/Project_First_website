@@ -130,25 +130,3 @@ export default AdminHeader;
 
 
 
-
-
-// import { Link } from "react-router-dom";
-// import { FiBell, FiUser } from "react-icons/fi";
-
-// const AdminHeader = () => {
-//   return (
-//     <header className="fixed top-0 left-0 w-full bg-indigo-700 text-white shadow-md z-50">
-//       <div className="flex items-center justify-between px-6 py-3">
-//         <Link to="/admin" className="text-2xl font-bold">
-//           Admin Panel
-//         </Link>
-//         <div className="flex items-center space-x-4">
-//           <FiBell className="w-5 h-5 cursor-pointer" />
-//           <FiUser className="w-5 h-5 cursor-pointer" />
-//         </div>
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default AdminHeader;

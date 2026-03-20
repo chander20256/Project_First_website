@@ -1,49 +1,53 @@
-// import { Outlet } from "react-router-dom";
-// import AdminHeader from "../components/admin_dashboard/admin_global_comp/AdminHeader";
-// import AdminSidebar from "../components/admin_dashboard/admin_global_comp/AdminSidebar";
-// import Footer from "../components/globalcomp/Footer";
-
-// const AdminDashboardLayout = () => {
-//   return (
-//     <div className="min-h-screen flex flex-col bg-gray-950">
-//       <AdminHeader />
-
-//       <div className="flex flex-1 pt-[65px]">
-//         <AdminSidebar />
-
-//         <main className="flex-1 p-6 bg-white">
-//           <Outlet />
-//         </main>
-//       </div>
-
-//       <Footer/>
-//     </div>
-//   );
-// };
-
-// export default AdminDashboardLayout;
 
 
 
 
+
+
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminHeader from "../components/admin_dashboard/admin_global_comp/AdminHeader";
 import AdminSidebar from "../components/admin_dashboard/admin_global_comp/AdminSidebar";
-import Footer from "../components/globalcomp/Footer";
 import ScrollToTop from "../components/globalcomp/ScrollToTop";
 
 const AdminDashboardLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen flex flex-col bg-[#030712]">
       <ScrollToTop />
-      <AdminHeader />
+
+      {/* HEADER */}
+      <AdminHeader
+        toggleSidebar={() => setSidebarOpen((prev) => !prev)}
+      />
+
+      {/* MAIN SECTION */}
       <div className="flex flex-1 pt-[65px]">
-        <AdminSidebar />
-        <main className="flex-1 p-6 bg-white">
+        
+        <AdminSidebar
+          isOpen={sidebarOpen}
+          closeSidebar={() => setSidebarOpen(false)}
+          isCollapsed={isCollapsed}
+          toggleCollapse={() => setIsCollapsed((prev) => !prev)}
+        />
+
+        {/* MOBILE BACKDROP */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* MAIN CONTENT */}
+        <main className="flex-1 min-w-0 bg-white p-6">
           <Outlet />
         </main>
       </div>
-      <Footer />
+
+    
     </div>
   );
 };
