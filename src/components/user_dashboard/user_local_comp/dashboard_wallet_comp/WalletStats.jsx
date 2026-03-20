@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const StatCard = ({ label, value, orange }) => (
-  <div className="bg-white rounded-xl border border-gray-100 p-5 font-['DM_Sans',sans-serif]">
+  <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 font-['DM_Sans',sans-serif]">
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${orange ? "bg-orange-50" : "bg-gray-100"}`}>
       <div className={`w-2.5 h-2.5 rounded-full ${orange ? "bg-orange-500" : "bg-black"}`} />
     </div>
-    <p className="text-xs font-medium text-gray-400 mb-1">{label}</p>
-    <p className={`text-2xl font-bold tracking-tight ${orange ? "text-orange-500" : "text-black"}`}>
+    <p className="text-xs font-medium text-gray-400 mb-1 truncate">{label}</p>
+    <p className={`text-xl sm:text-2xl font-bold tracking-tight ${orange ? "text-orange-500" : "text-black"}`}>
       ${value.toFixed(2)}
     </p>
   </div>
@@ -61,7 +61,7 @@ const WalletStats = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-3 gap-3 mb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
       <StatCard label="Total Earned"    value={stats.earned}    orange={false} />
       <StatCard label="Total Withdrawn" value={stats.withdrawn} orange={true}  />
       <StatCard label="Pending"         value={stats.pending}   orange={false} />

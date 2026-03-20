@@ -1,37 +1,202 @@
+// LOCATION: src/components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralsStats.jsx
+
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Users, Coins, UserCheck } from "lucide-react";
 
-const ReferralsStats = () => {
-  const [stats, setStats] = useState(null);
-
+const useCountUp = (target, delayMs = 0) => {
+  const [val, setVal] = useState(0);
   useEffect(() => {
-    fetch("http://localhost:5000/api/referrals/stats")
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch((err) => console.error(err));
-  }, []);
+    if (!target && target !== 0) return;
+    const t = setTimeout(() => {
+      const steps = 60;
+      const inc = target / steps;
+      let cur = 0;
+      const id = setInterval(() => {
+        cur += inc;
+        if (cur >= target) { setVal(target); clearInterval(id); }
+        else setVal(Math.floor(cur));
+      }, 1400 / steps);
+      return () => clearInterval(id);
+    }, delayMs);
+    return () => clearTimeout(t);
+  }, [target, delayMs]);
+  return val;
+};
 
-  if (!stats) {
-    return <p className="text-center">Loading...</p>;
-  }
+const CARDS = [
+  {
+    key:      "totalReferrals",
+    title:    "Friends Referred",
+    Icon:     Users,
+    suffix:   "",
+    accent:   "orange",
+  },
+  {
+    key:      "totalEarnings",
+    title:    "Tokens Earned",
+    Icon:     Coins,
+    suffix:   " TKN",
+    accent:   "white",
+  },
+  {
+    key:      "activeReferrals",
+    title:    "Active Referrals",
+    Icon:     UserCheck,
+    suffix:   "",
+    accent:   "orange",
+  },
+];
 
-  const statsData = [
-    { title: "Friends Referred", value: stats.totalReferrals },
-    { title: "Tokens Earned", value: stats.totalEarnings },
-    { title: "Active Referrals", value: stats.activeReferrals },
-  ];
+const FALLBACK = { totalReferrals: 0, totalEarnings: 0, activeReferrals: 0 };
+
+const StatCard = ({ cfg, raw, idx }) => {
+  const val     = useCountUp(raw ?? 0, idx * 150);
+  const isOrange = cfg.accent === "orange";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {statsData.map((stat, idx) => (
+    <>
+      <style>{`
+        @keyframes blob${idx} {
+          0%,100% { transform: scale(1) translate(0,0);    opacity: .18; }
+          50%      { transform: scale(1.3) translate(4px,-4px); opacity: .32; }
+        }
+        @keyframes tickerLine {
+          0%   { width: 0%; }
+          100% { width: 70%; }
+        }
+        @keyframes cardShimmer${idx} {
+          0%,100% { box-shadow: 0 0 20px rgba(249,115,22,0.${10 + idx * 5}); }
+          50%      { box-shadow: 0 0 40px rgba(249,115,22,0.${25 + idx * 5}); }
+        }
+      `}</style>
+
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.1, duration: 0.5, type: "spring", stiffness: 160 }}
+        whileHover={{ y: -6, scale: 1.02 }}
+        className="relative overflow-hidden rounded-3xl border bg-black p-6"
+        style={{
+          borderColor: isOrange ? "rgba(249,115,22,0.35)" : "rgba(255,255,255,0.1)",
+          animation: isOrange ? `cardShimmer${idx} 3s ease-in-out infinite` : "none",
+        }}
+      >
+        {/* bg blob */}
         <div
-          key={idx}
-          className="bg-white p-6 rounded-xl shadow border flex flex-col items-center"
-        >
-          <span className="text-gray-500">{stat.title}</span>
-          <span className="text-2xl font-bold text-gray-800">
-            {stat.value}
-          </span>
+          className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full blur-3xl"
+          style={{
+            background: isOrange ? "#f97316" : "#ffffff",
+            animation: `blob${idx} ${3.5 + idx * 0.5}s ease-in-out infinite`,
+          }}
+        />
+
+        {/* diagonal stripes */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg,#f97316 0px,#f97316 1px,transparent 1px,transparent 18px)",
+          }}
+        />
+
+        {/* top accent */}
+        <div
+          className="absolute top-0 left-6 right-6 h-px"
+          style={{
+            background: isOrange
+              ? "linear-gradient(90deg,transparent,#f97316,transparent)"
+              : "linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)",
+          }}
+        />
+
+        <div className="relative z-10">
+          <div className="flex items-start justify-between mb-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+              {cfg.title}
+            </p>
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-2xl"
+              style={{
+                background: isOrange
+                  ? "rgba(249,115,22,0.15)"
+                  : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <cfg.Icon
+                size={16}
+                className={isOrange ? "text-orange-400" : "text-white"}
+              />
+            </div>
+          </div>
+
+          {/* number */}
+          <motion.p
+            className="text-4xl font-black sm:text-5xl"
+            style={{
+              background: isOrange
+                ? "linear-gradient(135deg,#f97316,#fb923c,#fed7aa)"
+                : "linear-gradient(135deg,#ffffff,#d1d5db)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            {val.toLocaleString()}
+            <span className="ml-1 text-base">{cfg.suffix}</span>
+          </motion.p>
+
+          {/* progress bar */}
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "70%" }}
+              transition={{ duration: 1.4, delay: 0.5 + idx * 0.15, ease: "easeOut" }}
+              className="h-full rounded-full"
+              style={{
+                background: isOrange
+                  ? "linear-gradient(90deg,#ea580c,#f97316,#fb923c)"
+                  : "linear-gradient(90deg,rgba(255,255,255,0.3),rgba(255,255,255,0.8))",
+              }}
+            />
+          </div>
         </div>
+      </motion.div>
+    </>
+  );
+};
+
+const ReferralsStats = () => {
+  const [stats,   setStats]   = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/referrals/stats", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => { if (!res.ok) { setStats(FALLBACK); return null; } return res.json(); })
+      .then((data) => { if (!data) return; data.message ? setStats(FALLBACK) : setStats(data); })
+      .catch(() => setStats(FALLBACK))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-32 animate-pulse rounded-3xl border border-orange-500/10 bg-black"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {CARDS.map((cfg, i) => (
+        <StatCard key={cfg.key} cfg={cfg} raw={stats[cfg.key]} idx={i} />
       ))}
     </div>
   );
