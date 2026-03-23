@@ -11,6 +11,8 @@ const walletRoutes = require("./routes/walletRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const userTaskRoutes = require("./routes/userTaskRoutes");
 const userRoutes = require("./routes/userRoutes");
+const feedbackRoutes = require("./routes/Feedbackroutes");
+const contactRoutes = require("./routes/Contactroutes");
 
 // ✅ Initialize app FIRST
 const app = express();
@@ -32,6 +34,10 @@ app.use("/api/user",              userRoutes);
 // ⚠️ STATS must come BEFORE /api/referrals
 app.use("/api/referrals/stats",   require("./routes/referralStats"));
 app.use("/api/referrals",         require("./routes/referral"));
+
+// Feedback route 
+app.use("/api/feedback",          feedbackRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Test route
 app.get("/", (req, res) => {

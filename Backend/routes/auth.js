@@ -24,14 +24,12 @@ const generateToken = (userId, email) => {
 
 // ════════════════════════════════════════════════════════
 // @route   POST /api/auth/register
-// @desc    Register new user — auto-generates referral code
 // @access  Public
 // ════════════════════════════════════════════════════════
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password, confirm, referral } = req.body;
 
-    // ── Validation ──────────────────────────────────────
     if (!username || !email || !password || !confirm) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -45,7 +43,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Username must be at least 3 characters' });
     }
 
-    // ── Duplicate check ─────────────────────────────────
     const emailExists = await User.findOne({ email: email.toLowerCase() });
     if (emailExists) {
       return res.status(400).json({ message: 'This email is already registered' });
@@ -55,7 +52,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'This username is already taken' });
     }
 
-    // ── Referral code check ─────────────────────────────
     let referredBy     = null;
     let referredByCode = null;
     if (referral && referral.trim()) {
@@ -68,35 +64,28 @@ router.post('/register', async (req, res) => {
       referredByCode = referralCodeInput;
     }
 
-    // ── Hash password ───────────────────────────────────
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ── Auto-generate unique referral code ──────────────
-    // Format: 6 char hex string e.g. "A1B2C3"
     let referralCode = generateReferralCode();
     while (await User.findOne({ referralCode })) {
-      referralCode = generateReferralCode(); // retry if collision
+      referralCode = generateReferralCode();
     }
 
-    // ── Create user ─────────────────────────────────────
     const newUser = new User({
       username,
       email: email.toLowerCase(),
       password: hashedPassword,
-      referralCode,   // ✅ auto-generated code saved to user
+      referralCode,
       referredBy,
       referredByCode,
     });
     await newUser.save();
 
-    // ── If referred — create record + award tokens ──────
     if (referredBy) {
       const BASE_REWARD = 50;
-
       const referralCount = await Referral.countDocuments({ referrer: referredBy });
       const newCount      = referralCount + 1;
 
-      // Milestone bonuses (matches frontend MILESTONES)
       const MILESTONES = [
         { refs: 1,  bonus: 50   },
         { refs: 5,  bonus: 300  },
@@ -114,7 +103,6 @@ router.post('/register', async (req, res) => {
         earnings:     totalReward,
       });
 
-      // Add tokens to referrer
       await User.findByIdAndUpdate(referredBy, {
         $inc: { creds: totalReward },
       });
@@ -130,7 +118,7 @@ router.post('/register', async (req, res) => {
         username:       newUser.username,
         email:          newUser.email,
         creds:          newUser.creds,
-        referralCode:   newUser.referralCode, // ✅ returned on register
+        referralCode:   newUser.referralCode,
         referredBy:     newUser.referredBy,
         referredByCode: newUser.referredByCode,
         createdAt:      newUser.createdAt,
@@ -187,18 +175,16 @@ router.post('/login', async (req, res) => {
 
 // ════════════════════════════════════════════════════════
 // @route   GET /api/auth/me
-// @desc    Get current user — includes referralCode
 // @access  Private
 // ════════════════════════════════════════════════════════
 router.get('/me', protectRoute, async (req, res) => {
   try {
-    // ✅ referralCode returned at top level — frontend reads res.data.referralCode
     res.status(200).json({
       id:           req.user._id,
       username:     req.user.username,
       email:        req.user.email,
       creds:        req.user.creds,
-      referralCode: req.user.referralCode, // ✅ this is what ReferralLinkCard.jsx uses
+      referralCode: req.user.referralCode,
       createdAt:    req.user.createdAt,
     });
   } catch (err) {
@@ -209,17 +195,14 @@ router.get('/me', protectRoute, async (req, res) => {
 
 // ════════════════════════════════════════════════════════
 // @route   POST /api/auth/generate-referral-code
-// @desc    One-time fix for existing users with no referral code
 // @access  Private
 // ════════════════════════════════════════════════════════
 router.post('/generate-referral-code', protectRoute, async (req, res) => {
   try {
-    // If user already has a code — just return it
     if (req.user.referralCode) {
       return res.json({ referralCode: req.user.referralCode });
     }
 
-    // Generate a new unique code
     let referralCode = generateReferralCode();
     while (await User.findOne({ referralCode })) {
       referralCode = generateReferralCode();
@@ -227,10 +210,7 @@ router.post('/generate-referral-code', protectRoute, async (req, res) => {
 
     await User.findByIdAndUpdate(req.user._id, { referralCode });
 
-    res.json({
-      message:      'Referral code generated!',
-      referralCode,
-    });
+    res.json({ message: 'Referral code generated!', referralCode });
   } catch (err) {
     console.error('Generate code error:', err.message);
     res.status(500).json({ message: 'Server error.' });
@@ -306,15 +286,100 @@ router.put('/update-profile', protectRoute, async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════
+// @route   PUT /api/auth/change-password
+// @access  Private
+// ════════════════════════════════════════════════════════
+router.put('/change-password', protectRoute, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'Old and new password are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(req.user._id, { password: hashed });
+
+    res.json({ message: 'Password updated successfully!' });
+  } catch (err) {
+    console.error('Change password error:', err.message);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// ════════════════════════════════════════════════════════
 // @route   DELETE /api/auth/delete-account
+// @desc    Archive user data then delete account
 // @access  Private
 // ════════════════════════════════════════════════════════
 router.delete('/delete-account', protectRoute, async (req, res) => {
   try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // ✅ Get reason from request body
+    const { reason } = req.body;
+
+    const DeletedUser = require('../models/DeletedUser');
+    await DeletedUser.create({
+      originalId:     user._id,
+      username:       user.username,
+      email:          user.email,
+      referralCode:   user.referralCode,
+      referredBy:     user.referredBy,
+      referredByCode: user.referredByCode,
+      creds:          user.creds,
+      wallet:         user.wallet,
+      createdAt:      user.createdAt,
+      deletedAt:      new Date(),
+      reason:         "User requested account deletion",
+
+      // ✅ Save the actual reason they selected
+      deletionReason: reason || "Not provided",
+    });
+
     await User.findByIdAndDelete(req.user._id);
+
+    console.log(`🗑️  Deleted: ${user.username} | Reason: ${reason || "Not provided"}`);
+
     res.status(200).json({ message: 'Account deleted successfully.' });
   } catch (err) {
     console.error('Delete account error:', err.message);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+
+// verify passowrd for delete account or change password
+router.post('/verify-password', protectRoute, async (req, res) => {
+  try {
+    const { password } = req.body;
+ 
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
+ 
+    const user = await User.findById(req.user._id).select('+password');
+    const isMatch = await bcrypt.compare(password, user.password);
+ 
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect password. Please try again.' });
+    }
+ 
+    res.json({ message: 'Password verified' });
+  } catch (err) {
+    console.error('Verify password error:', err.message);
     res.status(500).json({ message: 'Server error.' });
   }
 });

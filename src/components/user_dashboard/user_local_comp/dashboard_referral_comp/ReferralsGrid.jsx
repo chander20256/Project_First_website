@@ -1,6 +1,6 @@
 // LOCATION: src/components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralsGrid.jsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -51,8 +51,8 @@ const ReferralsGrid = () => {
   const [sortDir,   setDir]       = useState("desc");
   const [page,      setPage]      = useState(1);
 
-
-const load = () => {
+  // ✅ useCallback prevents infinite re-renders
+  const load = useCallback(() => {
     setLoading(true);
     const token = localStorage.getItem("token");
     fetch("http://localhost:5000/api/referrals", {
@@ -61,9 +61,9 @@ const load = () => {
       .then((res) => res.json())
       .then((data) => { setReferrals(Array.isArray(data) ? data : []); setLoading(false); })
       .catch((err) => { console.error(err); setLoading(false); });
-  };
+  }, []);
 
-  useEffect(load, []);
+  useEffect(() => { load(); }, [load]);
 
   const toggleSort = (f) => {
     if (sortField === f) setDir((d) => (d === "asc" ? "desc" : "asc"));

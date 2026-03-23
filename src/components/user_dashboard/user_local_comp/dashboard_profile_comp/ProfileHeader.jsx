@@ -170,11 +170,11 @@ const ProfileHeader = () => {
                 fontSize: "1.8rem", letterSpacing: "0.08em",
                 color: "#0a0a0a", margin: 0, lineHeight: 1,
               }}>
-                Settings
+                Your Profile
               </h1>
             </div>
             <p style={{ color: "#b0b0b0", fontSize: "0.8rem", margin: "0 0 0 13px" }}>
-              Manage your account settings and preferences
+              Manage your account  Profile and preferences
             </p>
           </div>
 
