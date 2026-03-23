@@ -18,6 +18,7 @@ import DashboardReferrals from "./pages/userdashboard/DashboardReferrals";
 import DashboardQuizzes from "./pages/userdashboard/DashboardQuizzes";
 import DashboardSettings from "./pages/userdashboard/DashboardSettings";
 import Infopage from "./pages/Infopage";
+ import NotFoundPage from "./pages/NotFoundPage";
 
 import { i } from "framer-motion/client";
 
@@ -92,7 +93,14 @@ function App() {
 
 
         </Route>
+
+
+        {/* 404 Not Found Route - MUST BE LAST */}
+        <Route path="*" element={<NotFoundPage />} />
+    
       </Routes>
+
+      
     </BrowserRouter>
   );
 }
