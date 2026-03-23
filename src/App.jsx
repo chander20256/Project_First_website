@@ -38,7 +38,7 @@ import AdminDashboardPage from "./pages/admin_dashboard/AdminDashboardPage";
 import AdminReports from "./pages/admin_dashboard/AdminReports";
 import Adminleaderboard from "./pages/admin_dashboard/Adminleaderboard";
 import AdminReferrals from "./pages/admin_dashboard/AdminReferrals";
-import AdminQuizes from "./pages/admin_dashboard/AdminQuizes";
+import AdminQuizzes from "./pages/admin_dashboard/AdminQuizzes";
 import AdminSurveys from "./pages/admin_dashboard/AdminSurveys";
 import AdminTask from "./pages/admin_dashboard/AdminTask";
 import DashboardProfile from "./pages/userdashboard/DashboardProfile";
@@ -69,6 +69,7 @@ function App() {
           <Route path="leaderboard" element={<DashboardLeaderboard />} />
           <Route path="referrals" element={<DashboardReferrals />} />
           <Route path="quizzes" element={<DashboardQuizzes />} />
+          <Route path="quizes" element={<DashboardQuizzes />} /> {/* Fallback for typo */}
           <Route path="settings" element={<DashboardSettings />} />
           <Route path="profile" element={<DashboardProfile />} />
           {/* Add more dashboard routes as needed */}
@@ -85,7 +86,8 @@ function App() {
           <Route path="surveys" element={<AdminSurveys />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="quizes" element={<AdminQuizes />} />
+          <Route path="quizzes" element={<AdminQuizzes />} />
+          <Route path="quizes" element={<AdminQuizzes />} /> {/* Fallback for typo */}
           <Route path="reports" element={<AdminReports />} />
           <Route path="leaderboard" element={<Adminleaderboard />} />
           <Route path="referrals" element={<AdminReferrals />} />

@@ -2,6 +2,13 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const AdminHeader = () => {
+  const [userData, setUserData] = React.useState({
+    username: "Admin",
+    initial: "A",
+    balance: 0,
+    avatar: null,
+  });
+
   useEffect(() => {
     if (!document.getElementById("dashboard-fonts")) {
       const link = document.createElement("link");
@@ -11,6 +18,65 @@ const AdminHeader = () => {
         "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap";
       document.head.appendChild(link);
     }
+
+    const loadUser = () => {
+      let initialUser = null;
+      try {
+        const stored = localStorage.getItem("user");
+        if (stored) initialUser = JSON.parse(stored);
+      } catch (e) {}
+
+      let avatar = null;
+      try {
+        avatar = localStorage.getItem("userAvatar") || null;
+      } catch (e) {}
+
+      if (initialUser) {
+        setUserData({
+          username: initialUser.username || "Admin",
+          initial: (initialUser.username || "A").charAt(0).toUpperCase(),
+          balance: initialUser.creds || 0,
+          avatar,
+        });
+      }
+    };
+
+    loadUser();
+
+    const fetchMe = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data && data.id) {
+          const avatar = localStorage.getItem("userAvatar") || null;
+          setUserData({
+            username: data.username || "Admin",
+            initial: (data.username || "A").charAt(0).toUpperCase(),
+            balance: data.creds || 0,
+            avatar: data.avatar || avatar,
+          });
+          localStorage.setItem("user", JSON.stringify(data));
+        }
+      } catch (err) {
+        console.error("Failed to fetch admin user", err);
+      }
+    };
+    fetchMe();
+
+    const handleBalanceUpdate = () => {
+      fetchMe();
+    };
+    window.addEventListener("balanceUpdated", handleBalanceUpdate);
+    window.addEventListener("walletUpdated", handleBalanceUpdate);
+
+    return () => {
+      window.removeEventListener("balanceUpdated", handleBalanceUpdate);
+      window.removeEventListener("walletUpdated", handleBalanceUpdate);
+    };
   }, []);
 
   return (
@@ -72,7 +138,7 @@ const AdminHeader = () => {
           </svg>
         </button>
 
-        {/* Balance */}
+        {/* Balance Display */}
         <div
           className="flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-semibold"
           style={{
@@ -81,8 +147,9 @@ const AdminHeader = () => {
             fontFamily: "'DM Sans', sans-serif",
             color: "rgba(255,255,255,0.7)",
           }}
+          title="Account Balance"
         >
-          Balance: <span style={{ color: "#FF6B00" }}>$124</span>
+          Balance: <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
         </div>
 
         {/* Divider */}
@@ -95,11 +162,19 @@ const AdminHeader = () => {
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
             style={{
-              background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+              background: userData.avatar
+                ? "transparent"
+                : "linear-gradient(135deg, #FF6B00, #FF8C00)",
               boxShadow: "0 4px 14px rgba(255,107,0,0.32)",
+              border: userData.avatar ? "2px solid rgba(255,107,0,0.5)" : "none",
+              overflow: "hidden"
             }}
           >
-            U
+            {userData.avatar ? (
+              <img src={userData.avatar} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              userData.initial
+            )}
           </div>
           <span
             className="text-sm font-medium"
@@ -108,7 +183,7 @@ const AdminHeader = () => {
               color: "rgba(255,255,255,0.7)",
             }}
           >
-            Admin
+            {userData.username}
           </span>
         </div>
       </div>

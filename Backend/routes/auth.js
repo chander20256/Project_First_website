@@ -198,6 +198,7 @@ router.get('/me', protectRoute, async (req, res) => {
       username:     req.user.username,
       email:        req.user.email,
       creds:        req.user.creds,
+      wallet:       req.user.wallet,
       referralCode: req.user.referralCode, // ✅ this is what ReferralLinkCard.jsx uses
       createdAt:    req.user.createdAt,
     });

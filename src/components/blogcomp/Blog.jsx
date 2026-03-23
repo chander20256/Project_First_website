@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@sanity/client";
-import imageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 import BlogPost from "./Blogpost";
 
 // ─── SANITY SETUP ──────────────────────────────────────────────────────────────
@@ -11,7 +11,7 @@ const client = createClient({
   useCdn:     false,
   token:      import.meta.env.VITE_SANITY_TOKEN || "",
 });
-const builder = imageUrlBuilder(client);
+const builder = createImageUrlBuilder(client);
 const urlFor  = (src) => src ? builder.image(src) : null;
 
 const QUERY = `*[_type == "post"] | order(publishedAt desc) {
