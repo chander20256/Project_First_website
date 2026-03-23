@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const StatCard = ({ label, value, icon, color, bg, border, statKey, selectedStat, onSelectStat }) => {
   const isSelected = selectedStat === statKey;
@@ -92,12 +92,45 @@ const StatCard = ({ label, value, icon, color, bg, border, statKey, selectedStat
 };
 
 const StatsLeft = ({ selectedStat, onSelectStat }) => {
-  const [stats] = useState({
+  const [stats, setStats] = useState({
     completedTasks: 15,
-    totalEarnings: 240,
+    totalEarnings: 0, // Will be replaced by real points
     completedSurveys: 8,
-    totalReferrals: 5,
+    totalReferrals: 0,
   });
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await fetch("http://localhost:5000/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data) {
+        setStats(prev => ({
+          ...prev,
+          totalEarnings: data.creds || 0,
+          totalReferrals: data.referralCount || prev.totalReferrals
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to fetch stats", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    
+    const handleBalanceUpdate = () => {
+      fetchStats();
+    };
+    window.addEventListener("balanceUpdated", handleBalanceUpdate);
+    
+    return () => {
+      window.removeEventListener("balanceUpdated", handleBalanceUpdate);
+    };
+  }, []);
 
   const cards = [
     {
@@ -117,8 +150,8 @@ const StatsLeft = ({ selectedStat, onSelectStat }) => {
     },
     {
       statKey: "earnings",
-      label: "Earnings",
-      value: `$${stats.totalEarnings}`,
+      label: "Points Earned",
+      value: stats.totalEarnings,
       color: "#16a34a",
       bg: "rgba(22,163,74,0.08)",
       border: "rgba(22,163,74,0.2)",
