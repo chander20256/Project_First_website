@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,61 +7,29 @@ import {
   FaUser, FaCog,
 } from "react-icons/fa";
 
-const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
-  const location = useLocation();
-  const navRef = useRef(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({});
-
-  const mainItems = [
-    { path: "/dashboard",            label: "Dashboard",   icon: <FaHome /> },
-    { path: "/dashboard/wallet",     label: "Wallet",      icon: <FaWallet /> },
-    { path: "/dashboard/games",      label: "Games",       icon: <FaGamepad /> },
-    { path: "/dashboard/surveys",    label: "Surveys",     icon: <FaClipboardList /> },
-    { path: "/dashboard/tasks",      label: "Tasks",       icon: <FaTasks /> },
-    { path: "/dashboard/leaderboard",label: "Leaderboard", icon: <FaTrophy /> },
-    { path: "/dashboard/referrals",  label: "Referrals",   icon: <FaUserFriends /> },
-    { path: "/dashboard/quizzes",    label: "Quizzes",     icon: <FaQuestionCircle /> },
-  ];
-
-  const bottomItems = [
-    { path: "/dashboard/profile",  label: "Profile",  icon: <FaUser /> },
-    { path: "/dashboard/settings", label: "Settings", icon: <FaCog /> },
-  ];
-
-  // Update sliding indicator position on route change
-  useEffect(() => {
-    const activeEl = navRef.current?.querySelector(".active-item");
-    if (activeEl) {
-      setIndicatorStyle({
-        top: activeEl.offsetTop + "px",
-        height: activeEl.offsetHeight + "px",
-      });
-    }
-  }, [location.pathname, isCollapsed]);
-
-  // ── Shared nav item renderer ──────────────────────────────────────────────
-  const renderItem = (item, closeFn) => (
+// Create a memoized NavItem component to prevent unnecessary re-renders
+const NavItem = memo(({ item, isCollapsed, closeFn }) => {
+  return (
     <NavLink
-      key={item.path}
       to={item.path}
       end={item.path === "/dashboard"}
       onClick={closeFn}
     >
-      {({ isActive }) => (
+      {({ isActive: active }) => (
         <motion.div
           whileHover={{ scale: 1.05, x: isCollapsed ? 0 : 5 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           className={`group flex items-center rounded-xl cursor-pointer ${
-            isActive ? "active-item" : ""
+            active ? "active-item" : ""
           }`}
           title={isCollapsed ? item.label : ""}
           style={{
             gap: isCollapsed ? 0 : "12px",
             padding: isCollapsed ? "8px 0" : "10px 12px",
             justifyContent: isCollapsed ? "center" : "flex-start",
-            color: isActive ? "#fff" : "rgba(255,255,255,0.6)",
-            background: isActive
+            color: active ? "#fff" : "rgba(255,255,255,0.6)",
+            background: active
               ? "linear-gradient(135deg, rgba(255,107,0,0.25), rgba(255,107,0,0.05))"
               : "transparent",
             position: "relative",
@@ -79,10 +47,10 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: isActive
+              background: active
                 ? "linear-gradient(145deg, #ff7a18, #ff6b00)"
                 : "linear-gradient(145deg, #1a1a1a, #0c0c0c)",
-              boxShadow: isActive
+              boxShadow: active
                 ? "0 6px 20px rgba(255,107,0,0.6)"
                 : "0 4px 12px rgba(0,0,0,0.8)",
             }}
@@ -113,7 +81,7 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
           </AnimatePresence>
 
           {/* Orange glow dot for active item */}
-          {isActive && !isCollapsed && (
+          {active && !isCollapsed && (
             <motion.div
               layoutId="activeDot"
               style={{
@@ -151,158 +119,201 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
       )}
     </NavLink>
   );
+});
+
+NavItem.displayName = 'NavItem';
+
+const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
+  const location = useLocation();
+  const navRef = useRef(null);
+
+  const mainItems = [
+    { path: "/dashboard",            label: "Dashboard",   icon: <FaHome /> },
+    { path: "/dashboard/wallet",     label: "Wallet",      icon: <FaWallet /> },
+    { path: "/dashboard/games",      label: "Games",       icon: <FaGamepad /> },
+    { path: "/dashboard/surveys",    label: "Surveys",     icon: <FaClipboardList /> },
+    { path: "/dashboard/tasks",      label: "Tasks",       icon: <FaTasks /> },
+    { path: "/dashboard/leaderboard",label: "Leaderboard", icon: <FaTrophy /> },
+    { path: "/dashboard/referrals",  label: "Referrals",   icon: <FaUserFriends /> },
+    { path: "/dashboard/quizzes",    label: "Quizzes",     icon: <FaQuestionCircle /> },
+  ];
+
+  const bottomItems = [
+    { path: "/dashboard/profile",  label: "Profile",  icon: <FaUser /> },
+    { path: "/dashboard/settings", label: "Settings", icon: <FaCog /> },
+  ];
+
+  // Memoize the close function to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
+    onClose?.();
+  }, [onClose]);
+
+  // Memoize the toggle function
+  const handleToggleCollapse = useCallback(() => {
+    onToggleCollapse?.();
+  }, [onToggleCollapse]);
 
   // ── Shared sidebar inner content ──────────────────────────────────────────
-  const SidebarContent = ({ closeFn = () => {} }) => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        height: "100%",
-      }}
-    >
-      {/* TOP */}
-      <div>
-        {/* Header row: "Main Menu" label + toggle/close button */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: isCollapsed ? "20px 12px 10px" : "20px 20px 10px",
-            minHeight: "52px",
-          }}
-        >
-          {/* Label */}
+  const SidebarContent = ({ closeFn = null }) => {
+    // Create a stable close handler
+    const stableCloseFn = useCallback(() => {
+      if (closeFn) closeFn();
+    }, [closeFn]);
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          height: "100%",
+        }}
+      >
+        {/* TOP */}
+        <div>
+          {/* Header row: "Main Menu" label + toggle/close button */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: isCollapsed ? "20px 12px 10px" : "20px 20px 10px",
+              minHeight: "52px",
+            }}
+          >
+            {/* Label */}
+            <AnimatePresence initial={false}>
+              {!isCollapsed && (
+                <motion.h2
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    margin: 0,
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,0.3)",
+                    letterSpacing: "2px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  MAIN MENU
+                </motion.h2>
+              )}
+            </AnimatePresence>
+
+            {/* Desktop collapse toggle */}
+            <button
+              onClick={handleToggleCollapse}
+              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md shrink-0"
+              style={{
+                background: "rgba(255,107,0,0.08)",
+                border: "1px solid rgba(255,107,0,0.25)",
+                color: "rgba(255,107,0,0.8)",
+                cursor: "pointer",
+                transition: "background 0.2s, color 0.2s",
+                marginLeft: isCollapsed ? "auto" : "8px",
+                marginRight: isCollapsed ? "auto" : "0",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,107,0,0.2)";
+                e.currentTarget.style.color = "#FF6B00";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,107,0,0.08)";
+                e.currentTarget.style.color = "rgba(255,107,0,0.8)";
+              }}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <svg
+                width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{
+                  transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+
+            {/* Mobile close button */}
+            {closeFn && (
+              <button
+                onClick={handleClose}
+                className="lg:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  color: "rgba(255,255,255,0.4)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  cursor: "pointer",
+                  marginLeft: "auto",
+                }}
+                aria-label="Close sidebar"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Nav items */}
+          <div className="flex flex-col gap-2 px-3" ref={navRef}>
+            {mainItems.map((item) => (
+              <NavItem 
+                key={item.path} 
+                item={item} 
+                isCollapsed={isCollapsed} 
+                closeFn={stableCloseFn}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* BOTTOM */}
+        <div className="px-3 pb-5">
           <AnimatePresence initial={false}>
             {!isCollapsed && (
               <motion.h2
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 style={{
+                  padding: "10px",
                   margin: 0,
                   fontSize: "12px",
                   color: "rgba(255,255,255,0.3)",
                   letterSpacing: "2px",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
                   fontFamily: "'DM Sans', sans-serif",
                 }}
               >
-                MAIN MENU
+                ACCOUNT
               </motion.h2>
             )}
           </AnimatePresence>
+          {isCollapsed && <div style={{ paddingTop: "16px" }} />}
 
-          {/* Desktop collapse toggle */}
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md shrink-0"
-            style={{
-              background: "rgba(255,107,0,0.08)",
-              border: "1px solid rgba(255,107,0,0.25)",
-              color: "rgba(255,107,0,0.8)",
-              cursor: "pointer",
-              transition: "background 0.2s, color 0.2s",
-              marginLeft: isCollapsed ? "auto" : "8px",
-              marginRight: isCollapsed ? "auto" : "0",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,107,0,0.2)";
-              e.currentTarget.style.color = "#FF6B00";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,107,0,0.08)";
-              e.currentTarget.style.color = "rgba(255,107,0,0.8)";
-            }}
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <svg
-              width="14" height="14" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor"
-              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              style={{
-                transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.3s ease",
-              }}
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
-          {/* Mobile close button */}
-          <button
-            onClick={closeFn}
-            className="lg:hidden flex items-center justify-center w-7 h-7 rounded-md shrink-0"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              color: "rgba(255,255,255,0.4)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              cursor: "pointer",
-              marginLeft: "auto",
-            }}
-            aria-label="Close sidebar"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Nav items with sliding indicator */}
-        <div className="relative flex flex-col gap-2 px-3" ref={navRef}>
-          {/* Framer sliding left indicator */}
-          <motion.div
-            animate={indicatorStyle}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{
-              position: "absolute",
-              left: "0",
-              width: "4px",
-              borderRadius: "4px",
-              background: "linear-gradient(to bottom, #ff7a18, #ff6b00)",
-              boxShadow: "0 0 12px rgba(255,107,0,0.8)",
-            }}
-          />
-          {mainItems.map((item) => renderItem(item, closeFn))}
+          <div className="flex flex-col gap-2">
+            {bottomItems.map((item) => (
+              <NavItem 
+                key={item.path} 
+                item={item} 
+                isCollapsed={isCollapsed} 
+                closeFn={stableCloseFn}
+              />
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* BOTTOM */}
-      <div className="px-3 pb-5">
-        <AnimatePresence initial={false}>
-          {!isCollapsed && (
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                padding: "10px",
-                margin: 0,
-                fontSize: "12px",
-                color: "rgba(255,255,255,0.3)",
-                letterSpacing: "2px",
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              ACCOUNT
-            </motion.h2>
-          )}
-        </AnimatePresence>
-        {isCollapsed && <div style={{ paddingTop: "16px" }} />}
-
-        <div className="flex flex-col gap-2">
-          {bottomItems.map((item) => renderItem(item, closeFn))}
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Shared sidebar styles
   const sidebarBase = {

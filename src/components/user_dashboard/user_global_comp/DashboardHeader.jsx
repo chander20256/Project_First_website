@@ -7,6 +7,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
     username: "User",
     initial: "U",
     balance: 0,
+    wallet: 0,
     avatar: null,
   });
 
@@ -37,6 +38,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
           username: initialUser.username || "User",
           initial: (initialUser.username || "U").charAt(0).toUpperCase(),
           balance: initialUser.creds || 0,
+          wallet: initialUser.wallet || 0,
           avatar,
         });
       }
@@ -57,17 +59,19 @@ const DashboardHeader = ({ onMenuToggle }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (data.user) {
+        // The /me endpoint now returns the object directly, not wrapped in {user: ...}
+        if (data && data.id) {
           const avatar = localStorage.getItem("userAvatar") || null;
           setUserData({
-            username: data.user.username || "User",
-            initial: (data.user.username || "U").charAt(0).toUpperCase(),
-            balance: data.user.creds || 0,
-            avatar: data.user.avatar || avatar,
+            username: data.username || "User",
+            initial: (data.username || "U").charAt(0).toUpperCase(),
+            balance: data.creds || 0,
+            wallet: data.wallet || 0,
+            avatar: data.avatar || avatar,
           });
-          localStorage.setItem("user", JSON.stringify(data.user));
-          if (data.user.avatar) {
-            localStorage.setItem("userAvatar", data.user.avatar);
+          localStorage.setItem("user", JSON.stringify(data));
+          if (data.avatar) {
+            localStorage.setItem("userAvatar", data.avatar);
           }
         }
       } catch (err) {
@@ -76,8 +80,16 @@ const DashboardHeader = ({ onMenuToggle }) => {
     };
     fetchMe();
 
+    const handleBalanceUpdate = () => {
+      fetchMe();
+    };
+    window.addEventListener("balanceUpdated", handleBalanceUpdate);
+    window.addEventListener("walletUpdated", handleBalanceUpdate);
+
     return () => {
       window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+      window.removeEventListener("balanceUpdated", handleBalanceUpdate);
+      window.removeEventListener("walletUpdated", handleBalanceUpdate);
     };
   }, []);
 
@@ -166,7 +178,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
           </svg>
         </button>
 
-        {/* Balance */}
+        {/* Balance Display */}
         <div
           className="flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-semibold"
           style={{
@@ -175,6 +187,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
             fontFamily: "'DM Sans', sans-serif",
             color: "rgba(255,255,255,0.7)",
           }}
+          title="Account Balance"
         >
           <span className="hidden sm:inline">Balance:</span>
           <span style={{ color: "#FF6B00" }}>{userData.balance}</span>
