@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@sanity/client";
-import imageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 
 // ─── SANITY SETUP ─────────────────────────────────────────────────────────────
 const client = createClient({
@@ -10,7 +10,7 @@ const client = createClient({
   useCdn:     false,
   token:      import.meta.env.VITE_SANITY_TOKEN || "",
 });
-const builder = imageUrlBuilder(client);
+const builder = createImageUrlBuilder(client);
 const urlFor  = (src) => src ? builder.image(src) : null;
 
 // ─── QUERY ────────────────────────────────────────────────────────────────────
