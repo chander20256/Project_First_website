@@ -1,104 +1,15 @@
 import { useState, useEffect } from "react";
+import Faqs from '../ContactUSComp/Faq'
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const THEME = {
-  bg: "#0A0A0A",
-  white: "#FFFFFF",
+  bg: "#FAFAFA",
+  cardBg: "#FFFFFF",
+  textMain: "#111111",
+  textMuted: "#666666",
+  border: "rgba(0,0,0,0.08)",
   orange: "#FF6B00",
 };
-
-// ─── Circuit Lines ────────────────────────────────────────────────────────────
-const CircuitLines = () => (
-  <svg
-    style={{
-      position: "absolute", inset: 0, width: "100%", height: "100%",
-      pointerEvents: "none", opacity: 0.22, zIndex: 1,
-    }}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M 0 120 Q 60 120 80 140 L 240 140" stroke="#FF6B00" strokeWidth="1.3" fill="none" />
-    <circle cx="240" cy="140" r="4.5" fill="#FF6B00" />
-    <path d="M 0 190 L 110 190" stroke="#FF6B00" strokeWidth="1" fill="none" />
-    <circle cx="116" cy="190" r="3.5" fill="none" stroke="#FF6B00" strokeWidth="1.2" />
-    <path d="M 1200 100 L 1050 100 Q 1030 100 1020 118 L 1020 170" stroke="#FF6B00" strokeWidth="1.3" fill="none" />
-    <circle cx="1020" cy="176" r="4.5" fill="#FF6B00" />
-    <path d="M 1200 180 L 1110 180" stroke="#FF6B00" strokeWidth="1" fill="none" />
-    <circle cx="1104" cy="180" r="3.5" fill="none" stroke="#FF6B00" strokeWidth="1.2" />
-    <path d="M 40 700 L 40 780 Q 40 800 60 800 L 180 800" stroke="#FF6B00" strokeWidth="1" fill="none" />
-    <circle cx="186" cy="800" r="3" fill="#FF6B00" />
-    <path d="M 1200 720 L 1110 720 Q 1090 720 1080 705" stroke="#FF6B00" strokeWidth="1" fill="none" />
-    <circle cx="1076" cy="701" r="3" fill="#FF6B00" />
-  </svg>
-);
-
-// ─── Glow Background — starts from top: 0 ────────────────────────────────────
-const GlowBackground = () => (
-  <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
-    {/* Primary burst from very top */}
-    <div style={{
-      position: "absolute",
-      top: "-60px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "950px",
-      height: "620px",
-      background: "radial-gradient(ellipse at 50% 0%, rgba(255,107,0,0.60) 0%, rgba(255,107,0,0.25) 30%, rgba(255,107,0,0.07) 58%, transparent 78%)",
-      filter: "blur(20px)",
-    }} />
-    {/* Wide soft halo */}
-    <div style={{
-      position: "absolute",
-      top: "-100px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "1300px",
-      height: "750px",
-      background: "radial-gradient(ellipse at 50% 0%, rgba(255,107,0,0.22) 0%, transparent 58%)",
-    }} />
-    {/* Bottom-right accent */}
-    <div style={{
-      position: "absolute",
-      bottom: "-80px", right: "8%",
-      width: "420px", height: "420px",
-      background: "radial-gradient(ellipse, rgba(255,107,0,0.16) 0%, transparent 65%)",
-      filter: "blur(12px)",
-    }} />
-    {/* Left soft */}
-    <div style={{
-      position: "absolute",
-      top: "35%", left: "-80px",
-      width: "320px", height: "320px",
-      background: "radial-gradient(ellipse, rgba(255,107,0,0.10) 0%, transparent 70%)",
-    }} />
-  </div>
-);
-
-// ─── Watermark — positioned at top 20%, high visibility ──────────────────────
-const WatermarkText = () => (
-  <div style={{
-    position: "absolute",
-    top: "20%",
-    left: 0, right: 0,
-    display: "flex",
-    justifyContent: "center",
-    pointerEvents: "none",
-    userSelect: "none",
-    zIndex: 0,
-    overflow: "hidden",
-  }}>
-    <span style={{
-      fontSize: "clamp(90px, 16vw, 195px)",
-      fontFamily: "'Bebas Neue', 'Impact', sans-serif",
-      letterSpacing: "0.1em",
-      color: "transparent",
-      WebkitTextStroke: "2.2px rgba(255,107,0,0.42)",
-      textShadow: "0 0 90px rgba(255,107,0,0.15), 0 0 200px rgba(255,107,0,0.06)",
-      whiteSpace: "nowrap",
-    }}>
-      CONTACT
-    </span>
-  </div>
-);
 
 // ─── Section Badge ────────────────────────────────────────────────────────────
 const SectionBadge = ({ label }) => (
@@ -106,7 +17,7 @@ const SectionBadge = ({ label }) => (
     <div style={{
       width: 32, height: 32, borderRadius: "50%",
       background: "rgba(255,107,0,0.15)",
-      border: "1px solid rgba(255,107,0,0.48)",
+      border: "1px solid rgba(255,107,0,0.3)",
       display: "flex", alignItems: "center", justifyContent: "center",
     }}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -114,77 +25,89 @@ const SectionBadge = ({ label }) => (
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" />
       </svg>
     </div>
-    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "13px", color: THEME.white, letterSpacing: "0.06em" }}>
+    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "13px", color: THEME.textMain, letterSpacing: "0.06em", fontWeight: 600 }}>
       {label}
     </span>
   </div>
 );
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-const EmailIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="4" width="20" height="16" rx="3" stroke="#FF6B00" strokeWidth="1.8" />
-    <path d="M2 8l10 7 10-7" stroke="#FF6B00" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-const PhoneIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M6.5 3h-2A1.5 1.5 0 003 4.5v1C3 13.508 10.492 21 18.5 21h1A1.5 1.5 0 0021 19.5v-2a1.5 1.5 0 00-1.5-1.5h-2.586a1.5 1.5 0 00-1.06.44l-1.122 1.12a11.066 11.066 0 01-4.292-4.292l1.12-1.121A1.5 1.5 0 0012 10.586V8A1.5 1.5 0 0010.5 6.5H8A1.5 1.5 0 006.5 5V4.5"
-      stroke="#FF6B00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const LocationIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7z" stroke="#FF6B00" strokeWidth="1.8" />
-    <circle cx="12" cy="9" r="2.5" stroke="#FF6B00" strokeWidth="1.8" />
+// ─── Icons (Updated for Futuristic Hover) ─────────────────────────────────────
+const EmailIcon = ({ hovered }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)", transform: hovered ? "scale(1.15) translateY(-1px)" : "scale(1)" }}>
+    <rect x="2" y="4" width="20" height="16" rx="4" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" style={{ transition: "stroke 0.3s ease" }} />
+    <path d="M2 8l9.19 6.56c.48.34 1.14.34 1.62 0L22 8" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.3s ease" }} />
+    <circle cx="18" cy="8" r="2" fill={hovered ? "#FFFFFF" : "transparent"} style={{ transition: "all 0.3s ease", opacity: hovered ? 1 : 0, transform: hovered ? "scale(1)" : "scale(0)" }} />
   </svg>
 );
 
-// ─── Contact Card ─────────────────────────────────────────────────────────────
-const ContactCard = ({ icon, title, value, delay = 0 }) => {
+const PhoneIcon = ({ hovered }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)", transform: hovered ? "scale(1.15) rotate(8deg)" : "scale(1)" }}>
+    <path d="M21.36 16.21l-3.6-1.8a2.5 2.5 0 00-3.1.66l-1.35 1.66a15.46 15.46 0 01-8.2-8.2l1.66-1.35a2.5 2.5 0 00.66-3.1l-1.8-3.6A2.5 2.5 0 003.13 2H3a18.33 18.33 0 0018.3 18.3h.68a2.5 2.5 0 001.38-2.5z" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.3s ease" }} />
+    <path d="M15 3h6v6M21 3l-5.5 5.5" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "all 0.3s ease", opacity: hovered ? 1 : 0, transform: hovered ? "translate(-2px, 2px)" : "translate(0,0)" }} />
+  </svg>
+);
+
+const LocationIcon = ({ hovered }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)", transform: hovered ? "scale(1.15) translateY(-3px)" : "scale(1)" }}>
+    <path d="M12 21A15 15 0 003 9a9 9 0 0118 0 15 15 0 00-9 12z" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.3s ease" }} />
+    <circle cx="12" cy="9" r="3" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" style={{ transition: "stroke 0.3s ease" }} />
+    <ellipse cx="12" cy="22" rx="5" ry="1.5" fill={hovered ? "rgba(255,255,255,0.5)" : "rgba(255,107,0,0.15)"} style={{ transition: "all 0.3s ease" }} />
+  </svg>
+);
+
+// ─── Contact Card (Updated for Orange Hover) ──────────────────────────────────
+const ContactCard = ({ IconComponent, title, value, delay = 0 }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(255,107,0,0.07)" : "rgba(255,255,255,0.03)",
-        border: `1px solid ${hovered ? "rgba(255,107,0,0.5)" : "rgba(255,255,255,0.07)"}`,
+        background: hovered ? THEME.orange : THEME.cardBg,
+        border: `1px solid ${hovered ? THEME.orange : THEME.border}`,
         borderRadius: 14, padding: "16px 18px",
         display: "flex", alignItems: "center", gap: 14,
         cursor: "pointer",
-        transition: "all 0.3s ease",
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         animation: `fadeSlideUp 0.6s ease ${delay}s both`,
         position: "relative", overflow: "hidden",
+        boxShadow: hovered ? "0 12px 32px rgba(255,107,0,0.25)" : "0 2px 10px rgba(0,0,0,0.02)",
+        transform: hovered ? "translateY(-3px)" : "translateY(0)",
       }}
     >
+      {/* Futuristic Light Sweep Effect */}
       <div style={{
-        position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
-        background: hovered ? "#FF6B00" : "transparent",
-        borderRadius: "14px 0 0 14px", transition: "background 0.3s ease",
+        position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
+        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+        transform: hovered ? "translateX(300%)" : "translateX(0)",
+        transition: hovered ? "transform 0.8s ease" : "none",
+        pointerEvents: "none"
       }} />
+
       <div style={{
-        width: 42, height: 42, borderRadius: 10, flexShrink: 0,
-        background: hovered ? "rgba(255,107,0,0.18)" : "rgba(255,255,255,0.05)",
-        border: `1px solid ${hovered ? "rgba(255,107,0,0.5)" : "rgba(255,255,255,0.08)"}`,
+        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        background: hovered ? "rgba(255,255,255,0.2)" : "#F5F5F5",
+        border: `1px solid ${hovered ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.04)"}`,
         display: "flex", alignItems: "center", justifyContent: "center",
         transition: "all 0.3s ease",
+        backdropFilter: hovered ? "blur(4px)" : "none",
       }}>
-        {icon}
+        <IconComponent hovered={hovered} />
       </div>
-      <div style={{ flex: 1 }}>
-        <p style={{ margin: 0, marginBottom: 2, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "14px", color: THEME.white }}>{title}</p>
-        <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "rgba(255,255,255,0.45)" }}>{value}</p>
+      <div style={{ flex: 1, position: "relative", zIndex: 2 }}>
+        <p style={{ margin: 0, marginBottom: 2, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "15px", color: hovered ? "#FFFFFF" : THEME.textMain, transition: "color 0.3s ease" }}>{title}</p>
+        <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "12px", color: hovered ? "rgba(255,255,255,0.8)" : THEME.textMuted, transition: "color 0.3s ease" }}>{value}</p>
       </div>
       <div style={{
         width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-        background: hovered ? "rgba(255,107,0,0.2)" : "rgba(255,255,255,0.05)",
-        border: `1px solid ${hovered ? "rgba(255,107,0,0.5)" : "rgba(255,255,255,0.08)"}`,
+        background: hovered ? "rgba(255,255,255,0.2)" : "#F5F5F5",
+        border: `1px solid ${hovered ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.04)"}`,
         display: "flex", alignItems: "center", justifyContent: "center",
         transition: "all 0.3s ease",
+        transform: hovered ? "translateX(4px)" : "translateX(0)",
       }}>
         <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-          <path d="M2 10L10 2M10 2H4M10 2V8" stroke={hovered ? "#FF6B00" : "rgba(255,255,255,0.5)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M2 10L10 2M10 2H4M10 2V8" stroke={hovered ? "#FFFFFF" : "#888888"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.3s ease" }} />
         </svg>
       </div>
     </div>
@@ -193,29 +116,29 @@ const ContactCard = ({ icon, title, value, delay = 0 }) => {
 
 // ─── Left Panel ───────────────────────────────────────────────────────────────
 const LeftPanel = () => (
-  <div style={{ flex: "0 0 46%", paddingRight: "36px" }}>
+  <div className="left-panel">
     <SectionBadge label="Contact" />
     <h1 style={{
       fontFamily: "'Bebas Neue', 'Impact', sans-serif",
       fontSize: "clamp(38px, 4.5vw, 58px)",
-      color: THEME.white, letterSpacing: "0.02em",
+      color: THEME.textMain, letterSpacing: "0.02em",
       lineHeight: 1.05, margin: "0 0 12px",
       animation: "fadeSlideUp 0.5s ease 0.1s both",
     }}>
       Get in touch
     </h1>
     <p style={{
-      fontFamily: "'DM Sans', sans-serif", fontSize: "14px",
-      color: "rgba(255,255,255,0.45)", lineHeight: 1.7,
+      fontFamily: "'DM Sans', sans-serif", fontSize: "15px",
+      color: THEME.textMuted, lineHeight: 1.7,
       margin: "0 0 32px", maxWidth: 290,
       animation: "fadeSlideUp 0.5s ease 0.2s both",
     }}>
-      Have Questions or Any support ContactUs....
+      Have Questions or Any support Contact Us....
     </p>
     <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-      <ContactCard icon={<EmailIcon />} title="Email us" value="Revadoo@gmail.com" delay={0.3} />
-      <ContactCard icon={<PhoneIcon />} title="Call us" value="950112xxxx" delay={0.4} />
-      <ContactCard icon={<LocationIcon />} title="Our location" value="Punjab,INDIA" delay={0.5} />
+      <ContactCard IconComponent={EmailIcon} title="Email us" value="Revadoo@gmail.com" delay={0.3} />
+      <ContactCard IconComponent={PhoneIcon} title="Call us" value="950112xxxx" delay={0.4} />
+      <ContactCard IconComponent={LocationIcon} title="Our location" value="Punjab, INDIA" delay={0.5} />
     </div>
   </div>
 );
@@ -225,16 +148,16 @@ const FormField = ({ type = "text", placeholder, value, onChange, multiline = fa
   const [focused, setFocused] = useState(false);
   const shared = {
     width: "100%", boxSizing: "border-box",
-    background: focused ? "rgba(255,107,0,0.05)" : "rgba(255,255,255,0.03)",
-    border: `1px solid ${focused ? "rgba(255,107,0,0.62)" : "rgba(255,255,255,0.09)"}`,
+    background: focused ? "rgba(0,0,0,0.01)" : "#F9F9F9",
+    border: `1px solid ${focused ? "rgba(0,0,0,0.3)" : THEME.border}`,
     borderRadius: 12,
     padding: multiline ? "14px 16px" : "13px 16px",
-    color: THEME.white,
+    color: THEME.textMain,
     fontFamily: "'DM Sans', sans-serif", fontSize: "14px",
     outline: "none", resize: "none",
     transition: "all 0.3s ease",
     animation: `fadeSlideUp 0.5s ease ${delay}s both`,
-    boxShadow: focused ? "0 0 0 3px rgba(255,107,0,0.12), inset 0 0 20px rgba(255,107,0,0.04)" : "none",
+    boxShadow: focused ? "0 0 0 3px rgba(0,0,0,0.03)" : "none",
     display: "block",
   };
   return multiline
@@ -251,15 +174,15 @@ const SubmitButton = ({ loading }) => {
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         width: "100%", padding: "15px", borderRadius: 12,
-        background: hovered && !loading ? "#FF6B00" : THEME.white,
-        color: hovered && !loading ? THEME.white : "#0A0A0A",
-        border: "none",
+        background: hovered && !loading ? "#E66000" : THEME.orange,
+        color: "#FFFFFF",
+        border: `1px solid ${hovered && !loading ? "#E66000" : THEME.orange}`,
         fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "15px", letterSpacing: "0.04em",
         cursor: loading ? "not-allowed" : "pointer",
         transition: "all 0.3s ease",
         opacity: loading ? 0.7 : 1,
         animation: "fadeSlideUp 0.5s ease 0.7s both",
-        boxShadow: hovered && !loading ? "0 6px 30px rgba(255,107,0,0.55)" : "none",
+        boxShadow: hovered && !loading ? "0 6px 20px rgba(255,107,0,0.3)" : "0 2px 8px rgba(255,107,0,0.08)",
       }}
     >
       {loading
@@ -279,6 +202,8 @@ const SubmitButton = ({ loading }) => {
 const ContactForm = ({ onSuccess }) => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [formHovered, setFormHovered] = useState(false);
+
   const handleChange = (field) => (e) => setForm({ ...form, [field]: e.target.value });
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -289,21 +214,21 @@ const ContactForm = ({ onSuccess }) => {
     setForm({ name: "", email: "", message: "" });
   };
   return (
-    <div style={{
-      flex: "0 0 48%",
-      background: "rgba(255,255,255,0.025)",
-      border: "1px solid rgba(255,255,255,0.07)",
-      borderRadius: 20, padding: "26px",
-      backdropFilter: "blur(20px)",
-      animation: "fadeSlideUp 0.6s ease 0.15s both",
-      position: "relative", overflow: "hidden",
-    }}>
-      <div style={{
-        position: "absolute", top: -50, right: -50, width: 200, height: 200,
-        background: "radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+    <div
+      className="contact-form-container"
+      onMouseEnter={() => setFormHovered(true)}
+      onMouseLeave={() => setFormHovered(false)}
+      style={{
+        background: THEME.cardBg,
+        border: `1px solid ${formHovered ? "rgba(0,0,0,0.15)" : THEME.border}`,
+        borderRadius: 20, padding: "26px",
+        boxShadow: formHovered ? "0 12px 32px rgba(0,0,0,0.08)" : "0 4px 24px rgba(0,0,0,0.04)",
+        animation: "fadeSlideUp 0.6s ease 0.15s both",
+        position: "relative", overflow: "hidden",
+        transition: "all 0.3s ease",
+        transform: formHovered ? "translateY(-4px)" : "translateY(0)",
+      }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 13, width: "100%" }}>
         <FormField placeholder="Name" value={form.name} onChange={handleChange("name")} delay={0.3} />
         <FormField type="email" placeholder="Email" value={form.email} onChange={handleChange("email")} delay={0.4} />
         <FormField placeholder="Message" value={form.message} onChange={handleChange("message")} multiline delay={0.5} />
@@ -328,12 +253,12 @@ const MapSection = () => {
       position: "relative", zIndex: 10,
     }}>
       {/* Header row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+      <div className="map-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{
             width: 38, height: 38, borderRadius: "50%",
-            background: "rgba(255,107,0,0.15)",
-            border: "1px solid rgba(255,107,0,0.48)",
+            background: "rgba(255,107,0,0.1)",
+            border: "1px solid rgba(255,107,0,0.3)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
@@ -342,10 +267,10 @@ const MapSection = () => {
             </svg>
           </div>
           <div>
-            <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "15px", color: THEME.white }}>
+            <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "15px", color: THEME.textMain }}>
               Our Location
             </p>
-            <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "rgba(255,107,0,0.8)", letterSpacing: "0.04em" }}>
+            <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "11px", color: THEME.textMuted, letterSpacing: "0.04em" }}>
               Crosby Street, SoHo · New York, US
             </p>
           </div>
@@ -360,7 +285,7 @@ const MapSection = () => {
             }} />
             <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#FF6B00" }} />
           </div>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "rgba(255,255,255,0.38)", letterSpacing: "0.07em" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "11px", color: THEME.textMuted, letterSpacing: "0.07em", fontWeight: 500 }}>
             LIVE LOCATION
           </span>
         </div>
@@ -372,40 +297,34 @@ const MapSection = () => {
         onMouseLeave={() => setMapHovered(false)}
         style={{
           position: "relative", borderRadius: 20, overflow: "hidden",
-          border: `1px solid ${mapHovered ? "rgba(255,107,0,0.52)" : "rgba(255,255,255,0.08)"}`,
-          transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+          border: `1px solid ${mapHovered ? "rgba(0,0,0,0.15)" : THEME.border}`,
+          transition: "all 0.3s ease",
           boxShadow: mapHovered
-            ? "0 0 0 1px rgba(255,107,0,0.15), 0 20px 60px rgba(0,0,0,0.5)"
-            : "0 10px 40px rgba(0,0,0,0.35)",
+            ? "0 16px 40px rgba(0,0,0,0.08)"
+            : "0 8px 24px rgba(0,0,0,0.04)",
           height: 280,
+          transform: mapHovered ? "translateY(-4px)" : "translateY(0)",
         }}
       >
-        {/* Map iframe — OpenStreetMap with dark/orange filter */}
         <iframe
           title="Location Map"
           src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.009},${lat - 0.005},${lon + 0.009},${lat + 0.005}&layer=mapnik&marker=${lat},${lon}`}
           style={{
             width: "100%", height: "100%", border: "none", display: "block",
-            filter: "invert(93%) hue-rotate(175deg) saturate(0.55) brightness(0.72)",
           }}
           loading="lazy"
         />
 
-        {/* Orange overlay tint */}
-        <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(135deg, rgba(255,107,0,0.07) 0%, transparent 55%)",
-        }} />
-
         {/* Top-left coords chip */}
         <div style={{
           position: "absolute", top: 14, left: 14,
-          background: "rgba(10,10,10,0.88)",
-          border: "1px solid rgba(255,107,0,0.38)",
+          background: "rgba(255,255,255,0.9)",
+          border: `1px solid ${THEME.border}`,
           borderRadius: 8, padding: "5px 11px",
           backdropFilter: "blur(12px)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
         }}>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "rgba(255,107,0,0.95)", letterSpacing: "0.06em" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", color: THEME.textMain, letterSpacing: "0.06em", fontWeight: 500 }}>
             40.7233° N · 73.9971° W
           </span>
         </div>
@@ -413,14 +332,15 @@ const MapSection = () => {
         {/* Top-right: distance chip */}
         <div style={{
           position: "absolute", top: 14, right: 14,
-          background: "rgba(10,10,10,0.88)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.9)",
+          border: `1px solid ${THEME.border}`,
           borderRadius: 8, padding: "5px 11px",
           backdropFilter: "blur(12px)",
           display: "flex", alignItems: "center", gap: 6,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
         }}>
           <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF6B00", flexShrink: 0, animation: "ping 2s ease-in-out infinite" }} />
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "rgba(255,255,255,0.55)", letterSpacing: "0.05em" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", color: THEME.textMuted, letterSpacing: "0.05em", fontWeight: 500 }}>
             SoHo, Manhattan
           </span>
         </div>
@@ -432,15 +352,16 @@ const MapSection = () => {
           rel="noreferrer"
           style={{
             position: "absolute", bottom: 14, right: 14,
-            background: "rgba(10,10,10,0.88)",
-            border: "1px solid rgba(255,107,0,0.38)",
+            background: "rgba(255,255,255,0.9)",
+            border: `1px solid ${THEME.border}`,
             borderRadius: 8, padding: "7px 14px",
             backdropFilter: "blur(12px)",
             display: "flex", alignItems: "center", gap: 7,
             textDecoration: "none", cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
           }}
         >
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, color: THEME.textMain }}>
             Open in Maps
           </span>
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
@@ -451,12 +372,13 @@ const MapSection = () => {
         {/* Bottom-left: address pill */}
         <div style={{
           position: "absolute", bottom: 14, left: 14,
-          background: "rgba(10,10,10,0.88)",
-          border: "1px solid rgba(255,255,255,0.07)",
+          background: "rgba(255,255,255,0.9)",
+          border: `1px solid ${THEME.border}`,
           borderRadius: 8, padding: "6px 12px",
           backdropFilter: "blur(12px)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
         }}>
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.55)" }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, color: THEME.textMuted }}>
             📍 Crosby St, New York, NY 10012
           </span>
         </div>
@@ -469,11 +391,11 @@ const MapSection = () => {
 const SuccessToast = ({ show }) => (
   <div style={{
     position: "fixed", bottom: 32, right: 32,
-    background: "rgba(18,18,18,0.97)",
-    border: "1px solid rgba(255,107,0,0.55)",
+    background: THEME.cardBg,
+    border: "1px solid rgba(255,107,0,0.4)",
     borderRadius: 14, padding: "14px 22px",
     display: "flex", alignItems: "center", gap: 12,
-    boxShadow: "0 8px 40px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,107,0,0.08)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,107,0,0.05)",
     transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
     transform: show ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
     opacity: show ? 1 : 0, pointerEvents: show ? "auto" : "none",
@@ -481,7 +403,7 @@ const SuccessToast = ({ show }) => (
   }}>
     <div style={{
       width: 34, height: 34, borderRadius: "50%",
-      background: "rgba(255,107,0,0.2)",
+      background: "rgba(255,107,0,0.1)",
       display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
     }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -489,8 +411,8 @@ const SuccessToast = ({ show }) => (
       </svg>
     </div>
     <div>
-      <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "13px", color: "#fff" }}>Message sent!</p>
-      <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>We'll get back to you soon.</p>
+      <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "13px", color: THEME.textMain }}>Message sent!</p>
+      <p style={{ margin: 0, fontFamily: "'DM Mono', monospace", fontSize: "11px", color: THEME.textMuted }}>We'll get back to you soon.</p>
     </div>
   </div>
 );
@@ -511,8 +433,8 @@ export default function Contactus() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0A0A0A; }
-        ::placeholder { color: rgba(255,255,255,0.22); font-family: 'DM Sans', sans-serif; font-size: 14px; }
+        body { background: #FAFAFA; margin: 0; }
+        ::placeholder { color: #888888; font-family: 'DM Sans', sans-serif; font-size: 14px; }
         @keyframes fadeSlideUp {
           from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -523,40 +445,73 @@ export default function Contactus() {
           75%, 100% { transform: scale(2.5); opacity: 0; }
         }
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0A0A0A; }
+        ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.35); border-radius: 2px; }
+
+        /* Mobile Responsiveness Styles */
+        .hero-row {
+            display: flex;
+            flex-direction: row;
+            gap: 56px;
+            align-items: flex-start;
+        }
+        .left-panel {
+            flex: 0 0 46%;
+            padding-right: 36px;
+        }
+        .contact-form-container {
+            flex: 1; /* Takes remaining width */
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .hero-row {
+                flex-direction: column !important;
+                gap: 40px !important;
+            }
+            .left-panel {
+                flex: 1 1 100% !important;
+                padding-right: 0 !important;
+                width: 100%;
+            }
+            .contact-form-container {
+                flex: 1 1 100% !important;
+            }
+            .map-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px;
+            }
+        }
       `}</style>
 
       <div style={{
         minHeight: "100vh",
         background: THEME.bg,
         position: "relative",
-        padding: "60px 40px 80px",
+        padding: "60px 5% 80px", 
         overflow: "hidden",
         opacity: mounted ? 1 : 0,
         transition: "opacity 0.4s ease",
       }}>
-        {/* BG layers — glow starts from top */}
-        <GlowBackground />
-        <CircuitLines />
-        {/* Watermark at 20% from top */}
-        <WatermarkText />
 
         {/* ── Contact hero row ── */}
-        <div style={{
+        <div className="hero-row" style={{
           position: "relative", zIndex: 10,
           width: "100%", maxWidth: 1080,
           margin: "0 auto",
-          display: "flex", gap: "56px", alignItems: "flex-start",
         }}>
           <LeftPanel />
           <ContactForm onSuccess={handleSuccess} />
         </div>
 
+        <Faqs/>
+        
         {/* ── Map below ── */}
         <MapSection />
 
         <SuccessToast show={success} />
+        
       </div>
     </>
   );
