@@ -58,17 +58,29 @@ const DashboardHeader = ({ onMenuToggle }) => {
         const res = await fetch("http://localhost:5000/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            console.warn("Session expired. Please login again.");
+          }
+          return;
+        }
+
         const data = await res.json();
-        // The /me endpoint now returns the object directly, not wrapped in {user: ...}
-        if (data && data.id) {
+        // Support both 'id' and '_id' from the backend
+        if (data && (data.id || data._id)) {
+          console.log("Balance updated successfully");
           const avatar = localStorage.getItem("userAvatar") || null;
-          setUserData({
-            username: data.username || "User",
-            initial: (data.username || "U").charAt(0).toUpperCase(),
-            balance: data.creds || 0,
-            wallet: data.wallet || 0,
-            avatar: data.avatar || avatar,
-          });
+          
+          setUserData(prev => ({
+            ...prev,
+            username: data.username || prev.username,
+            initial: (data.username || prev.username).charAt(0).toUpperCase(),
+            balance: data.creds !== undefined ? data.creds : prev.balance,
+            wallet: data.wallet !== undefined ? data.wallet : prev.wallet,
+            avatar: data.avatar || avatar || prev.avatar,
+          }));
+          
           localStorage.setItem("user", JSON.stringify(data));
           if (data.avatar) {
             localStorage.setItem("userAvatar", data.avatar);
