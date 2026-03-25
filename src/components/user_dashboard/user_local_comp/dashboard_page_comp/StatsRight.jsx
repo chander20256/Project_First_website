@@ -71,7 +71,7 @@ const StatsRight = ({ selectedStat }) => {
 
   return (
     <div
-      className="flex flex-col h-full w-full rounded-2xl p-6"
+      className="flex flex-col h-full w-full rounded-2xl p-4 sm:p-6"
       style={{
         background: "#ffffff",
         border: "1px solid #f0f0f0",
@@ -80,34 +80,36 @@ const StatsRight = ({ selectedStat }) => {
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
           <p
-            className="text-xs font-semibold uppercase tracking-widest"
+            className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest"
             style={{ color: current.color }}
           >
             {current.label} (This Week)
           </p>
           <h3
-            className="text-3xl font-bold mt-1"
+            className="text-2xl sm:text-3xl font-bold mt-1"
             style={{ color: "#0a0a0a" }}
           >
             {selectedStat === "earnings" ? `$${current.total}` : current.total}
           </h3>
-          <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
+          <p className="text-[10px] sm:text-xs mt-1" style={{ color: "#9ca3af" }}>
             Total this week
           </p>
         </div>
         <div
-          className="flex items-center justify-center rounded-full"
+          className="flex items-center justify-center rounded-full flex-shrink-0"
           style={{
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
+            mdWidth: 48,
+            mdHeight: 48,
             background: `${current.color}14`,
             border: `1px solid ${current.color}33`,
           }}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke={current.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="1" x2="12" y2="23" />
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
@@ -116,58 +118,58 @@ const StatsRight = ({ selectedStat }) => {
       </div>
 
       {/* Weekly Summary Stats */}
-      <div className="flex justify-between mb-4 px-2">
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Weekly Total</p>
-          <p className="text-sm font-bold" style={{ color: current.color }}>
+      <div className="grid grid-cols-2 sm:flex sm:justify-between gap-3 mb-4 px-1 sm:px-2">
+        <div className="text-left sm:text-center">
+          <p className="text-[10px] text-gray-500">Weekly Total</p>
+          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
             {selectedStat === "earnings" ? `$${weeklyTotal}` : weeklyTotal}
           </p>
         </div>
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Daily Avg</p>
-          <p className="text-sm font-bold" style={{ color: current.color }}>
+        <div className="text-left sm:text-center">
+          <p className="text-[10px] text-gray-500">Daily Avg</p>
+          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
             {selectedStat === "earnings" ? `$${weeklyAverage}` : weeklyAverage}
           </p>
         </div>
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Best Day</p>
-          <p className="text-sm font-bold" style={{ color: current.color }}>
+        <div className="text-left sm:text-center col-span-2 sm:col-span-1">
+          <p className="text-[10px] text-gray-500">Best Day</p>
+          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
             {bestDay} ({bestDayValue})
           </p>
         </div>
       </div>
 
       {/* Bar Chart with Y-axis */}
-      <div className="flex gap-2 flex-1">
+      <div className="flex gap-1 sm:gap-2 flex-1 min-h-[140px]">
         {/* Y-axis Labels */}
-        <div className="flex flex-col justify-between text-right pr-2" style={{ height: "160px" }}>
+        <div className="flex flex-col justify-between text-right pr-1 sm:pr-2" style={{ height: "140px" }}>
           {yAxisTicks.slice().reverse().map((tick) => (
-            <div key={tick} className="text-xs" style={{ color: "#9ca3af", lineHeight: "1" }}>
+            <div key={tick} className="text-[9px] sm:text-xs" style={{ color: "#9ca3af", lineHeight: "1" }}>
               {current.unit}{tick}
             </div>
           ))}
         </div>
         
         {/* Bars Container */}
-        <div className="flex items-end gap-3 flex-1">
+        <div className="flex items-end gap-1.5 sm:gap-3 flex-1">
           {current.days.map((day, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 flex-1">
+            <div key={i} className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
               <div
-                className="w-full rounded-lg transition-all duration-500 relative group"
+                className="w-full rounded-md sm:rounded-lg transition-all duration-500 relative group"
                 style={{
-                  height: max > 0 ? `${(current.values[i] / max) * 140}px` : "0px",
+                  height: max > 0 ? `${(current.values[i] / max) * 120}px` : "0px",
                   background:
                     i === current.days.length - 1
-                      ? `linear-gradient(180deg, ${current.color}, ${current.color}cc)`
-                      : `${current.color}1F`,
+                       ? `linear-gradient(180deg, ${current.color}, ${current.color}cc)`
+                       : `${current.color}1F`,
                 }}
               >
                 {/* Tooltip on hover */}
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-[10px] text-white rounded px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                   {current.unit}{current.values[i]}
                 </div>
               </div>
-              <span style={{ fontSize: "0.65rem", color: "#9ca3af" }}>
+              <span className="text-[8px] sm:text-[0.65rem]" style={{ color: "#9ca3af" }}>
                 {day}
               </span>
             </div>
@@ -177,17 +179,18 @@ const StatsRight = ({ selectedStat }) => {
 
       {/* Footer */}
       <div
-        className="flex items-center gap-2 mt-4 pt-4"
+        className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4"
         style={{ borderTop: "1px solid #f0f0f0" }}
       >
-        <span style={{ color: growthRate >= 0 ? "#22c55e" : "#ef4444", fontSize: "0.8rem", fontWeight: 600 }}>
+        <span style={{ color: growthRate >= 0 ? "#22c55e" : "#ef4444", fontSize: "0.75rem", fontWeight: 600 }}>
           {growthRate >= 0 ? "↑" : "↓"} {Math.abs(growthRate)}%
         </span>
-        <span style={{ color: "#9ca3af", fontSize: "0.8rem" }}>
+        <span style={{ color: "#9ca3af", fontSize: "0.75rem" }}>
           vs last week
         </span>
       </div>
     </div>
+
   );
 };
 

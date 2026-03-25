@@ -14,7 +14,6 @@ const RewardsSection = () => {
 
   return (
     <>
-      {/* Load Barlow Condensed to match the screenshot's bold condensed style */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap');
       `}</style>
@@ -30,7 +29,6 @@ const RewardsSection = () => {
         <div style={{ maxWidth:1200, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ textAlign:'center', marginBottom:72 }}>
 
-            {/* Label — thin orange line + spaced mono text like screenshot */}
             <div style={{
               display:'flex', alignItems:'center', justifyContent:'center',
               gap:12, marginBottom:24,
@@ -46,7 +44,6 @@ const RewardsSection = () => {
               }}>REWARDS CATALOG</span>
             </div>
 
-            {/* H2 — matches screenshot: ultra-bold condensed, tight, no letter-spacing */}
             <h2 style={{
               fontFamily:"'Barlow Condensed',sans-serif",
               fontWeight:900,
@@ -61,7 +58,6 @@ const RewardsSection = () => {
               <span style={{ color:'#FF6B00' }}>YOU ACTUALLY WANT</span>
             </h2>
 
-            {/* Paragraph — matches screenshot: light weight, muted, centered */}
             <p style={{
               fontFamily:"'Barlow Condensed',sans-serif",
               fontWeight:400,
@@ -76,26 +72,65 @@ const RewardsSection = () => {
             </p>
           </div>
 
-          {/* Cards — unchanged from original */}
+          {/* Cards */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:20 }}>
             {rewards.map((r, i) => (
-              <div key={i} className="reveal" style={{
-                background:'#000000', borderRadius:22,
-                border:'1px solid rgba(0,0,0,0.15)',
-                padding:'28px 24px', position:'relative', overflow:'hidden',
-                transition:'transform 0.3s, border-color 0.3s, background 0.3s',
-                cursor:'pointer', transitionDelay:`${i*0.06}s` }}
-                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-6px)'; e.currentTarget.style.borderColor='rgba(255,107,0,0.4)'; e.currentTarget.style.background='rgba(255,107,0,0.06)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.borderColor='rgba(0,0,0,0.15)'; e.currentTarget.style.background='#000000' }}>
+              <div key={i} style={{
+                background:'#1a1a1a',
+                borderRadius:22,
+                border:'1px solid rgba(255,255,255,0.08)',
+                padding:'28px 24px',
+                position:'relative',
+                overflow:'hidden',
+                transition:'transform 0.3s, border-color 0.3s, box-shadow 0.3s',
+                cursor:'pointer',
+              }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-6px)'
+                  e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)'
+                  e.currentTarget.style.boxShadow = '0 16px 40px rgba(255,107,0,0.15)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}>
+
                 {r.hot && (
-                  <div style={{ position:'absolute', top:14, right:14, background:'#FF6B00',
-                    borderRadius:99, padding:'3px 10px', fontSize:'0.6rem',
-                    fontFamily:"'JetBrains Mono',monospace", color:'#fff', letterSpacing:'0.08em' }}>HOT</div>
+                  <div style={{
+                    position:'absolute', top:14, right:14,
+                    background:'#FF6B00',
+                    borderRadius:99, padding:'3px 10px',
+                    fontSize:'0.6rem',
+                    fontFamily:"'Barlow Condensed',sans-serif",
+                    color:'#fff',
+                    letterSpacing:'0.08em',
+                  }}>HOT</div>
                 )}
+
                 <div style={{ fontSize:36, marginBottom:16 }}>{r.icon}</div>
-                <div style={{ fontWeight:700, fontSize:'0.95rem', color:'#ffffff', marginBottom:4 }}>{r.name}</div>
-                <div style={{ fontSize:'0.85rem', color:'rgba(255,255,255,0.45)', marginBottom:16 }}>{r.val}</div>
-                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:'1.3rem', color:'#FF6B00', letterSpacing:'0.02em' }}>{r.creds}</div>
+
+                <div style={{
+                  fontFamily:"'Barlow Condensed',sans-serif",
+                  fontWeight:700,
+                  fontSize:'0.95rem',
+                  color:'#ffffff',
+                  marginBottom:4,
+                }}>{r.name}</div>
+
+                <div style={{
+                  fontSize:'0.85rem',
+                  color:'rgba(255,255,255,0.45)',
+                  marginBottom:16,
+                }}>{r.val}</div>
+
+                <div style={{
+                  fontFamily:"'Barlow Condensed',sans-serif",
+                  fontWeight:800,
+                  fontSize:'1.3rem',
+                  color:'#FF6B00',
+                  letterSpacing:'0.02em',
+                }}>{r.creds}</div>
               </div>
             ))}
           </div>
