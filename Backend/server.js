@@ -11,6 +11,8 @@ const walletRoutes = require("./routes/walletRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const userTaskRoutes = require("./routes/userTaskRoutes");
 const userRoutes = require("./routes/userRoutes");
+// 👇 NEW: Survey route import kiya
+const surveyRoutes = require("./routes/surveyRoutes"); 
 
 // ✅ Initialize app FIRST
 const app = express();
@@ -32,6 +34,9 @@ app.use("/api/user",              userRoutes);
 // ⚠️ STATS must come BEFORE /api/referrals
 app.use("/api/referrals/stats",   require("./routes/referralStats"));
 app.use("/api/referrals",         require("./routes/referral"));
+
+// 👇 NEW: Survey API route register kiya
+app.use("/api/surveys",           surveyRoutes);
 
 // Test route
 app.get("/", (req, res) => {
