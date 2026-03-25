@@ -28,8 +28,16 @@ app.use("/api/wallet",            walletRoutes);
 app.use("/api/tasks",             taskRoutes);
 app.use("/api/user-tasks",        userTaskRoutes);
 app.use("/api/user",              require("./routes/user"));
-app.use("/api/top-referrer",      require("./routes/topReferrer"));
 app.use("/api/user",              userRoutes);
+app.use("/api/top-referrer",      require("./routes/topReferrer"));
+
+// Quiz & Attempt Routes
+app.use("/api/quizzes",           require("./routes/quizzes"));
+app.use("/api/attempts",          require("./routes/attempts"));
+
+// Contact & Feedback Routes
+app.use("/api/contact",           require("./routes/Contactroutes"));
+app.use("/api/feedback",          require("./routes/Feedbackroutes"));
 
 // ⚠️ STATS must come BEFORE /api/referrals
 app.use("/api/referrals/stats",   require("./routes/referralStats"));

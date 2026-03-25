@@ -102,7 +102,7 @@ export const useQuiz = () => {
       setUserAnswers([]);
 
       // Dispatch event to refresh balance in header
-      window.dispatchEvent(new CustomEvent('balanceUpdated'));
+      window.dispatchEvent(new CustomEvent('balanceUpdated', { detail: { newBalance: resultData.totalCreds || resultData.earnedCoins } }));
 
       return resultData;
     } catch (err) {
