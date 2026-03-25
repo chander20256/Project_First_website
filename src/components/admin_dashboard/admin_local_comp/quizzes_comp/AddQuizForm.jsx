@@ -35,7 +35,6 @@ const AddQuizForm = ({ onQuizCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Filter out incomplete questions
     const validQuestions = questions.filter(q => 
       q.text.trim() && 
       q.options.every(opt => opt.trim()) && 
@@ -57,7 +56,6 @@ const AddQuizForm = ({ onQuizCreated }) => {
     try {
       await createQuiz(quizData);
       alert('Quiz created successfully!');
-      // Reset form
       setTitle('');
       setDescription('');
       setReward(10);
@@ -69,82 +67,95 @@ const AddQuizForm = ({ onQuizCreated }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
-      <h2 className="text-2xl font-bold">Create New Quiz</h2>
+    <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100 max-w-4xl mx-auto">
+      <div className="border-b border-gray-100 pb-4">
+        <h2 className="text-2xl font-bold text-gray-900">Create New Quiz</h2>
+        <p className="text-gray-500 text-sm mt-1">Fill in the details below to launch a new quiz.</p>
+      </div>
       
       {/* Quiz Info */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Quiz Title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Quiz Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+            placeholder="e.g., General Knowledge Challenge"
+            required
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-2 border rounded"
-          rows="3"
-        />
-      </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+            rows="3"
+            placeholder="Describe what this quiz is about..."
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Reward (Coins)</label>
-        <input
-          type="number"
-          value={reward}
-          onChange={(e) => setReward(e.target.value)}
-          className="w-full p-2 border rounded"
-          min="0"
-          required
-        />
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Reward (Coins)</label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🪙</span>
+            <input
+              type="number"
+              value={reward}
+              onChange={(e) => setReward(e.target.value)}
+              className="w-full p-3 pl-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+              min="0"
+              required
+            />
+          </div>
+        </div>
       </div>
 
       {/* Questions */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Questions</h3>
+          <h3 className="text-lg font-bold text-gray-900">Questions</h3>
           <button
             type="button"
             onClick={addQuestion}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="flex items-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors"
           >
-            + Add Question
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-100">+</span>
+            Add Question
           </button>
         </div>
 
         {questions.map((question, qIndex) => (
-          <div key={qIndex} className="border p-4 rounded-lg">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-medium">Question {qIndex + 1}</h4>
+          <div key={qIndex} className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative group">
+            <div className="flex justify-between items-center mb-4">
+              <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-500 border border-gray-200">
+                Question {qIndex + 1}
+              </span>
               {questions.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeQuestion(qIndex)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-500 hover:text-red-700 text-sm font-medium"
                 >
                   Remove
                 </button>
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <input
                 type="text"
-                placeholder="Question text"
+                placeholder="Type your question here..."
                 value={question.text}
                 onChange={(e) => updateQuestion(qIndex, 'text', e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white transition-all"
                 required
               />
 
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {question.options.map((option, oIndex) => (
                   <input
                     key={oIndex}
@@ -152,23 +163,26 @@ const AddQuizForm = ({ onQuizCreated }) => {
                     placeholder={`Option ${oIndex + 1}`}
                     value={option}
                     onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white transition-all"
                     required
                   />
                 ))}
               </div>
 
-              <select
-                value={question.correctAnswer}
-                onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select correct answer</option>
-                {question.options.map((option, idx) => (
-                  option && <option key={idx} value={option}>{option}</option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Correct Answer</label>
+                <select
+                  value={question.correctAnswer}
+                  onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-white transition-all"
+                  required
+                >
+                  <option value="">Select correct option</option>
+                  {question.options.map((option, idx) => (
+                    option && <option key={idx} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         ))}
@@ -176,7 +190,7 @@ const AddQuizForm = ({ onQuizCreated }) => {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        className="w-full py-4 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#ff8c00] text-white font-bold text-lg shadow-lg hover:shadow-orange-200 hover:-translate-y-0.5 transition-all duration-200"
       >
         Create Quiz
       </button>
@@ -184,4 +198,4 @@ const AddQuizForm = ({ onQuizCreated }) => {
   );
 };
 
-export default AddQuizForm;
+export default AddQuizForm;

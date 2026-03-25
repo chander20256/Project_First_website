@@ -1,30 +1,62 @@
 const QuizzesTable = ({ quizzes, onDelete }) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white rounded-lg overflow-hidden">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-6 py-3 text-left">Title</th>
-            <th className="px-6 py-3 text-left">Questions</th>
-            <th className="px-6 py-3 text-left">Reward</th>
-            <th className="px-6 py-3 text-left">Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {quizzes?.map((quiz) => (
-            <tr key={quiz._id} className="border-t hover:bg-gray-50">
-              <td className="px-6 py-4">{quiz.title}</td>
-              <td className="px-6 py-4">{quiz.questions?.length || 0}</td>
-              <td className="px-6 py-4">🪙 {quiz.reward}</td>
-              <td className="px-6 py-4 text-sm text-gray-500">
-                {new Date(quiz.createdAt).toLocaleDateString()}
-              </td>
+    <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Title</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Questions</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Reward</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Created</th>
+              <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {quizzes?.map((quiz) => (
+              <tr key={quiz._id} className="hover:bg-orange-50/30 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-bold text-gray-900">{quiz.title}</div>
+                  <div className="text-xs text-gray-500 truncate max-w-xs">{quiz.description}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {quiz.questions?.length || 0} Questions
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center text-sm font-bold text-orange-600">
+                    <span className="mr-1">🪙</span>
+                    {quiz.reward}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(quiz.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => onDelete && onDelete(quiz._id)}
+                    className="text-red-600 hover:text-red-900 font-bold transition-colors"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!quizzes?.length && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No quizzes found. Create your first quiz above!</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default QuizzesTable;
+export default QuizzesTable;
