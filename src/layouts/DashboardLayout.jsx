@@ -40,14 +40,6 @@ const DashboardLayout = () => {
           onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
         />
 
-        {/* Mobile backdrop */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
         {/* Main content */}
         <main className="flex-1 min-w-0 bg-white p-4 md:p-6">
           <Outlet />

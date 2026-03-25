@@ -33,14 +33,6 @@ const AdminDashboardLayout = () => {
           toggleCollapse={() => setIsCollapsed((prev) => !prev)}
         />
 
-        {/* MOBILE BACKDROP */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
         {/* MAIN CONTENT */}
         <main className="flex-1 min-w-0 bg-white p-6">
           <Outlet />

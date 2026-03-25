@@ -48,9 +48,9 @@ const StatisticsGraph = () => {
           </div>
         </div>
 
-        {/* Stats Badge */}
+        {/* Stats Badge - Desktop Only */}
         <div
-          className="flex items-center gap-3 px-3 py-1.5 rounded-lg"
+          className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-lg"
           style={{ background: "#f3f4f6" }}
         >
           <div className="text-right">
@@ -69,8 +69,9 @@ const StatisticsGraph = () => {
         </div>
       </div>
 
-      {/* Graph */}
-      <div style={{ height: 280 }}>
+      {/* Graph Section - Desktop Only */}
+      <div className="hidden sm:block" style={{ height: 280 }}>
+        {/* ... (LineChart code remains same) ... */}
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={visitData}
@@ -112,8 +113,53 @@ const StatisticsGraph = () => {
         </ResponsiveContainer>
       </div>
 
-      {/* Insights */}
-      <div className="mt-4 pt-4 border-t border-gray-100">
+      {/* Mobile-Optimized 2x2 Grid (Visible only on small screens) */}
+      <div className="grid grid-cols-2 gap-3 sm:hidden">
+        {/* Total Visits */}
+        <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Visits</p>
+          <p className="text-lg font-black mt-1" style={{ color: "#0a0a0a" }}>{totalVisits}</p>
+          <div className="h-1 w-8 bg-orange-500 rounded-full mt-1" />
+        </div>
+
+        {/* Daily Avg */}
+        <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Daily Avg</p>
+          <p className="text-lg font-black mt-1" style={{ color: "#0a0a0a" }}>{averageVisits}</p>
+          <div className="h-1 w-8 bg-blue-500 rounded-full mt-1" />
+        </div>
+
+        {/* Most Active */}
+        <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Peak Day</p>
+          <p className="text-lg font-black mt-1" style={{ color: "#FF6B00" }}>{mostActiveDay.day}</p>
+          <p className="text-[9px] text-gray-400 mt-1 font-medium">{mostActiveDay.visits} visits</p>
+        </div>
+
+        {/* Growth */}
+        <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Trend</p>
+          <p className="text-lg font-black mt-1 text-green-500">{weeklyGrowth}</p>
+          <p className="text-[9px] text-gray-400 mt-1 font-medium">vs last week</p>
+        </div>
+
+        {/* Mini Sparkline Bar Chart at Bottom - Full Width */}
+        <div className="col-span-2 p-4 rounded-xl border border-gray-100 bg-gray-50/50 flex items-center justify-between">
+          <div className="flex flex-col">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">7-Day Activity</p>
+            <p className="text-xs font-bold mt-0.5" style={{ color: "#0a0a0a" }}>Weekly Snapshot</p>
+          </div>
+          <div className="h-8 w-32 flex items-end gap-1.5 px-1">
+             {visitData.map((d, i) => (
+               <div key={i} className="flex-1 rounded-sm bg-orange-100" style={{ height: `${(d.visits/10)*100}%`, background: i === 5 ? '#FF6B00' : '' }} />
+             ))}
+          </div>
+        </div>
+      </div>
+
+
+      {/* Insights - Desktop Only */}
+      <div className="hidden sm:block mt-4 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
@@ -141,6 +187,7 @@ const StatisticsGraph = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };

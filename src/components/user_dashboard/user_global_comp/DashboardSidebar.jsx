@@ -315,14 +315,12 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
     );
   };
 
-  // Shared sidebar styles
+  // Shared sidebar styles (removed display: flex to let Tailwind handle it)
   const sidebarBase = {
     background: "rgba(10,10,10,0.97)",
     backdropFilter: "blur(16px)",
     WebkitBackdropFilter: "blur(16px)",
     borderRight: "1px solid rgba(255,255,255,0.05)",
-    display: "flex",
-    flexDirection: "column",
   };
 
   const scrollbarStyles = `
@@ -354,13 +352,13 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
       <motion.aside
         animate={{ width: isCollapsed ? 72 : 260 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden lg:block flex-shrink-0 self-start sidebar-scroll"
+        className="hidden lg:flex flex-col flex-shrink-0 self-start sidebar-scroll"
         style={{
           ...sidebarBase,
           position: "sticky",
           top: "65px",
           height: "calc(100vh - 65px)",
-          zIndex: 20,
+          zIndex: 40,
         }}
       >
         <SidebarContent />
@@ -370,24 +368,23 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop for mobile */}
+            {/* Backdrop for mobile - Increased z-index and fixed logic */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="lg:hidden fixed inset-0 z-30 bg-black/40 backdrop-blur-sm"
+              className="lg:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-md"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-[65px] left-0 z-40 sidebar-scroll"
+              className="lg:hidden fixed top-0 left-0 h-full z-[70] sidebar-scroll w-[280px] max-w-[85vw] flex flex-col"
               style={{
                 ...sidebarBase,
-                width: "260px",
-                height: "calc(100vh - 65px)",
+                boxShadow: "20px 0 50px rgba(0,0,0,0.5)",
               }}
             >
               <SidebarContent closeFn={onClose} />
@@ -395,6 +392,7 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
           </>
         )}
       </AnimatePresence>
+
     </>
   );
 };

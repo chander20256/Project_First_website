@@ -5,77 +5,71 @@ const StatCard = ({ label, value, icon, color, bg, border, statKey, selectedStat
 
   return (
     <div
-      className="flex flex-col justify-between rounded-2xl p-5 transition-all duration-200"
+      onClick={() => onSelectStat(statKey)}
+      className="flex flex-col justify-between rounded-xl p-3 sm:p-4 transition-all duration-200 cursor-pointer"
       style={{
         background: "#ffffff",
         border: isSelected ? `2px solid ${color}` : `1px solid ${border}`,
         boxShadow: isSelected
-          ? `0 4px 24px ${bg}`
-          : "0 2px 16px rgba(0,0,0,0.06)",
+          ? `0 4px 20px ${bg}`
+          : "0 2px 12px rgba(0,0,0,0.04)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
       {/* Top row — label + icon */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-1 text-[#030712]">
         <p
-          className="text-xs font-semibold uppercase tracking-widest"
+          className="text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate"
           style={{ color: "#9ca3af" }}
         >
           {label}
         </p>
         <div
-          className="flex items-center justify-center rounded-full"
+          className="flex items-center justify-center rounded-full shrink-0"
           style={{
-            width: 40,
-            height: 40,
+            width: 28,
+            height: 28,
+            smWidth: 36,
+            smHeight: 36,
             background: bg,
             border: `1px solid ${border}`,
             color,
           }}
         >
-          {icon}
+          {React.cloneElement(icon, { width: 14, height: 14 })}
         </div>
       </div>
 
       {/* Value */}
-      <h3
-        className="text-3xl font-bold mt-4"
-        style={{ color: "#0a0a0a" }}
-      >
-        {value}
-      </h3>
+      <div className="mt-2 sm:mt-3">
+        <h3
+          className="text-xl sm:text-2xl font-black leading-none text-[#030712]"
+        >
+          {value}
+        </h3>
+        <p className="text-[9px] sm:text-xs mt-1 font-medium" style={{ color: "#9ca3af" }}>
+          Active
+        </p>
+      </div>
 
-      <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
-        • active
-      </p>
-
-      {/* Colored underline */}
+      {/* Colored underline indicator */}
       <div
-        className="mt-3 rounded-full"
-        style={{ height: 3, width: 32, background: color }}
+        className="mt-2 sm:mt-3 rounded-full"
+        style={{ height: 2, width: 24, background: color }}
       />
 
-      {/* View Graph button */}
+      {/* View Graph button - Desktop ONLY */}
       <button
-        onClick={() => onSelectStat(statKey)}
-        className="flex items-center gap-1.5 mt-4 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 w-fit"
+        className="hidden sm:flex items-center gap-1.5 mt-4 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 w-fit"
         style={{
           background: isSelected ? color : bg,
           border: `1px solid ${border}`,
           color: isSelected ? "#ffffff" : color,
           cursor: "pointer",
         }}
-        onMouseEnter={(e) => {
-          if (!isSelected) {
-            e.currentTarget.style.background = color;
-            e.currentTarget.style.color = "#ffffff";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isSelected) {
-            e.currentTarget.style.background = bg;
-            e.currentTarget.style.color = color;
-          }
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent duplicate call if parent also has onClick
+          onSelectStat(statKey);
         }}
       >
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
@@ -90,6 +84,8 @@ const StatCard = ({ label, value, icon, color, bg, border, statKey, selectedStat
     </div>
   );
 };
+
+
 
 const StatsLeft = ({ selectedStat, onSelectStat }) => {
   const [stats, setStats] = useState({
@@ -201,7 +197,7 @@ const StatsLeft = ({ selectedStat, onSelectStat }) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 h-full">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 h-full">
       {cards.map((card, i) => (
         <StatCard
           key={i}
@@ -211,6 +207,7 @@ const StatsLeft = ({ selectedStat, onSelectStat }) => {
         />
       ))}
     </div>
+
   );
 };
 
