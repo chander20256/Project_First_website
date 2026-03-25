@@ -63,7 +63,7 @@ const AdminSidebar = () => {
 
   return (
     <aside
-      className="sticky self-start flex flex-col justify-between w-64 shrink-0"
+      className="sticky self-start flex flex-col justify-between w-64 shrink-0 overflow-y-auto custom-scrollbar"
       style={{
         top: "65px",
         height: "calc(100vh - 65px)",
@@ -71,8 +71,28 @@ const AdminSidebar = () => {
         borderRight: "1px solid rgba(255,107,0,0.12)",
       }}
     >
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 107, 0, 0.2);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 107, 0, 0.5);
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 107, 0, 0.2) transparent;
+        }
+      `}</style>
       {/* Main Nav */}
       <div className="flex flex-col mt-2">
+
         {/* Section label */}
         <span
           className="px-6 pt-4 pb-2 text-xs font-bold tracking-widest uppercase"

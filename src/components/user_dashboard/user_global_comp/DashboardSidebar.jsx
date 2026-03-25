@@ -321,16 +321,40 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
     backdropFilter: "blur(16px)",
     WebkitBackdropFilter: "blur(16px)",
     borderRight: "1px solid rgba(255,255,255,0.05)",
-    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
   };
+
+  const scrollbarStyles = `
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 107, 0, 0.2);
+      border-radius: 10px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 107, 0, 0.5);
+    }
+    .sidebar-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 107, 0, 0.2) transparent;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  `;
 
   return (
     <>
+      <style>{scrollbarStyles}</style>
       {/* ── DESKTOP SIDEBAR (lg+): sticky, collapses with animation ── */}
       <motion.aside
         animate={{ width: isCollapsed ? 72 : 260 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden lg:block flex-shrink-0 self-start"
+        className="hidden lg:block flex-shrink-0 self-start sidebar-scroll"
         style={{
           ...sidebarBase,
           position: "sticky",
@@ -345,24 +369,35 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) =>
       {/* ── MOBILE DRAWER (below lg): fixed overlay, slides in/out ── */}
       <AnimatePresence>
         {isOpen && (
-          <motion.aside
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="lg:hidden fixed top-[65px] left-0 z-40"
-            style={{
-              ...sidebarBase,
-              width: "260px",
-              height: "calc(100vh - 65px)",
-            }}
-          >
-            <SidebarContent closeFn={onClose} />
-          </motion.aside>
+          <>
+            {/* Backdrop for mobile */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="lg:hidden fixed inset-0 z-30 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="lg:hidden fixed top-[65px] left-0 z-40 sidebar-scroll"
+              style={{
+                ...sidebarBase,
+                width: "260px",
+                height: "calc(100vh - 65px)",
+              }}
+            >
+              <SidebarContent closeFn={onClose} />
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </>
   );
 };
+
 
 export default DashboardSidebar;
