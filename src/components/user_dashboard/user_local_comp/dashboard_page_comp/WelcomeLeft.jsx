@@ -17,34 +17,44 @@ const WelcomeLeft = () => {
   })();
 
   return (
-    <div className="flex flex-col gap-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2 sm:gap-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* Greeting */}
-      <p
-        className="text-sm font-semibold uppercase tracking-widest"
-        style={{ color: "#FF6B00" }}
-      >
-        {getGreeting()} 👋
-      </p>
+      <div className="flex items-center gap-2">
+        <span className="w-8 h-[2px] bg-[#FF6B00] hidden md:block" />
+        <p
+          className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em]"
+          style={{ color: "#FF6B00" }}
+        >
+          {getGreeting()} 👋
+        </p>
+      </div>
 
       {/* Welcome + Username */}
-      <h2
-        className="text-4xl font-bold"
-        style={{ color: "#0a0a0a", lineHeight: 1.2 }}
-      >
-        Welcome,{" "}
-        <span style={{ color: "#FF6B00" }}>{username}!</span>
-      </h2>
+      <div className="space-y-1">
+        <h2
+          className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight"
+          style={{ color: "#0a0a0a", lineHeight: 1.1 }}
+        >
+          Welcome Back,
+        </h2>
+        <h3 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight" style={{ color: "#FF6B00", lineHeight: 1.1 }}>
+          {username}!
+        </h3>
+      </div>
 
       {/* Taglines */}
-      <p className="text-base mt-2" style={{ color: "#6b7280" }}>
-        Ready to Unlock Your Earning Potential?
-      </p>
-      <p className="text-sm" style={{ color: "#9ca3af" }}>
-        Complete surveys, refer friends & grow your earnings every day.
-      </p>
-
+      <div className="max-w-md">
+        <p className="text-sm sm:text-base font-medium mt-2" style={{ color: "#4b5563" }}>
+          Ready to unlock your earning potential today?
+        </p>
+        <p className="text-xs sm:text-sm mt-1 leading-relaxed" style={{ color: "#9ca3af" }}>
+          Join thousands of users completing surveys, playing games, and growing their portfolios every day.
+        </p>
+      </div>
     </div>
+
+
   );
 };
 
