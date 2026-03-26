@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
 
+import divyaImg from '../../assets/AboutTeam/Divya.jpeg';
+import anmolImg from '../../assets/AboutTeam/anmolk.png';
+import kapilImg from '../../assets/AboutTeam/kapilprofilepic.png';
+import hardeepImg from '../../assets/AboutTeam/hardeepsingh.jpeg';
+import chiragImg from '../../assets/AboutTeam/chirag.png';
+import shagunImg from '../../assets/AboutTeam/shagun.png';
+import sahilImg from '../../assets/AboutTeam/sahil.png';
+import surajImg from '../../assets/AboutTeam/suraj.jpeg';
+import HritImg from '../../assets/AboutTeam/Hrittik.png';
+import CImg from '../../assets/AboutTeam/cparkash.jpeg';
+
 const TeamSection = ({ gridBg, Label, Heading }) => {
   const team = [
-    { name: 'Chandar Prakash', role: 'CEO & Founder', img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=500&fit=crop&q=80' },
-    { name: 'Divya Gupta', role: 'AI&ML Developer', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&q=80' },
-    { name: 'Anmol', role: 'Lead App Developer', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&q=80' },
-    { name: 'Suraj', role: 'Lead Developer', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=500&fit=crop&q=80' },
-    { name: 'Kapil', role: 'Lead Developer', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&q=80' },
-    { name: 'Hardeep singh Saini', role: 'Developer', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop&q=80' },
-    { name: 'Chirag', role: 'Developer', img: 'https://images.unsplash.com/photo-1530268729831-4b0b9e170218?w=400&h=500&fit=crop&q=80' },
-    { name: 'Shagun', role: 'UX Designer', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&q=80' },
-    { name: 'Sahil', role: 'UX Designer', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop&q=80' },
+
+    { name: 'Chandar Prakash', role: 'CEO & Founder', img: CImg },
+    { name: 'Divya Gupta', role: 'AI&ML Developer', img: divyaImg },
+    { name: 'Anmol', role: 'App Developer', img: anmolImg },
+    { name: 'Suraj', role: 'Fullstack Developer', img: surajImg },
+    { name: 'Kapil', role: 'Team Leader', img: kapilImg },
+    { name: 'Hardeep singh Saini', role: 'MERN Stack Developer', img: hardeepImg },
+    { name: 'Chirag', role: 'Full Stack Developer', img: chiragImg },
+    { name: 'Shagun', role: 'UI/UX Designer', img: shagunImg },
+    { name: 'Sahil', role: 'UI/UX Designer', img: sahilImg },
+    { name: 'Hrittik', role: 'MERN Stack Developer', img: HritImg }, 
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -258,7 +271,8 @@ const TeamSection = ({ gridBg, Label, Heading }) => {
                       <img 
                         src={m.img} 
                         alt={`${m.name}`} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                        // objectPosition added to fit profile pictures perfectly from the top/center
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} 
                       />
                     ) : (
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
