@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TeamSection from './TeamSection'; 
 import HeroSection from './HeroSection';
-import WhyUsSection from './WhyUsSection'; // <-- Naya Why Us component import kiya
+import WhyUsSection from './WhyUsSection'; 
 
 const Label = ({ text, center = false }) => (
   <div style={{
@@ -71,6 +71,47 @@ const BtnOutline = ({ children, href = '#', light = false }) => (
   >{children}</a>
 )
 
+// ════ Custom Hook & Component for Count Up Animation ════
+const AnimatedStat = ({ endVal, suffix = '', prefix = '', decimals = 0, duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setIsVisible(true);
+    }, { threshold: 0.1 });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible || endVal === 0) {
+      if (endVal === 0) setCount(0);
+      return;
+    }
+    let startTime = null;
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easeOut = progress * (2 - progress); // Smooth deceleration
+      setCount(endVal * easeOut);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(endVal);
+      }
+    };
+    requestAnimationFrame(animate);
+  }, [isVisible, endVal, duration]);
+
+  return (
+    <span ref={ref}>
+      {prefix}{count.toFixed(decimals)}{suffix}
+    </span>
+  );
+};
+
 const AboutUs = () => {
   return (
     <>
@@ -87,15 +128,15 @@ const AboutUs = () => {
         .about-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
         @media (max-width: 768px) {
           .about-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
-          .about-stats-grid .stat-item { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 16px !important; }
-          .about-stats-grid .stat-item:nth-child(2) { border-left: 1px solid rgba(255,255,255,0.08) !important; }
+          .about-stats-grid .stat-item { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.3); padding: 24px 16px !important; }
+          .about-stats-grid .stat-item:nth-child(2) { border-left: 1px solid rgba(255,255,255,0.3) !important; }
           .about-stats-grid .stat-item:nth-child(3) { border-left: none !important; }
-          .about-stats-grid .stat-item:nth-child(4) { border-left: 1px solid rgba(255,255,255,0.08) !important; }
+          .about-stats-grid .stat-item:nth-child(4) { border-left: 1px solid rgba(255,255,255,0.3) !important; }
           .about-stats-grid .stat-item:first-child, .about-stats-grid .stat-item:nth-child(2) { border-top: none; }
         }
         @media (max-width: 400px) {
           .about-stats-grid { grid-template-columns: 1fr; }
-          .about-stats-grid .stat-item { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.08) !important; }
+          .about-stats-grid .stat-item { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.3) !important; }
           .about-stats-grid .stat-item:first-child { border-top: none !important; }
         }
 
@@ -109,6 +150,12 @@ const AboutUs = () => {
 
         .about-corner-accent { position: absolute; bottom: -16px; left: -16px; width: 80px; height: 80px; background: #FF6B00; border-radius: 16px; z-index: -1; }
         @media (max-width: 900px) { .about-corner-accent { display: none; } }
+
+        /* Hides Background image from Why Us Section via CSS override */
+        .why-us-wrapper-override > section,
+        .why-us-wrapper-override div {
+          background-image: none !important;
+        }
       `}</style>
 
       <main style={{ background: '#ffffff', fontFamily: "'Barlow Condensed', sans-serif" }}>
@@ -156,26 +203,28 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* ════ 3. STATS BAR ════ */}
-        <section className="about-section-pad-sm" style={{ background: '#0A0A0A', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
+        {/* ════ 3. STATS BAR (Updated Background & Counting Animation) ════ */}
+        <section className="about-section-pad-sm" style={{ background: '#FF6B00', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none', opacity: 0.3 }} />
           <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
             <div className="about-stats-grid">
               {[
-                { number: '2M+', label: 'Active Earners' },
-                { number: '100+', label: 'Reward Options' },
-                { number: '$0', label: 'Minimum Payout' },
-                { number: '4.9★', label: 'User Rating' },
+                { endVal: 2, suffix: 'M+', prefix: '', decimals: 0, label: 'Active Earners' },
+                { endVal: 100, suffix: '+', prefix: '', decimals: 0, label: 'Reward Options' },
+                { endVal: 0, suffix: '', prefix: '$', decimals: 0, label: 'Minimum Payout' },
+                { endVal: 4.9, suffix: '★', prefix: '', decimals: 1, label: 'User Rating' },
               ].map((s, i) => (
-                <div key={i} className="stat-item" style={{ borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none', padding: '0 24px' }}>
+                <div key={i} className="stat-item" style={{ borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.3)' : 'none', padding: '0 24px' }}>
                   <div style={{
                     fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 900,
-                    fontSize: 'clamp(2rem, 4vw, 4rem)', color: '#FF6B00',
+                    fontSize: 'clamp(2rem, 4vw, 4rem)', color: '#FFFFFF',
                     letterSpacing: '-0.01em', lineHeight: 1,
-                  }}>{s.number}</div>
+                  }}>
+                    <AnimatedStat endVal={s.endVal} suffix={s.suffix} prefix={s.prefix} decimals={s.decimals} />
+                  </div>
                   <div style={{
-                    fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 400,
-                    fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)',
+                    fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
+                    fontSize: '0.8rem', color: 'rgba(255,255,255,0.9)',
                     letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 8,
                   }}>{s.label}</div>
                 </div>
@@ -184,8 +233,10 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* ════ 4. WHY US (Imported Component) ════ */}
-        <WhyUsSection gridBg={gridBg} Label={Label} Heading={Heading} Body={Body} />
+        {/* ════ 4. WHY US (Wrapped in a class to override background) ════ */}
+        <div className="why-us-wrapper-override" style={{ backgroundColor: '#0A0A0A' }}>
+          <WhyUsSection gridBg={gridBg} Label={Label} Heading={Heading} Body={Body} />
+        </div>
 
         {/* ════ 5. TEAM (Imported Component) ════ */}
         <TeamSection gridBg={gridBg} Label={Label} Heading={Heading} />
