@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import Faqs from '../ContactUSComp/Faq'
 
-// ─── Theme ───────────────────────────────────────────────────────────────────
 const THEME = {
   bg: "#FAFAFA",
   cardBg: "#FFFFFF",
@@ -11,7 +10,6 @@ const THEME = {
   orange: "#FF6B00",
 };
 
-// ─── Section Badge ────────────────────────────────────────────────────────────
 const SectionBadge = ({ label }) => (
   <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
     <div style={{
@@ -31,7 +29,6 @@ const SectionBadge = ({ label }) => (
   </div>
 );
 
-// ─── Icons (Updated for Futuristic Hover) ─────────────────────────────────────
 const EmailIcon = ({ hovered }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)", transform: hovered ? "scale(1.15) translateY(-1px)" : "scale(1)" }}>
     <rect x="2" y="4" width="20" height="16" rx="4" stroke={hovered ? "#FFFFFF" : "#FF6B00"} strokeWidth="1.8" style={{ transition: "stroke 0.3s ease" }} />
@@ -55,14 +52,24 @@ const LocationIcon = ({ hovered }) => (
   </svg>
 );
 
-// ─── Contact Card (Updated for Orange Hover) ──────────────────────────────────
-const ContactCard = ({ IconComponent, title, value, delay = 0 }) => {
+const ContactCard = ({ IconComponent, title, value, delay = 0, isEmail = false }) => {
   const [hovered, setHovered] = useState(false);
+
+  // PRO FIX: Direct Gmail compose URL instad of mailto
+  const Tag = isEmail ? "a" : "div";
+  const tagProps = isEmail ? { 
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=revadoo@gmail.com",
+    target: "_blank", 
+    rel: "noopener noreferrer" 
+  } : {};
+
   return (
-    <div
+    <Tag
+      {...tagProps}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        textDecoration: "none",
         background: hovered ? THEME.orange : THEME.cardBg,
         border: `1px solid ${hovered ? THEME.orange : THEME.border}`,
         borderRadius: 14, padding: "16px 18px",
@@ -75,7 +82,6 @@ const ContactCard = ({ IconComponent, title, value, delay = 0 }) => {
         transform: hovered ? "translateY(-3px)" : "translateY(0)",
       }}
     >
-      {/* Futuristic Light Sweep Effect */}
       <div style={{
         position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%",
         background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
@@ -110,11 +116,10 @@ const ContactCard = ({ IconComponent, title, value, delay = 0 }) => {
           <path d="M2 10L10 2M10 2H4M10 2V8" stroke={hovered ? "#FFFFFF" : "#888888"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.3s ease" }} />
         </svg>
       </div>
-    </div>
+    </Tag>
   );
 };
 
-// ─── Left Panel ───────────────────────────────────────────────────────────────
 const LeftPanel = () => (
   <div className="left-panel">
     <SectionBadge label="Contact" />
@@ -136,14 +141,13 @@ const LeftPanel = () => (
       Have Questions or Any support Contact Us....
     </p>
     <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-      <ContactCard IconComponent={EmailIcon} title="Email us" value="Revadoo@gmail.com" delay={0.3} />
+      <ContactCard IconComponent={EmailIcon} title="Email us" value="revadoo@gmail.com" delay={0.3} isEmail={true} />
       <ContactCard IconComponent={PhoneIcon} title="Call us" value="950112xxxx" delay={0.4} />
       <ContactCard IconComponent={LocationIcon} title="Our location" value="Punjab, INDIA" delay={0.5} />
     </div>
   </div>
 );
 
-// ─── Form Field ───────────────────────────────────────────────────────────────
 const FormField = ({ type = "text", placeholder, value, onChange, multiline = false, delay = 0 }) => {
   const [focused, setFocused] = useState(false);
   const shared = {
@@ -165,7 +169,6 @@ const FormField = ({ type = "text", placeholder, value, onChange, multiline = fa
     : <input type={type} placeholder={placeholder} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={shared} />;
 };
 
-// ─── Submit Button ────────────────────────────────────────────────────────────
 const SubmitButton = ({ loading }) => {
   const [hovered, setHovered] = useState(false);
   return (
@@ -198,9 +201,8 @@ const SubmitButton = ({ loading }) => {
   );
 };
 
-// ─── Contact Form ─────────────────────────────────────────────────────────────
 const ContactForm = ({ onSuccess }) => {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [formHovered, setFormHovered] = useState(false);
 
@@ -211,7 +213,7 @@ const ContactForm = ({ onSuccess }) => {
     await new Promise((r) => setTimeout(r, 1500));
     setLoading(false);
     onSuccess();
-    setForm({ name: "", email: "", message: "" });
+    setForm({ name: "", email: "", phone: "", message: "" });
   };
   return (
     <div
@@ -229,8 +231,9 @@ const ContactForm = ({ onSuccess }) => {
         transform: formHovered ? "translateY(-4px)" : "translateY(0)",
       }}>
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 13, width: "100%" }}>
-        <FormField placeholder="Name" value={form.name} onChange={handleChange("name")} delay={0.3} />
-        <FormField type="email" placeholder="Email" value={form.email} onChange={handleChange("email")} delay={0.4} />
+        <FormField placeholder="Name" value={form.name} onChange={handleChange("name")} delay={0.2} />
+        <FormField type="email" placeholder="Email" value={form.email} onChange={handleChange("email")} delay={0.3} />
+        <FormField type="tel" placeholder="Mobile Number" value={form.phone} onChange={handleChange("phone")} delay={0.4} />
         <FormField placeholder="Message" value={form.message} onChange={handleChange("message")} multiline delay={0.5} />
         <SubmitButton loading={loading} />
       </form>
@@ -238,7 +241,6 @@ const ContactForm = ({ onSuccess }) => {
   );
 };
 
-// ─── Map Section ──────────────────────────────────────────────────────────────
 const MapSection = () => {
   const [mapHovered, setMapHovered] = useState(false);
   const lat = 40.7233;
@@ -252,7 +254,6 @@ const MapSection = () => {
       animation: "fadeSlideUp 0.7s ease 0.65s both",
       position: "relative", zIndex: 10,
     }}>
-      {/* Header row */}
       <div className="map-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{
@@ -276,7 +277,6 @@ const MapSection = () => {
           </div>
         </div>
 
-        {/* Live badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ position: "relative", width: 10, height: 10 }}>
             <div style={{
@@ -291,7 +291,6 @@ const MapSection = () => {
         </div>
       </div>
 
-      {/* Map card */}
       <div
         onMouseEnter={() => setMapHovered(true)}
         onMouseLeave={() => setMapHovered(false)}
@@ -315,7 +314,6 @@ const MapSection = () => {
           loading="lazy"
         />
 
-        {/* Top-left coords chip */}
         <div style={{
           position: "absolute", top: 14, left: 14,
           background: "rgba(255,255,255,0.9)",
@@ -329,7 +327,6 @@ const MapSection = () => {
           </span>
         </div>
 
-        {/* Top-right: distance chip */}
         <div style={{
           position: "absolute", top: 14, right: 14,
           background: "rgba(255,255,255,0.9)",
@@ -345,7 +342,6 @@ const MapSection = () => {
           </span>
         </div>
 
-        {/* Bottom-right: open maps link */}
         <a
           href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=${zoom}/${lat}/${lon}`}
           target="_blank"
@@ -369,7 +365,6 @@ const MapSection = () => {
           </svg>
         </a>
 
-        {/* Bottom-left: address pill */}
         <div style={{
           position: "absolute", bottom: 14, left: 14,
           background: "rgba(255,255,255,0.9)",
@@ -387,7 +382,6 @@ const MapSection = () => {
   );
 };
 
-// ─── Success Toast ────────────────────────────────────────────────────────────
 const SuccessToast = ({ show }) => (
   <div style={{
     position: "fixed", bottom: 32, right: 32,
@@ -417,7 +411,6 @@ const SuccessToast = ({ show }) => (
   </div>
 );
 
-// ─── Root Page ────────────────────────────────────────────────────────────────
 export default function Contactus() {
   const [mounted, setMounted] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -448,7 +441,6 @@ export default function Contactus() {
         ::-webkit-scrollbar-track { background: #FAFAFA; }
         ::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.35); border-radius: 2px; }
 
-        /* Mobile Responsiveness Styles */
         .hero-row {
             display: flex;
             flex-direction: row;
@@ -460,7 +452,7 @@ export default function Contactus() {
             padding-right: 36px;
         }
         .contact-form-container {
-            flex: 1; /* Takes remaining width */
+            flex: 1;
             width: 100%;
         }
 
@@ -494,8 +486,6 @@ export default function Contactus() {
         opacity: mounted ? 1 : 0,
         transition: "opacity 0.4s ease",
       }}>
-
-        {/* ── Contact hero row ── */}
         <div className="hero-row" style={{
           position: "relative", zIndex: 10,
           width: "100%", maxWidth: 1080,
@@ -506,12 +496,8 @@ export default function Contactus() {
         </div>
 
         <Faqs/>
-        
-        {/* ── Map below ── */}
         <MapSection />
-
         <SuccessToast show={success} />
-        
       </div>
     </>
   );

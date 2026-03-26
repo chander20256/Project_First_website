@@ -1,21 +1,17 @@
 import React from "react";
 
-// Beautiful SVG S-Curve (Left to Right)
 const CurveLeftToRight = () => (
-  // h-[calc(100%+8rem)] matches the new md:gap-32 spacing
   <svg className="hidden md:block absolute top-[50%] left-[46%] w-[54%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
     <path d="M 0,0 C 60,0 40,100 100,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)]" />
   </svg>
 );
 
-// Beautiful SVG S-Curve (Right to Left)
 const CurveRightToLeft = () => (
   <svg className="hidden md:block absolute top-[50%] right-[46%] w-[54%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
     <path d="M 100,0 C 40,0 60,100 0,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)]" />
   </svg>
 );
 
-// Premium UI Mockups tailored for the 8 steps (Light Theme Adapted)
 const MiniMockup = ({ type }) => {
   if (type === "form") return (
     <div className="w-full max-w-[180px] flex flex-col gap-2 opacity-90 transition-transform duration-500 group-hover:scale-105">
@@ -37,12 +33,17 @@ const MiniMockup = ({ type }) => {
     </div>
   );
   if (type === "plans") return (
-    <div className="w-[85%] h-[70%] flex justify-center gap-3 items-end opacity-90 transition-transform duration-500 group-hover:scale-105">
-      <div className="w-1/3 h-[60%] bg-white rounded-t-lg border border-b-0 border-neutral-200"></div>
-      <div className="w-1/3 h-[100%] bg-orange-500 rounded-t-lg shadow-[0_0_20px_rgba(255,92,0,0.3)] relative overflow-hidden">
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-1 bg-white/50 rounded"></div>
+    <div className="w-full h-full flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+      <div className="relative">
+        <div className="absolute -inset-4 bg-orange-500/20 rounded-full blur-xl animate-pulse"></div>
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative drop-shadow-[0_0_15px_rgba(255,92,0,0.4)]">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#ff5c00" stroke="#ff5c00" strokeWidth="1" strokeLinejoin="round"/>
+          <path d="M12 17.77V2L8.91 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77Z" fill="white" opacity="0.3"/>
+        </svg>
+        <div className="absolute -bottom-2 -right-2 bg-white rounded-lg shadow-lg p-1 px-2 border border-orange-100">
+          <span className="text-[10px] font-bold text-orange-500">BONUS</span>
+        </div>
       </div>
-      <div className="w-1/3 h-[75%] bg-white rounded-t-lg border border-b-0 border-neutral-200"></div>
     </div>
   );
   if (type === "ads") return (
@@ -51,7 +52,7 @@ const MiniMockup = ({ type }) => {
         <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white pl-1 shadow-[0_0_15px_rgba(255,92,0,0.3)] text-sm">▶</div>
       </div>
       <div className="w-full h-6 bg-white border-t border-neutral-100 flex justify-between items-center px-3">
-        <div className="w-1/2 h-1 bg-neutral-200 rounded"></div>
+        <div className="w-1/2 h-1.5 bg-neutral-200 rounded"></div>
         <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
       </div>
     </div>
@@ -78,8 +79,6 @@ const MiniMockup = ({ type }) => {
       <div className="w-4 h-4 rounded-full bg-neutral-100 group-hover:bg-orange-500 transition-colors"></div>
     </div>
   );
-
-  // REDESIGNED: Step 7 (Games)
   if (type === "games") return (
     <div className="w-[85%] h-[80%] bg-white border border-neutral-200 rounded-xl p-2.5 flex flex-col gap-2 group-hover:border-orange-500/40 transition-all duration-500 shadow-sm opacity-90">
       <div className="flex justify-between items-center border-b border-neutral-100 pb-1.5 px-1">
@@ -96,41 +95,33 @@ const MiniMockup = ({ type }) => {
       </div>
     </div>
   );
-
-  // REDESIGNED: Step 8 (Referral)
   if (type === "referral") return (
     <div className="w-[90%] h-[85%] flex flex-col items-center justify-center relative gap-3 opacity-90 transition-all duration-500 group-hover:scale-105">
-      {/* Network Diagram */}
       <div className="w-full h-16 relative flex items-center justify-center mt-2">
-        {/* SVG Connecting Lines */}
         <svg className="absolute inset-0 w-full h-full z-0" style={{ overflow: 'visible' }}>
           <path d="M 50,45 L 20,15" stroke="#ff5c00" strokeWidth="1.5" strokeDasharray="3,3" fill="none" opacity="0.3" className="group-hover:opacity-100 transition-opacity" />
           <path d="M 50,45 L 80,15" stroke="#ff5c00" strokeWidth="1.5" strokeDasharray="3,3" fill="none" opacity="0.3" className="group-hover:opacity-100 transition-opacity" />
         </svg>
-        {/* Side Nodes */}
         <div className="absolute top-0 left-3 w-7 h-7 bg-white border border-neutral-300 rounded-full flex items-center justify-center text-[10px] z-10 group-hover:border-orange-500 transition-colors shadow-sm">👤</div>
         <div className="absolute top-0 right-3 w-7 h-7 bg-white border border-neutral-300 rounded-full flex items-center justify-center text-[10px] z-10 group-hover:border-orange-500 transition-colors shadow-sm">👤</div>
-        {/* Center Node */}
         <div className="relative w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-xl z-20 shadow-[0_0_15px_rgba(255,92,0,0.3)] group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,92,0,0.4)] transition-all duration-500 text-white">
           🤝
         </div>
       </div>
-      {/* Code Box */}
       <div className="w-[85%] h-8 bg-white border border-neutral-200 rounded-full flex items-center justify-between p-1 pl-3 group-hover:border-orange-500/50 transition-colors z-20 shadow-sm">
         <div className="w-1/2 h-1.5 bg-neutral-200 rounded-full"></div>
         <div className="bg-orange-50 text-orange-500 text-[9px] font-bold px-3 py-1 rounded-full group-hover:bg-orange-500 group-hover:text-white transition-colors cursor-pointer tracking-wider">COPY</div>
       </div>
     </div>
   );
-
   return null;
 };
 
 export default function Loops() {
   const steps = [
-    { num: "01", title: "Sign Up Free", desc: "Get started with PTC.ad in seconds! Register now to start earning cash by viewing ads. No credit card required.", mockup: "form", btnText: "Create Account" },
+    { num: "01", title: "Sign Up Free", desc: "Get started with Revadoo in seconds! Register now to start earning real cash.", mockup: "form", btnText: "Create Account" },
     { num: "02", title: "Verify Account", desc: "Secure your account by completing verification, ensuring a safe platform experience with genuine users and trusted rewards.", mockup: "id", btnText: "Verify ID Now" },
-    { num: "03", title: "Choose a Plan", desc: "Pick a plan that fits your goals and budget. Flexible options provide various earning opportunities tailored to your preferences.", mockup: "plans", btnText: "Explore Plans" },
+    { num: "03", title: "Welcome Reward", desc: "Start your journey with a reward! Claim your bonus and boost your earnings from day one.", mockup: "plans", btnText: "Claim Now" },
     { num: "04", title: "View Ads", desc: "Watch ads at your convenience and start earning. View tailored ads to grow your rewards and enjoy effortless online income.", mockup: "ads", btnText: "Start Earning" },
     { num: "05", title: "Complete Tasks", desc: "Engage with various micro-tasks available on the platform to boost your daily earnings effortlessly.", mockup: "tasks", btnText: "View Tasks" },
     { num: "06", title: "Shortlinks", desc: "Navigate through our sponsored shortlinks. A quick and easy way to add more to your balance.", mockup: "links", btnText: "Visit Links" },
@@ -140,53 +131,33 @@ export default function Loops() {
 
   return (
     <section className="bg-[#FAFAFA] text-neutral-900 font-barlow py-16 md:py-24 overflow-hidden border-t border-neutral-200">
-      
       <div className="text-center mb-16 md:mb-24 px-6">
         <h2 className="font-anton text-4xl md:text-6xl uppercase leading-none text-neutral-900">
           THE EARNING <span className="text-orange-500">PATH</span>
         </h2>
         <p className="text-neutral-600 mt-3 text-base md:text-lg">Follow these simple steps to maximize your income.</p>
       </div>
-
       <div className="max-w-6xl mx-auto px-6 relative flex flex-col gap-12 md:gap-32">
-        
-        {/* Mobile Vertical Dotted Line - Centered perfectly */}
         <div className="md:hidden absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] border-l-2 border-dashed border-orange-500/30 z-0"></div>
-
         {steps.map((step, i) => {
-          const isLeft = i % 2 === 0; // 0, 2, 4, 6 are Left. 1, 3, 5, 7 are Right.
-
+          const isLeft = i % 2 === 0;
           return (
             <div key={i} className={`relative flex w-full ${isLeft ? 'md:justify-start' : 'md:justify-end'}`}>
-
-              {/* Connecting Curves (Desktop Only) */}
               {i < steps.length - 1 && (
                 isLeft ? <CurveLeftToRight /> : <CurveRightToLeft />
               )}
-
-              {/* COMPRESSED: Smaller width, mx-auto for mobile centering, smaller padding */}
               <div className="relative z-10 w-[92%] sm:w-[80%] md:w-[44%] mx-auto md:mx-0 bg-white border border-neutral-200 hover:border-orange-500 rounded-3xl p-5 md:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] group transition-all duration-500 hover:-translate-y-2">
-                
-                {/* Number & Title */}
                 <div className="flex items-center gap-3 mb-4">
-                  {/* COMPRESSED: Smaller circle */}
                   <div className="w-12 h-12 rounded-full bg-[#FFF5EE] border border-orange-100 flex items-center justify-center text-xl font-anton text-neutral-600 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 group-hover:shadow-[0_0_20px_rgba(255,92,0,0.3)] transition-all duration-300">
                     {step.num}
                   </div>
-                  {/* COMPRESSED: Smaller title text */}
                   <h3 className="font-anton text-2xl md:text-3xl uppercase tracking-wide text-neutral-900">
                     {step.title}
                   </h3>
                 </div>
-
-                {/* Description */}
-                {/* COMPRESSED: Smaller description text */}
                 <p className="text-neutral-600 text-sm md:text-base leading-relaxed mb-5">
                   {step.desc}
                 </p>
-
-                {/* Action Button */}
-                {/* COMPRESSED: Smaller button padding */}
                 <div className="mb-6">
                   <button 
                     onClick={() => {}} 
@@ -195,21 +166,14 @@ export default function Loops() {
                     {step.btnText} →
                   </button>
                 </div>
-
-                {/* Visual UI Box */}
-                {/* COMPRESSED: Smaller height (h-36 instead of h-40/48) */}
                 <div className="w-full h-36 bg-[#FAFAFA] rounded-xl border border-neutral-200 flex items-center justify-center overflow-hidden relative group-hover:border-orange-500/50 transition-colors duration-500">
                   <MiniMockup type={step.mockup} />
-                  
-                  {/* Subtle inner glow on hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
-
               </div>
             </div>
           );
         })}
-
       </div>
     </section>
   );
