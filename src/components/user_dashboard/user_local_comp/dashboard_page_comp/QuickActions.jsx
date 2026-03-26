@@ -8,57 +8,58 @@ const QuickActions = () => {
     {
       label: "Games",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="6" width="20" height="12" rx="2" />
           <path d="M12 12h.01M8 12h.01M16 12h.01M12 8h.01M12 16h.01" />
         </svg>
       ),
-      color: "#7C3AED",
-      bg: "rgba(124,58,237,0.08)",
-      border: "rgba(124,58,237,0.2)",
+      color: "#FF6B00",
+      bg: "rgba(255,107,0,0.06)",
+      border: "rgba(255,107,0,0.12)",
       route: "/dashboard/games",
     },
     {
       label: "Deposit",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12l7 7 7-7" />
         </svg>
       ),
-      color: "#16a34a",
-      bg: "rgba(22,163,74,0.08)",
-      border: "rgba(22,163,74,0.2)",
+      color: "#FF6B00",
+      bg: "rgba(255,107,0,0.06)",
+      border: "rgba(255,107,0,0.12)",
       route: "/dashboard/wallet",
     },
     {
       label: "Withdraw",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 19V5M5 12l7-7 7 7" />
         </svg>
       ),
       color: "#FF6B00",
-      bg: "rgba(255,107,0,0.08)",
-      border: "rgba(255,107,0,0.2)",
+      bg: "rgba(255,107,0,0.06)",
+      border: "rgba(255,107,0,0.12)",
       route: "/dashboard/wallet",
     },
     {
       label: "View Ads",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
       ),
-      color: "#0ea5e9",
-      bg: "rgba(14,165,233,0.08)",
-      border: "rgba(14,165,233,0.2)",
+      color: "#FF6B00",
+      bg: "rgba(255,107,0,0.06)",
+      border: "rgba(255,107,0,0.12)",
       route: "/dashboard/ads",
     },
+
   ];
 
   return (
