@@ -1,30 +1,26 @@
-import { useState } from "react";
+// LOCATION: src/components/admin_dashboard/admin_local_comp/leaderboard_comp/LeaderboardTabs.jsx
+const TABS = [
+  { id: "daily",   label: "Daily"   },
+  { id: "weekly",  label: "Weekly"  },
+  { id: "monthly", label: "Monthly" },
+];
 
-const LeaderboardTabs = () => {
-  const [activeTab, setActiveTab] = useState("daily");
-
-  const tabs = [
-    { id: "daily", label: "Daily" },
-    { id: "weekly", label: "Weekly" },
-    { id: "monthly", label: "Monthly" },
-  ];
-
+const LeaderboardTabs = ({ activeTab = "daily", setActiveTab = () => {} }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-2 flex space-x-2">
-      {tabs.map((tab) => (
+    <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+      {TABS.map((tab) => (
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            activeTab === tab.id
-              ? "bg-indigo-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
+          className={`px-5 py-2 rounded-lg text-sm font-bold transition-all duration-150
+            ${activeTab === tab.id
+              ? "bg-orange-500 text-white shadow-sm shadow-orange-200"
+              : "text-gray-500 hover:text-black hover:bg-white"
+            }`}
         >
           {tab.label}
         </button>
       ))}
-      {/* Hidden input to pass active tab to other components via context or prop drilling; for simplicity we'll rely on state management later */}
     </div>
   );
 };

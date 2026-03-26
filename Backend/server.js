@@ -13,6 +13,8 @@ const userTaskRoutes = require("./routes/userTaskRoutes");
 const userRoutes = require("./routes/userRoutes");
 // 👇 NEW: Survey route import kiya
 const surveyRoutes = require("./routes/surveyRoutes"); 
+const leaderboardRoutes = require("./routes/Leaderboardroutes");
+
 
 // ✅ Initialize app FIRST
 const app = express();
@@ -45,6 +47,10 @@ app.use("/api/referrals",         require("./routes/referral"));
 
 // 👇 NEW: Survey API route register kiya
 app.use("/api/surveys",           surveyRoutes);
+
+//top leaderboard route
+app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/admin/leaderboard", require("./routes/adminLeaderboard"));
 
 // Test route
 app.get("/", (req, res) => {

@@ -24,6 +24,7 @@ const TopUserHighlight = ({
     completionRate: 94,
     weeklyGrowth: "+18%",
   },
+  userData,
 }) => {
   return (
     <motion.div
@@ -46,9 +47,7 @@ const TopUserHighlight = ({
         />
       </div>
 
-      {/* ══════════════════════════════
-          GRAND CHAMPION TITLE BANNER
-      ══════════════════════════════ */}
+      {/* ── Grand Champion Title Banner ── */}
       <div className="relative flex items-center justify-between px-5 sm:px-7 pt-5 pb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center shadow-md shadow-orange-500/40">
@@ -75,9 +74,7 @@ const TopUserHighlight = ({
       {/* Thin orange accent line */}
       <div className="mx-5 sm:mx-7 h-px bg-gradient-to-r from-orange-500 via-orange-400 to-transparent opacity-60" />
 
-      {/* ══════════════════════════════
-          PLAYER PROFILE
-      ══════════════════════════════ */}
+      {/* ── Player Profile ── */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +91,7 @@ const TopUserHighlight = ({
               className="absolute -inset-2.5 rounded-full border-2 border-dashed border-orange-500 opacity-50"
             />
             <img
-              src={topUser.avatar}
+              src={topUser.avatar || userData?.avatar}
               alt={topUser.username}
               className="w-24 h-24 rounded-full border-4 border-orange-500 object-cover relative z-10 shadow-xl shadow-orange-500/20"
             />
@@ -173,9 +170,9 @@ const TopUserHighlight = ({
           {/* Earnings + Completion + Growth row */}
           <div className="grid grid-cols-3 gap-2">
             {[
-              { icon: DollarSign,  val: topUser.totalEarned,    label: "Earned",     color: "text-orange-400" },
-              { icon: Target,      val: `${topUser.completionRate}%`, label: "Completion", color: "text-green-400"  },
-              { icon: TrendingUp,  val: topUser.weeklyGrowth,   label: "This Week",  color: "text-purple-400" },
+              { icon: DollarSign, val: topUser.totalEarned,         label: "Earned",     color: "text-orange-400" },
+              { icon: Target,     val: `${topUser.completionRate}%`, label: "Completion", color: "text-green-400"  },
+              { icon: TrendingUp, val: topUser.weeklyGrowth,         label: "This Week",  color: "text-purple-400" },
             ].map(({ icon: Icon, val, label, color }, i) => (
               <div key={i} className="flex flex-col items-center bg-white/5 border border-white/8 rounded-xl py-2.5 px-2">
                 <Icon className={`w-4 h-4 ${color} mb-1`} />
