@@ -11,7 +11,7 @@ const getSettings = () =>
   Settings.findOneAndUpdate(
     { singletonKey: "main" },
     { $setOnInsert: { singletonKey: "main" } },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
 // GET /api/admin/leaderboard?limit=100
@@ -65,7 +65,7 @@ router.post("/settings", async (req, res) => {
     const updated = await Settings.findOneAndUpdate(
       { singletonKey: "main" },
       { autoResetDaily, autoResetWeekly, autoResetMonthly, dailyReward, weeklyReward, monthlyReward },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ message: "Settings saved.", settings: updated });
   } catch (err) {
@@ -148,7 +148,7 @@ router.put("/points/:userId", async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.userId,
       { $set: { creds: points } },
-      { new: true }
+      { returnDocument: 'after' }
     ).select("username creds");
 
     if (!user) return res.status(404).json({ message: "User not found." });
