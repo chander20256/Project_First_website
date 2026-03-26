@@ -1,14 +1,14 @@
 import React from "react";
 
 const CurveLeftToRight = () => (
-  <svg className="hidden md:block absolute top-[50%] left-[46%] w-[54%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-    <path d="M 0,0 C 60,0 40,100 100,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)]" />
+  <svg className="hidden md:block absolute top-[50%] left-[42%] lg:left-[38%] w-[58%] lg:w-[62%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path d="M 0,0 C 60,0 40,100 100,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)] animate-dash-flow" />
   </svg>
 );
 
 const CurveRightToLeft = () => (
-  <svg className="hidden md:block absolute top-[50%] right-[46%] w-[54%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-    <path d="M 100,0 C 40,0 60,100 0,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)]" />
+  <svg className="hidden md:block absolute top-[50%] right-[42%] lg:right-[38%] w-[58%] lg:w-[62%] h-[calc(100%+8rem)] z-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path d="M 100,0 C 40,0 60,100 0,100" stroke="#ff5c00" strokeWidth="2" strokeDasharray="6,6" fill="none" vectorEffect="non-scaling-stroke" opacity="0.5" className="drop-shadow-[0_0_8px_rgba(255,92,0,0.3)] animate-dash-flow" />
   </svg>
 );
 
@@ -114,6 +114,33 @@ const MiniMockup = ({ type }) => {
       </div>
     </div>
   );
+  if (type === "withdraw") return (
+    <div className="w-[85%] h-[80%] bg-white border border-neutral-200 rounded-xl p-3 flex flex-col gap-2 opacity-90 transition-all duration-500 group-hover:scale-105 group-hover:border-orange-500/50 shadow-sm">
+      <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+        <div className="flex flex-col gap-1.5 w-1/2">
+          <div className="w-full h-1.5 bg-neutral-200 rounded"></div>
+          <div className="w-2/3 h-1.5 bg-neutral-200 rounded"></div>
+        </div>
+        <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5L20 7"></path>
+          </svg>
+        </div>
+      </div>
+      <div className="flex-1 bg-neutral-50 rounded-lg border border-neutral-200 flex items-center justify-center relative overflow-hidden group-hover:bg-orange-50/50 transition-colors">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,92,0,0.05)_0,transparent_70%)]"></div>
+        <div className="flex items-center gap-2 z-10">
+          <span className="text-2xl group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-md">💳</span>
+          <div className="flex flex-col gap-1 group-hover:translate-x-1 transition-transform duration-300">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   return null;
 };
 
@@ -126,18 +153,33 @@ export default function Loops() {
     { num: "05", title: "Complete Tasks", desc: "Engage with various micro-tasks available on the platform to boost your daily earnings effortlessly.", mockup: "tasks", btnText: "View Tasks" },
     { num: "06", title: "Shortlinks", desc: "Navigate through our sponsored shortlinks. A quick and easy way to add more to your balance.", mockup: "links", btnText: "Visit Links" },
     { num: "07", title: "Play Games", desc: "Have fun while earning! Play exciting browser games and get rewarded for your time and high scores.", mockup: "games", btnText: "Play Now" },
-    { num: "08", title: "Referrals Code", desc: "Invite friends using your unique referral code and earn a percentage of their earnings for life.", mockup: "referral", btnText: "Get Code" }
+    { num: "08", title: "Referrals Code", desc: "Invite friends using your unique referral code and earn a percentage of their earnings for life.", mockup: "referral", btnText: "Get Code" },
+    { num: "09", title: "Withdrawals", desc: "Easily withdraw your hard-earned cash directly to your preferred wallet or bank account quickly and securely.", mockup: "withdraw", btnText: "Cash Out" }
   ];
 
   return (
     <section className="bg-[#FAFAFA] text-neutral-900 font-barlow py-16 md:py-24 overflow-hidden border-t border-neutral-200">
+      
+      {/* Added Inline Keyframes for Realistic Flow Motion */}
+      <style>{`
+        @keyframes dashFlow {
+          from { stroke-dashoffset: 24; }
+          to { stroke-dashoffset: 0; }
+        }
+        .animate-dash-flow {
+          animation: dashFlow 1.2s linear infinite;
+        }
+      `}</style>
+
       <div className="text-center mb-16 md:mb-24 px-6">
         <h2 className="font-anton text-4xl md:text-6xl uppercase leading-none text-neutral-900">
           THE EARNING <span className="text-orange-500">PATH</span>
         </h2>
         <p className="text-neutral-600 mt-3 text-base md:text-lg">Follow these simple steps to maximize your income.</p>
       </div>
-      <div className="max-w-6xl mx-auto px-6 relative flex flex-col gap-12 md:gap-32">
+      
+      {/* Compressed Gaps for Better Responsiveness */}
+      <div className="max-w-6xl mx-auto px-6 relative flex flex-col gap-10 md:gap-20 lg:gap-24">
         <div className="md:hidden absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] border-l-2 border-dashed border-orange-500/30 z-0"></div>
         {steps.map((step, i) => {
           const isLeft = i % 2 === 0;
@@ -146,27 +188,30 @@ export default function Loops() {
               {i < steps.length - 1 && (
                 isLeft ? <CurveLeftToRight /> : <CurveRightToLeft />
               )}
-              <div className="relative z-10 w-[92%] sm:w-[80%] md:w-[44%] mx-auto md:mx-0 bg-white border border-neutral-200 hover:border-orange-500 rounded-3xl p-5 md:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] group transition-all duration-500 hover:-translate-y-2">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-[#FFF5EE] border border-orange-100 flex items-center justify-center text-xl font-anton text-neutral-600 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 group-hover:shadow-[0_0_20px_rgba(255,92,0,0.3)] transition-all duration-300">
+              
+              {/* Cards are now compressed slightly: changed paddings, margins, sizes */}
+              <div className="relative z-10 w-[92%] sm:w-[75%] md:w-[42%] lg:w-[38%] mx-auto md:mx-0 bg-white border border-neutral-200 hover:border-orange-500 rounded-3xl p-4 md:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] group transition-all duration-500 hover:-translate-y-2">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[#FFF5EE] border border-orange-100 flex items-center justify-center text-lg font-anton text-neutral-600 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 group-hover:shadow-[0_0_20px_rgba(255,92,0,0.3)] transition-all duration-300">
                     {step.num}
                   </div>
-                  <h3 className="font-anton text-2xl md:text-3xl uppercase tracking-wide text-neutral-900">
+                  <h3 className="font-anton text-xl md:text-2xl uppercase tracking-wide text-neutral-900">
                     {step.title}
                   </h3>
                 </div>
-                <p className="text-neutral-600 text-sm md:text-base leading-relaxed mb-5">
+                <p className="text-neutral-600 text-sm md:text-sm leading-relaxed mb-3">
                   {step.desc}
                 </p>
-                <div className="mb-6">
+                <div className="mb-4">
                   <button 
                     onClick={() => {}} 
-                    className="px-5 py-2.5 bg-transparent border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-bold uppercase tracking-widest text-xs rounded transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,92,0,0.2)]"
+                    className="px-4 py-2 bg-transparent border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-bold uppercase tracking-widest text-xs rounded transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,92,0,0.2)]"
                   >
                     {step.btnText} →
                   </button>
                 </div>
-                <div className="w-full h-36 bg-[#FAFAFA] rounded-xl border border-neutral-200 flex items-center justify-center overflow-hidden relative group-hover:border-orange-500/50 transition-colors duration-500">
+                {/* Mockup height compressed slightly (h-28 instead of h-36) */}
+                <div className="w-full h-28 bg-[#FAFAFA] rounded-xl border border-neutral-200 flex items-center justify-center overflow-hidden relative group-hover:border-orange-500/50 transition-colors duration-500">
                   <MiniMockup type={step.mockup} />
                   <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
