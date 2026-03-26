@@ -1,6 +1,15 @@
 const dns = require("dns");
 dns.setDefaultResultOrder("ipv4first");
 
+// Force known-good DNS resolvers for Atlas SRV lookups when local resolver blocks querySrv.
+const dnsServers = (process.env.DNS_SERVERS || "8.8.8.8,1.1.1.1")
+  .split(",")
+  .map((server) => server.trim())
+  .filter(Boolean);
+if (dnsServers.length) {
+  dns.setServers(dnsServers);
+}
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");

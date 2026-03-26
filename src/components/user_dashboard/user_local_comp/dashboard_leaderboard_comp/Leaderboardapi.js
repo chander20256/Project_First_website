@@ -1,5 +1,3 @@
-// LOCATION: src/utils/leaderboardApi.js
-// Shared by AdminLeaderboardPage, DashboardLeaderboard, and LeaderboardStats
 
 export const BASE = "http://localhost:5000";
 
