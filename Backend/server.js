@@ -13,7 +13,8 @@ if (dnsServers.length) {
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 // Routes import
 const walletRoutes = require("./routes/walletRoutes");
@@ -21,41 +22,40 @@ const taskRoutes = require("./routes/taskRoutes");
 const userTaskRoutes = require("./routes/userTaskRoutes");
 const userRoutes = require("./routes/userRoutes");
 // 👇 NEW: Survey route import kiya
-const surveyRoutes = require("./routes/surveyRoutes"); 
+const surveyRoutes = require("./routes/surveyRoutes");
 const leaderboardRoutes = require("./routes/Leaderboardroutes");
-
 
 // ✅ Initialize app FIRST
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // ✅ FIXED server.js — only change these 2 lines order
-app.use("/api/auth",              require("./routes/auth"));
-app.use("/api/wallet",            walletRoutes);
-app.use("/api/tasks",             taskRoutes);
-app.use("/api/user-tasks",        userTaskRoutes);
-app.use("/api/user",              require("./routes/user"));
-app.use("/api/user",              userRoutes);
-app.use("/api/top-referrer",      require("./routes/topReferrer"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/wallet", walletRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/user-tasks", userTaskRoutes);
+app.use("/api/user", require("./routes/user"));
+app.use("/api/user", userRoutes);
+app.use("/api/top-referrer", require("./routes/topReferrer"));
 
 // Quiz & Attempt Routes
-app.use("/api/quizzes",           require("./routes/quizzes"));
-app.use("/api/attempts",          require("./routes/attempts"));
+app.use("/api/quizzes", require("./routes/quizzes"));
+app.use("/api/attempts", require("./routes/attempts"));
 
 // Contact & Feedback Routes
-app.use("/api/contact",           require("./routes/Contactroutes"));
-app.use("/api/feedback",          require("./routes/Feedbackroutes"));
+app.use("/api/contact", require("./routes/Contactroutes"));
+app.use("/api/feedback", require("./routes/Feedbackroutes"));
 
 // ⚠️ STATS must come BEFORE /api/referrals
-app.use("/api/referrals/stats",   require("./routes/referralStats"));
-app.use("/api/referrals",         require("./routes/referral"));
+app.use("/api/referrals/stats", require("./routes/referralStats"));
+app.use("/api/referrals", require("./routes/referral"));
 
 // 👇 NEW: Survey API route register kiya
-app.use("/api/surveys",           surveyRoutes);
+app.use("/api/surveys", surveyRoutes);
 
 //top leaderboard route
 app.use("/api/leaderboard", leaderboardRoutes);

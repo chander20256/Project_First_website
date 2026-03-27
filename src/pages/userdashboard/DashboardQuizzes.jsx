@@ -1,4 +1,5 @@
 import { useQuiz } from "../../hooks/useQuiz";
+import { useEffect } from "react";
 import QuizzesHeader from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesHeader";
 import QuizzesResult from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesResult";
 import QuizzesGrid from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesGrid";
@@ -18,8 +19,14 @@ const DashboardQuizzes = () => {
     nextQuestion,
     prevQuestion,
     submitQuiz,
-    closeQuiz
+    closeQuiz,
+    loadQuizzes,
   } = useQuiz();
+
+  // Load quizzes on component mount
+  useEffect(() => {
+    loadQuizzes();
+  }, []);
 
   if (loading && quizzes.length === 0) {
     return (
@@ -40,10 +47,7 @@ const DashboardQuizzes = () => {
       )}
 
       {!activeQuiz && !result && (
-        <QuizzesGrid 
-          quizzes={quizzes} 
-          onStartQuiz={startQuiz} 
-        />
+        <QuizzesGrid quizzes={quizzes} onStartQuiz={startQuiz} />
       )}
 
       {activeQuiz && !result && (
@@ -58,12 +62,7 @@ const DashboardQuizzes = () => {
         />
       )}
 
-      {result && (
-        <QuizzesResult 
-          result={result} 
-          onClose={closeQuiz} 
-        />
-      )}
+      {result && <QuizzesResult result={result} onClose={closeQuiz} />}
     </div>
   );
 };

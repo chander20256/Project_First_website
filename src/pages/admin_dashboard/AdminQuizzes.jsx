@@ -1,9 +1,5 @@
 import { useQuiz } from "../../hooks/useQuiz";
-
-
-
-
-
+import { useEffect } from "react";
 
 import QuizzesHeader from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/QuizzesHeader";
 import AddQuizForm from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/AddQuizForm";
@@ -12,16 +8,21 @@ import QuizzesTable from "../../components/admin_dashboard/admin_local_comp/quiz
 const AdminQuizzes = () => {
   const { quizzes, loading, error, loadQuizzes, removeQuiz } = useQuiz();
 
+  // Load quizzes on component mount
+  useEffect(() => {
+    loadQuizzes();
+  }, []);
+
   const handleDelete = async (quizId) => {
-    if (window.confirm('Are you sure you want to delete this quiz?')) {
+    if (window.confirm("Are you sure you want to delete this quiz?")) {
       await removeQuiz(quizId);
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <QuizzesHeader />
-      
+      <QuizzesHeader totalQuizzes={quizzes.length} />
+
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4 text-red-700">
           {error}
@@ -36,7 +37,6 @@ const AdminQuizzes = () => {
         <>
           <AddQuizForm onQuizCreated={loadQuizzes} />
           <QuizzesTable quizzes={quizzes} onDelete={handleDelete} />
-
         </>
       )}
     </div>
