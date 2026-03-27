@@ -59,7 +59,11 @@ app.use("/api/surveys", surveyRoutes);
 
 //top leaderboard route
 app.use("/api/leaderboard", leaderboardRoutes);
+
+//Admin routes
 app.use("/api/admin/leaderboard", require("./routes/adminLeaderboard"));
+app.use("/api/admin/referrals",   require("./routes/Adminreferral"));
+ 
 
 // Test route
 app.get("/", (req, res) => {

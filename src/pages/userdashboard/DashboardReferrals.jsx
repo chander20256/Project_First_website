@@ -3,7 +3,7 @@ import ReferralsStats from "../../components/user_dashboard/user_local_comp/dash
 import ReferralLinkCard from "../../components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralLinkCard";
 import ReferralsGrid from "../../components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralsGrid";
 import TopReferrerHighlight from "../../components/user_dashboard/user_local_comp/dashboard_referral_comp/TopReferrerHighlight";
-import ReferralsQuickActions from "../../components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralsQuickActions";
+// import ReferralsQuickActions from "../../components/user_dashboard/user_local_comp/dashboard_referral_comp/ReferralsQuickActions";
 
 const DashboardReferrals = () => {
   return (
@@ -13,7 +13,7 @@ const DashboardReferrals = () => {
       <ReferralLinkCard />
       <ReferralsGrid />
       <TopReferrerHighlight />
-      <ReferralsQuickActions />
+      {/* <ReferralsQuickActions /> */}
     </div>
   );
 };

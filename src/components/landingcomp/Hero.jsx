@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import React from 'react'
-import GLOBAL_CSS from './StyleHero/GLOBAL_CSS'
 
 /* ════════════════════ PHONE MOCKUP DATA ════════════════════════ */
 const SCREENS = [
@@ -77,22 +76,16 @@ const PhoneMockup = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-
-      {/* Phone frame */}
       <div style={{
         width: 270, height: 520, borderRadius: 40, background: '#111', padding: 10,
         position: 'relative', animation: 'phoneFloat 5s ease-in-out infinite',
         boxShadow: '0 40px 100px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.08)',
       }}>
-
-        {/* Screen */}
         <div style={{
           width: '100%', height: '100%', borderRadius: 32, background: s.bg,
           overflow: 'hidden', position: 'relative',
           animation: 'screenGlow 4s ease-in-out infinite', transition: 'background 0.5s ease',
         }}>
-
-          {/* Status bar */}
           <div style={{ padding: '12px 18px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: '0.58rem', color: 'rgba(0,0,0,0.35)', letterSpacing: '0.06em' }}>9:41</span>
             <div style={{ width: 60, height: 14, borderRadius: 99, background: 'rgba(0,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -103,7 +96,6 @@ const PhoneMockup = () => {
             </div>
           </div>
 
-          {/* Screen content */}
           <div style={{
             padding: '10px 16px 16px',
             opacity: animating ? 0 : 1,
@@ -116,7 +108,6 @@ const PhoneMockup = () => {
               <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: '2rem', color: s.accent, lineHeight: 1 }}>{s.value}</span>
               <span style={{ fontSize: '0.65rem', color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono',monospace" }}>{s.valueSub}</span>
             </div>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {s.items.map((item, i) => (
                 <div key={i} style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 14, padding: '9px 12px', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.6)' }}>
@@ -135,7 +126,6 @@ const PhoneMockup = () => {
             </div>
           </div>
 
-          {/* Notification pop */}
           <div style={{
             position: 'absolute', bottom: 16, left: 10, right: 10,
             background: 'rgba(10,10,10,0.88)', borderRadius: 14, padding: '9px 12px',
@@ -144,12 +134,9 @@ const PhoneMockup = () => {
             animation: 'notifSlide 3.2s ease-in-out infinite', letterSpacing: '0.01em',
           }}>{s.notif}</div>
         </div>
-
-        {/* Notch */}
         <div style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', width: 70, height: 20, background: '#111', borderRadius: 99, zIndex: 5 }} />
       </div>
 
-      {/* Dot indicators */}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         {SCREENS.map((_, i) => (
           <div key={i} onClick={() => setActive(i)} style={{
@@ -177,20 +164,24 @@ const Hero = () => {
     setTimeout(() => setVisible(v => ({ ...v, ctas: true, trust: true })), 900)
   }, [])
 
-  /* Rotating headline word */
+  /* ── FIX: Rotating headline word — replaced double rAF with setTimeout(20ms)
+     The double rAF was fragile on fast GPUs causing words to jump/teleport.
+     A 20ms gap guarantees at least one paint cycle between 'enter' and 'visible'
+     so the CSS transition always has a defined start state to animate from. ── */
   useEffect(() => {
     const interval = setInterval(() => {
       setWordState('exit')
       setTimeout(() => {
         setWordIndex(i => (i + 1) % words.length)
         setWordState('enter')
-        requestAnimationFrame(() => requestAnimationFrame(() => setWordState('visible')))
+        setTimeout(() => setWordState('visible'), 20)
       }, 350)
     }, 2800)
     return () => clearInterval(interval)
   }, [])
 
-  /* Three.js background */
+  /* Three.js background — NOTE: Three.js CDN script must be loaded in
+     public/index.html before </body>. JSX <script> tags don't execute in React. */
   useEffect(() => {
     const canvas = document.getElementById('three-canvas')
     if (!canvas) return
@@ -271,14 +262,16 @@ const Hero = () => {
   }[wordState]
 
   return (
-    <section id="hero" style={{ position: 'relative', display: 'flex', alignItems: 'center', minHeight: '100vh', background: '#fff', overflow: 'hidden' }}>
+    <section
+      id="hero"
+      aria-label="Hero — Start earning with REVADOO"
+      style={{ position: 'relative', display: 'flex', alignItems: 'center', minHeight: '100vh', background: '#fff', overflow: 'hidden' }}
+    >
+      {/* ── FIX: GLOBAL_CSS is now injected only once in LandingPage.jsx.
+          Removed the duplicate <style> injection that was here previously. ── */}
 
-      {/* Global styles — injected here so they're available to all sibling sections */}
-      <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
-
-      {/* Three.js canvas */}
+      {/* Three.js canvas — Three.js must be loaded via public/index.html */}
       <canvas id="three-canvas" style={{ position: 'absolute', inset: 0, zIndex: 0 }} />
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" async />
 
       {/* Grid overlay */}
       <div style={{
@@ -304,6 +297,8 @@ const Hero = () => {
           {/* Badge */}
           <div
             className="hero-badge"
+            role="status"
+            aria-label="2.4 million plus users earning daily"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               borderRadius: 999, background: '#FFF5EE',
@@ -319,7 +314,7 @@ const Hero = () => {
             </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline — H1 is correct here as the only H1 on the page */}
           <h1 style={{
             fontFamily: "'Bebas Neue',sans-serif",
             fontSize: 'clamp(3.8rem,7vw,7.5rem)', lineHeight: 0.92,
@@ -334,6 +329,7 @@ const Hero = () => {
             <span style={{ position: 'relative', display: 'inline-block' }}>
               REWARDED
               <svg viewBox="0 0 240 10" fill="none" xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
                 style={{ position: 'absolute', left: 0, bottom: '-10px', width: '100%' }}>
                 <path d="M2 8 Q60 2 120 6 Q180 10 238 3" stroke="#FF6B00" strokeWidth="3" strokeLinecap="round" fill="none" />
               </svg>
@@ -356,17 +352,22 @@ const Hero = () => {
             className="hero-ctas"
             style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 56, opacity: visible.ctas ? 1 : 0, transition: 'opacity 0.6s 0.5s' }}
           >
-            <a href="#tasks-section"   className="btn-primary" style={{ fontSize: '1rem', padding: '15px 36px' }}>Start Earning Free &nbsp;→</a>
-            <a href="#rewards-section" className="btn-outline" style={{ fontSize: '1rem', padding: '15px 36px' }}>View Rewards</a>
+            <a href="#tasks-section" className="btn-primary" style={{ fontSize: '1rem', padding: '15px 36px' }}>
+              Start Earning Free &nbsp;→
+            </a>
+            <a href="#rewards-section" className="btn-outline" style={{ fontSize: '1rem', padding: '15px 36px' }}>
+              View Rewards
+            </a>
           </div>
 
           {/* Trust bar */}
           <div
             className="hero-trust"
+            aria-label="Social proof"
             style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 28, opacity: visible.trust ? 1 : 0, transition: 'opacity 0.6s 0.65s' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex' }} aria-hidden="true">
                 {AVATARS.map((av, i) => (
                   <div key={i} style={{
                     width: 34, height: 34, borderRadius: '50%', background: av.bg,
@@ -381,14 +382,16 @@ const Hero = () => {
               </span>
             </div>
 
-            <div className="hero-trust-divider" style={{ width: 1, height: 24, background: '#E0E0E0' }} />
+            <div className="hero-trust-divider" style={{ width: 1, height: 24, background: '#E0E0E0' }} aria-hidden="true" />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: '#FF6B00', fontSize: 13 }}>★★★★★</span>
-              <span style={{ fontSize: '0.85rem', color: '#999' }}><strong style={{ color: '#0A0A0A' }}>4.9/5</strong> rating</span>
+              <span style={{ color: '#FF6B00', fontSize: 13 }} aria-hidden="true">★★★★★</span>
+              <span style={{ fontSize: '0.85rem', color: '#999' }}>
+                <strong style={{ color: '#0A0A0A' }}>4.9/5</strong> rating
+              </span>
             </div>
 
-            <div className="hero-trust-divider" style={{ width: 1, height: 24, background: '#E0E0E0' }} />
+            <div className="hero-trust-divider" style={{ width: 1, height: 24, background: '#E0E0E0' }} aria-hidden="true" />
 
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: '0.72rem', color: '#999', letterSpacing: '0.08em' }}>
               FREE TO JOIN
@@ -396,7 +399,7 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* RIGHT — phone mockup, hidden on tablet/mobile via CSS */}
+        {/* RIGHT — phone mockup */}
         <div className="hero-right">
           <PhoneMockup />
         </div>
@@ -405,6 +408,7 @@ const Hero = () => {
       {/* Scroll indicator */}
       <div
         className="hero-scroll"
+        aria-hidden="true"
         style={{
           position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
           zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
