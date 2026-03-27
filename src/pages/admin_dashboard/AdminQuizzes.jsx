@@ -10,7 +10,13 @@ import AddQuizForm from "../../components/admin_dashboard/admin_local_comp/quizz
 import QuizzesTable from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/QuizzesTable";
 
 const AdminQuizzes = () => {
-  const { quizzes, loading, error, loadQuizzes } = useQuiz();
+  const { quizzes, loading, error, loadQuizzes, removeQuiz } = useQuiz();
+
+  const handleDelete = async (quizId) => {
+    if (window.confirm('Are you sure you want to delete this quiz?')) {
+      await removeQuiz(quizId);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -29,7 +35,8 @@ const AdminQuizzes = () => {
       ) : (
         <>
           <AddQuizForm onQuizCreated={loadQuizzes} />
-          <QuizzesTable quizzes={quizzes} />
+          <QuizzesTable quizzes={quizzes} onDelete={handleDelete} />
+
         </>
       )}
     </div>

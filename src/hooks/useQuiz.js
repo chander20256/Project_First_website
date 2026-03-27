@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchQuizzes, fetchQuizById, submitQuizAttempt } from '../services/api';
+import { fetchQuizzes, fetchQuizById, submitQuizAttempt, deleteQuiz } from '../services/api';
 
 export const useQuiz = () => {
   // Initialize with empty array, not undefined
@@ -123,6 +123,23 @@ export const useQuiz = () => {
     setError(null);
   };
 
+  // Delete a quiz
+  const removeQuiz = async (quizId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteQuiz(quizId);
+      setQuizzes((prev) => prev.filter((q) => q._id !== quizId));
+      return true;
+    } catch (err) {
+      console.error('Delete quiz error:', err);
+      setError(err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load quizzes on mount
   useEffect(() => {
     loadQuizzes();
@@ -142,6 +159,7 @@ export const useQuiz = () => {
     prevQuestion,
     submitQuiz,
     closeQuiz,
+    removeQuiz,
     loadQuizzes
   };
 };

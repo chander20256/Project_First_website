@@ -31,3 +31,11 @@ export const createQuiz = async (quizData) => {
   if (!response.ok) throw new Error('Failed to create quiz');
   return response.json();
 };
+
+export const deleteQuiz = async (quizId) => {
+  const response = await fetch(`${API_URL}/quizzes/${quizId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete quiz');
+  return response.json();
+};

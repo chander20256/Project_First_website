@@ -5,7 +5,7 @@ const router = express.Router();
 // GET all quizzes
 router.get('/', async (req, res) => {
   try {
-    const quizzes = await Quiz.find().select('title description reward');
+    const quizzes = await Quiz.find().select('title description reward thumbnail');
     res.json(quizzes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -31,6 +31,17 @@ router.post('/', async (req, res) => {
     res.status(201).json(quiz);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE remove a quiz (admin)
+router.delete('/:id', async (req, res) => {
+  try {
+    const quiz = await Quiz.findByIdAndDelete(req.params.id);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    res.json({ message: 'Quiz deleted successfully', id: req.params.id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

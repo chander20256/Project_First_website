@@ -1,17 +1,27 @@
 const QuizCard = ({ quiz, onStart }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-      <div className="flex justify-between items-start mb-4">
-        <div className="bg-orange-50 p-3 rounded-xl group-hover:bg-orange-100 transition-colors">
-          <span className="text-2xl font-bold text-orange-600">Q</span>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+      <div className="relative mb-4">
+        <div className="w-full h-40 bg-gray-100 rounded-xl overflow-hidden border border-gray-100 group-hover:border-orange-200 transition-colors">
+          {quiz.thumbnail ? (
+            <img 
+              src={quiz.thumbnail} 
+              alt={quiz.title} 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-orange-50">
+              <span className="text-4xl font-bold text-orange-200">Q</span>
+            </div>
+          )}
         </div>
-        <div className="flex items-center bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+        <div className="absolute top-2 right-2 flex items-center bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-orange-100 shadow-sm">
           <span className="text-sm font-bold text-orange-600">🪙 {quiz.reward}</span>
         </div>
       </div>
 
       <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors line-clamp-1">{quiz.title}</h3>
-      <p className="text-gray-500 mb-6 text-sm line-clamp-2 flex-grow">{quiz.description}</p>
+      <p className="text-gray-500 mb-4 text-sm line-clamp-2">{quiz.description}</p>
       
       <div className="flex items-center gap-4 text-xs font-bold text-gray-400 mb-6 uppercase tracking-wider">
         <span className="flex items-center gap-1">
@@ -24,15 +34,7 @@ const QuizCard = ({ quiz, onStart }) => {
 
       <button
         onClick={() => onStart(quiz._id)}
-        className="w-full py-3 rounded-xl bg-orange-600 text-white font-bold opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-orange-200"
-      >
-        Start Quiz
-      </button>
-      
-      {/* Fallback button for mobile/no-hover */}
-      <button
-        onClick={() => onStart(quiz._id)}
-        className="w-full py-3 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 font-bold group-hover:hidden transition-all md:hidden"
+        className="w-full py-3 rounded-xl bg-orange-600 text-white font-bold transition-all duration-300 shadow-lg shadow-orange-100 hover:bg-orange-700 hover:shadow-orange-200"
       >
         Start Quiz
       </button>

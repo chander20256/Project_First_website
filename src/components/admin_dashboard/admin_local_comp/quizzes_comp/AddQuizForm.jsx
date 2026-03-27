@@ -4,6 +4,7 @@ import { createQuiz } from "../../../../services/api";
 const AddQuizForm = ({ onQuizCreated }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
   const [reward, setReward] = useState(10);
   const [questions, setQuestions] = useState([
     { text: '', options: ['', '', '', ''], correctAnswer: '' }
@@ -32,6 +33,21 @@ const AddQuizForm = ({ onQuizCreated }) => {
     setQuestions(updated);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size should be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnail(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -49,6 +65,7 @@ const AddQuizForm = ({ onQuizCreated }) => {
     const quizData = {
       title,
       description,
+      thumbnail,
       reward: Number(reward),
       questions: validQuestions
     };
@@ -58,6 +75,7 @@ const AddQuizForm = ({ onQuizCreated }) => {
       alert('Quiz created successfully!');
       setTitle('');
       setDescription('');
+      setThumbnail('');
       setReward(10);
       setQuestions([{ text: '', options: ['', '', '', ''], correctAnswer: '' }]);
       if (onQuizCreated) onQuizCreated();
@@ -111,6 +129,60 @@ const AddQuizForm = ({ onQuizCreated }) => {
               required
             />
           </div>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Quiz Thumbnail</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div className="space-y-4">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🖼️</span>
+                <input
+                  type="text"
+                  value={thumbnail && !thumbnail.startsWith('data:') ? thumbnail : ''}
+                  onChange={(e) => setThumbnail(e.target.value)}
+                  className="w-full p-3 pl-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                  placeholder="Paste image URL here..."
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <label className="flex-1 cursor-pointer bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-lg p-3 text-center transition-all group">
+                  <span className="text-sm font-bold text-gray-600 group-hover:text-orange-600 transition-colors">
+                    📁 Browse Local Image
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </label>
+                {thumbnail && (
+                  <button
+                    type="button"
+                    onClick={() => setThumbnail('')}
+                    className="px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {thumbnail && (
+              <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                <img 
+                  src={thumbnail} 
+                  alt="Thumbnail Preview" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 backdrop-blur-sm rounded text-[10px] font-bold text-white uppercase tracking-wider">
+                  Preview
+                </div>
+              </div>
+            )}
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-widest font-bold">Recommended: 16:9 Aspect Ratio • Max 2MB</p>
         </div>
       </div>
 
