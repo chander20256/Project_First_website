@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 
+const surveyQuestionSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  options: [{ type: String, required: true }]
+});
+
 const surveySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  category: { type: String, required: true },
-  questions: { type: Number, required: true },
+  category: { type: String, default: "General" },
+  thumbnail: { type: String, default: '' },
   reward: { type: Number, required: true },
-  active: { type: Boolean, default: true }, // Default active rahega
+  questions: [surveyQuestionSchema],
+  expiresAt: { type: Date, expires: 0, required: true }, // 👈 Yeh Auto-delete karega
   createdAt: { type: Date, default: Date.now }
 });
 

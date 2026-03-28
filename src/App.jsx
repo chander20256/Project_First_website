@@ -1,5 +1,3 @@
-
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -11,19 +9,19 @@ import AuthPage from './pages/AuthPage';
 import DashboardPage from "./pages/userdashboard/DashboardPage";
 import DashboardWallet from "./pages/userdashboard/DashboardWallet";
 import DashboardGames from "./pages/userdashboard/DashboardGames";
-import DashboardSurveys from "./pages/userdashboard/DashboardSurveys";
+
+// 👇 SIRF YEH LINE CHANGE KI HAI (Correct Folder Path)
+import DashboardSurveys from "./components/user_dashboard/user_local_comp/dashboard_surveys_comp/DashboardSurveys";
+
 import DashboardTasks from "./pages/userdashboard/DashboardTasks";
 import DashboardLeaderboard from "./pages/userdashboard/DashboardLeaderboard";
 import DashboardReferrals from "./pages/userdashboard/DashboardReferrals";
 import DashboardQuizzes from "./pages/userdashboard/DashboardQuizzes";
 import DashboardSettings from "./pages/userdashboard/DashboardSettings";
 import Infopage from "./pages/Infopage";
- import NotFoundPage from "./pages/NotFoundPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 import { i } from "framer-motion/client";
-
-
-
 
 import AdminDashboardLayout from "./layouts/AdminDashboardLayout";
 // import AdminDashboardPage from "./pages/admin_dashboard/AdminDashboardPage";
@@ -43,7 +41,6 @@ import AdminSurveys from "./pages/admin_dashboard/AdminSurveys";
 import AdminTask from "./pages/admin_dashboard/AdminTask";
 import DashboardProfile from "./pages/userdashboard/DashboardProfile";
 
-
 function App() {
   return (
     <BrowserRouter>
@@ -57,7 +54,6 @@ function App() {
           <Route path="Infopage" element={<Infopage />} />
           <Route path="AuthPage" element={<AuthPage />} />
         </Route>
-
 
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
@@ -73,9 +69,7 @@ function App() {
           <Route path="settings" element={<DashboardSettings />} />
           <Route path="profile" element={<DashboardProfile />} />
           {/* Add more dashboard routes as needed */}
-
         </Route>
-
 
         <Route path="/Admin" element={<AdminDashboardLayout />}>
           <Route index element={<AdminDashboardPage />} />
@@ -92,17 +86,11 @@ function App() {
           <Route path="leaderboard" element={<Adminleaderboard />} />
           <Route path="referrals" element={<AdminReferrals />} />
           <Route path="tasks" element={<AdminTask />} />
-
-
         </Route>
-
 
         {/* 404 Not Found Route - MUST BE LAST */}
         <Route path="*" element={<NotFoundPage />} />
-    
       </Routes>
-
-      
     </BrowserRouter>
   );
 }

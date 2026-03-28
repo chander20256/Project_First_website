@@ -1,53 +1,40 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import SurveyCard from "./SurveyCard";
+import React from 'react';
+import SurveyCard from './SurveyCard';
 
-const SurveysGrid = () => {
-  const [surveys, setSurveys] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Jab component load hoga, tab backend se data aayega
-  useEffect(() => {
-    const fetchSurveys = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/surveys/all");
-        // Sirf active surveys dikhayenge user ko
-        const activeSurveys = response.data.filter(survey => survey.active === true);
-        setSurveys(activeSurveys);
-      } catch (error) {
-        console.error("Error fetching surveys:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSurveys();
-  }, []);
+const SurveysGrid = ({ surveys, onStartSurvey, completedSurveyIds }) => {
+  if (!surveys || surveys.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+        <div className="text-5xl mb-4">📭</div>
+        <h3 className="text-xl font-bold text-gray-900">No Surveys Available</h3>
+        <p className="text-gray-500 mt-2">Check back later for new earning opportunities!</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Available Surveys</h2>
+    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-900">Latest Opportunities</h2>
+        <span className="text-sm font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full">{surveys.length} Active</span>
+      </div>
       
-      {loading ? (
-        <p className="text-gray-500">Loading surveys...</p>
-      ) : surveys.length === 0 ? (
-        <p className="text-gray-500">No active surveys available right now.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-h-[600px] overflow-y-auto pr-2 pb-4 space-y-2 relative" 
+           style={{ scrollbarWidth: 'thin', scrollbarColor: '#fed7aa transparent' }}>
+           
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {surveys.map((survey) => (
-            // Hum backend se aayi 'id' (_id hoti hai mongoDB mein) aur baaki details bhej rahe hain
             <SurveyCard 
               key={survey._id} 
-              survey={{
-                id: survey._id,
-                title: survey.title,
-                reward: `${survey.reward} tokens`, // Format adjust kiya
-                time: `${survey.questions * 1} min` // Dummy time estimate logic (1 min per question)
-              }} 
+              survey={survey} 
+              onStart={onStartSurvey} 
+              /* Check karega ki kya ye ID completed list mein hai */
+              isCompleted={completedSurveyIds?.includes(survey._id)} 
             />
           ))}
         </div>
-      )}
+        
+      </div>
     </div>
   );
 };

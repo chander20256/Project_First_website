@@ -1,7 +1,6 @@
 import React from 'react';
 
 const WhyUsSection = ({ gridBg, Label, Heading, Body }) => {
-  // Pillars data ko yahin move kar diya hai
   const pillars = [
     { icon: '⚡', title: 'Instant Rewards', desc: 'Complete tasks and get paid fast. No waiting periods, no minimums — your Creds are yours the moment you earn them.' },
     { icon: '🎯', title: 'Real Opportunities', desc: 'Every task on our platform is vetted and valued. We connect you with brands and surveys that respect your time.' },
