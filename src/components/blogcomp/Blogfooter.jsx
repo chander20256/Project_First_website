@@ -1,0 +1,1 @@
+export { BlogFooter as default } from './Blogcta';
