@@ -1,6 +1,7 @@
 import { useQuiz } from "../../hooks/useQuiz";
 import { useEffect } from "react";
 import QuizzesHeader from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesHeader";
+import UserQuizStats from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/UserQuizStats";
 import QuizzesResult from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesResult";
 import QuizzesGrid from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/QuizzesGrid";
 import ActiveQuiz from "../../components/user_dashboard/user_local_comp/dashboard_Quizzes_comp/ActiveQuiz";
@@ -39,6 +40,8 @@ const DashboardQuizzes = () => {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <QuizzesHeader />
+
+      <UserQuizStats />
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">

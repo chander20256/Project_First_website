@@ -62,8 +62,8 @@ app.use("/api/leaderboard", leaderboardRoutes);
 
 //Admin routes
 app.use("/api/admin/leaderboard", require("./routes/adminLeaderboard"));
-app.use("/api/admin/referrals",   require("./routes/Adminreferral"));
- 
+app.use("/api/admin/referrals", require("./routes/Adminreferral"));
+app.use("/api/admin/users", require("./routes/adminUsers"));
 
 // Test route
 app.get("/", (req, res) => {

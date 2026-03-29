@@ -2,6 +2,7 @@ import { useQuiz } from "../../hooks/useQuiz";
 import { useEffect } from "react";
 
 import QuizzesHeader from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/QuizzesHeader";
+import AdminQuizStats from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/AdminQuizStats";
 import AddQuizForm from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/AddQuizForm";
 import QuizzesTable from "../../components/admin_dashboard/admin_local_comp/quizzes_comp/QuizzesTable";
 
@@ -13,6 +14,12 @@ const AdminQuizzes = () => {
     loadQuizzes();
   }, []);
 
+  // Callback to refresh quizzes after creation
+  const handleQuizCreated = async () => {
+    console.log("Quiz created, refreshing list...");
+    await loadQuizzes();
+  };
+
   const handleDelete = async (quizId) => {
     if (window.confirm("Are you sure you want to delete this quiz?")) {
       await removeQuiz(quizId);
@@ -22,6 +29,8 @@ const AdminQuizzes = () => {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <QuizzesHeader totalQuizzes={quizzes.length} />
+
+      <AdminQuizStats />
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4 text-red-700">
@@ -35,7 +44,7 @@ const AdminQuizzes = () => {
         </div>
       ) : (
         <>
-          <AddQuizForm onQuizCreated={loadQuizzes} />
+          <AddQuizForm onQuizCreated={handleQuizCreated} />
           <QuizzesTable quizzes={quizzes} onDelete={handleDelete} />
         </>
       )}
