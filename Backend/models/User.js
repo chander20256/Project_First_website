@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+  tempPassword: {
+    type: String,
+    default: null
+  },
+
   wallet: {
     type: Number,
     default: 0

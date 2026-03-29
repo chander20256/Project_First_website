@@ -174,6 +174,85 @@ router.post('/login', async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════
+// @route   POST /api/auth/google
+// @access  Public
+// ════════════════════════════════════════════════════════
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const lowerCaseEmail = email.toLowerCase();
+    let user = await User.findOne({ email: lowerCaseEmail });
+
+    if (user) {
+      const token = generateToken(user._id, user.email);
+      return res.status(200).json({
+        message: 'Google login successful!',
+        token,
+        user: {
+          id:        user._id,
+          username:  user.username,
+          email:     user.email,
+          creds:     user.creds,
+          createdAt: user.createdAt,
+        },
+      });
+    }
+
+    // Create new user with 8-digit auto-generated password
+    const generatedPassword = Math.floor(10000000 + Math.random() * 90000000).toString();
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
+    let referralCode = generateReferralCode();
+    while (await User.findOne({ referralCode })) {
+      referralCode = generateReferralCode();
+    }
+
+    let username = name || lowerCaseEmail.split('@')[0];
+    
+    // Ensure username is unique if it happens to be taken (e.g., from email parsing)
+    let usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+      username = `${username}${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+
+    const newUser = new User({
+      username,
+      email: lowerCaseEmail,
+      password: hashedPassword,
+      tempPassword: generatedPassword,
+      referralCode
+    });
+
+    await newUser.save();
+
+    const token = generateToken(newUser._id, newUser.email);
+
+    return res.status(201).json({
+      message: 'Google account created successfully!',
+      token,
+      generatedPassword, // Return so frontend can notify the user
+      user: {
+        id:             newUser._id,
+        username:       newUser.username,
+        email:          newUser.email,
+        creds:          newUser.creds,
+        referralCode:   newUser.referralCode,
+        createdAt:      newUser.createdAt,
+      },
+    });
+
+  } catch (err) {
+    console.error('Google Auth error:', err.message);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
+});
+
+// ════════════════════════════════════════════════════════
 // @route   GET /api/auth/me
 // @access  Private
 // ════════════════════════════════════════════════════════
@@ -185,6 +264,7 @@ router.get('/me', protectRoute, async (req, res) => {
       email:        req.user.email,
       creds:        req.user.creds,
       referralCode: req.user.referralCode, // ✅ this is what ReferralLinkCard.jsx uses
+      tempPassword: req.user.tempPassword,
       createdAt:    req.user.createdAt,
     });
   } catch (err) {

@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Calendar, Star, Shield, Trophy, Zap, Coins } from "lucide-react";
+import { Mail, Calendar, Star, Shield, Trophy, Zap, Coins, Eye, EyeOff, Key } from "lucide-react";
 
 const SettingsProfile = () => {
-  const [profile, setProfile] = useState({ username: "", email: "", initial: "U", avatar: null, memberSince: "", creds: 0 });
+  const [showPassword, setShowPassword] = useState(false);
+  const [profile, setProfile] = useState({ username: "", email: "", initial: "U", avatar: null, memberSince: "", creds: 0, tempPassword: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,7 +15,7 @@ const SettingsProfile = () => {
       const avatar = localStorage.getItem("userAvatar") || null;
       if (stored) {
         const user = JSON.parse(stored);
-        setProfile({ username: user.username||"User", email: user.email||"", initial: (user.username||"U").charAt(0).toUpperCase(), avatar, creds: user.creds||0,
+        setProfile({ username: user.username||"User", email: user.email||"", initial: (user.username||"U").charAt(0).toUpperCase(), avatar, creds: user.creds||0, tempPassword: user.tempPassword||null,
           memberSince: user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US",{month:"long",year:"numeric"}) : "" });
       }
     } catch {}
@@ -26,7 +27,7 @@ const SettingsProfile = () => {
         const res  = await fetch("http://localhost:5000/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         const avatar = data.avatar || localStorage.getItem("userAvatar") || null;
-        setProfile({ username: data.username||"User", email: data.email||"", initial: (data.username||"U").charAt(0).toUpperCase(), avatar, creds: data.creds||0,
+        setProfile({ username: data.username||"User", email: data.email||"", initial: (data.username||"U").charAt(0).toUpperCase(), avatar, creds: data.creds||0, tempPassword: data.tempPassword||null,
           memberSince: data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-US",{month:"long",year:"numeric"}) : "" });
         localStorage.setItem("user", JSON.stringify(data));
       } catch (err) { console.error(err); }
@@ -109,6 +110,22 @@ const SettingsProfile = () => {
                     className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-400 break-all">
                     <Mail size={12} className="text-orange-400 shrink-0" />{profile.email}
                   </motion.p>}
+
+              {/* password display (if auto-generated) */}
+              {!loading && profile.tempPassword && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.38 }}
+                  className="flex items-center gap-2 text-xs text-gray-400 bg-orange-50/50 px-3 py-1.5 rounded-lg border border-orange-100/50 w-full justify-center">
+                  <Key size={12} className="text-orange-400 shrink-0" />
+                  <span className="font-semibold text-gray-500">Auto-Password:</span>
+                  <span className="font-mono bg-white px-2 py-0.5 rounded shadow-sm text-orange-600 font-bold border border-orange-100 min-w-[70px] text-center">
+                    {showPassword ? profile.tempPassword : "••••••••"}
+                  </span>
+                  <button onClick={() => setShowPassword(!showPassword)} 
+                    className="flex items-center justify-center p-1 rounded-md hover:bg-orange-100 hover:text-orange-500 transition-colors text-gray-400">
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </motion.div>
+              )}
 
               {/* member since */}
               {!loading && profile.memberSince && (
