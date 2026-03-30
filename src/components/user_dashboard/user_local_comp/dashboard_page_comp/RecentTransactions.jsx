@@ -1,53 +1,80 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaClipboardList, FaGamepad, FaGift, FaUserPlus } from "react-icons/fa";
+import axios from "axios";
 
 const RecentTransactions = () => {
-  const transactions = [
-    {
-      id: 1,
-      description: "Completed survey #142",
-      date: "2023-02-27",
-      amount: "+$5.00",
-      type: "survey",
-    },
-    {
-      id: 2,
-      description: "Won Quiz Game",
-      date: "2023-02-27",
-      amount: "+$2.50",
-      type: "game",
-    },
-    {
-      id: 3,
-      description: "Daily Spin Reward",
-      date: "2023-02-26",
-      amount: "+$1.00",
-      type: "bonus",
-    },
-    {
-      id: 4,
-      description: "Referral bonus - Sarah M.",
-      date: "2023-02-25",
-      amount: "+$10.00",
-      type: "referral",
-    },
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [weeklyEarnings, setWeeklyEarnings] = useState(0);
 
   const iconMap = {
     survey: FaClipboardList,
     game: FaGamepad,
     bonus: FaGift,
     referral: FaUserPlus,
+    credit: FaGift,
+    debit: FaGamepad,
   };
 
-  const weeklyEarnings = transactions
-    .filter((t) => {
-      const transactionDate = new Date(t.date);
-      const today = new Date();
-      const weekAgo = new Date(today.setDate(today.getDate() - 7));
-      return transactionDate >= weekAgo;
-    })
-    .reduce((sum, t) => sum + parseFloat(t.amount.replace("+$", "")), 0);
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const userStr = localStorage.getItem("user");
+
+        if (!userStr) {
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(userStr);
+
+        // Fetch transactions from API
+        const response = await axios.get(
+          `http://localhost:5000/api/wallet/transactions/${user._id}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        if (response.data && response.data.transactions) {
+          const txns = response.data.transactions.map((t) => ({
+            id: t._id,
+            description:
+              t.description ||
+              `${t.type === "credit" ? "Earned" : "Spent"} $${t.amount}`,
+            date: t.createdAt,
+            amount: `${t.type === "credit" ? "+" : "-"}$${t.amount.toFixed(2)}`,
+            type: t.type === "credit" ? "bonus" : "game",
+          }));
+
+          setTransactions(txns);
+
+          // Calculate weekly earnings
+          const today = new Date();
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+          const weekly = txns
+            .filter((t) => {
+              const txnDate = new Date(t.date);
+              return txnDate >= weekAgo && t.amount.includes("+");
+            })
+            .reduce(
+              (sum, t) => sum + parseFloat(t.amount.replace("+$", "")),
+              0,
+            );
+
+          setWeeklyEarnings(weekly);
+        }
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+        // Fallback to empty transactions
+        setTransactions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   return (
     <div
@@ -112,62 +139,106 @@ const RecentTransactions = () => {
 
       {/* ── Transaction Rows ── */}
       <div className="space-y-2">
-        {transactions.map((t) => {
-          const Icon = iconMap[t.type];
-          return (
-            <div
-              key={t.id}
-              className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200"
-              style={{
-                border: "1.5px solid rgba(0,0,0,0.05)",
-                background: "#ffffff",
-              }}
-            >
-              {/* Icon — solid fill on selected state, consistent with StatsLeft icon treatment */}
+        {loading ? (
+          // Loading skeleton
+          <>
+            {[1, 2, 3, 4].map((i) => (
               <div
-                className="flex items-center justify-center rounded-xl flex-shrink-0"
+                key={i}
+                className="flex items-center gap-3 p-3 rounded-xl animate-pulse"
+                style={{ background: "rgba(0,0,0,0.05)" }}
+              >
+                <div
+                  className="rounded-xl flex-shrink-0"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    background: "rgba(0,0,0,0.08)",
+                  }}
+                />
+                <div className="flex-1">
+                  <div
+                    className="h-3 w-40 rounded mb-2"
+                    style={{ background: "rgba(0,0,0,0.08)" }}
+                  />
+                  <div
+                    className="h-2 w-20 rounded"
+                    style={{ background: "rgba(0,0,0,0.06)" }}
+                  />
+                </div>
+                <div
+                  className="h-4 w-16 rounded"
+                  style={{ background: "rgba(0,0,0,0.08)" }}
+                />
+              </div>
+            ))}
+          </>
+        ) : transactions.length > 0 ? (
+          transactions.slice(0, 4).map((t) => {
+            const Icon = iconMap[t.type];
+            return (
+              <div
+                key={t.id}
+                className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200"
                 style={{
-                  width: 38,
-                  height: 38,
-                  background: "rgba(255,107,0,0.08)",
-                  border: "1.5px solid rgba(255,107,0,0.15)",
+                  border: "1.5px solid rgba(0,0,0,0.05)",
+                  background: "#ffffff",
                 }}
               >
-                {Icon && <Icon style={{ color: "#FF6B00", fontSize: 15 }} />}
-              </div>
-
-              {/* Details */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className="font-semibold text-sm truncate"
-                  style={{ color: "#030712" }}
+                {/* Icon */}
+                <div
+                  className="flex items-center justify-center rounded-xl flex-shrink-0"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    background: "rgba(255,107,0,0.08)",
+                    border: "1.5px solid rgba(255,107,0,0.15)",
+                  }}
                 >
-                  {t.description}
-                </p>
-                <p
-                  className="text-[10px] sm:text-[11px] font-medium mt-0.5"
-                  style={{ color: "#9ca3af" }}
-                >
-                  {new Date(t.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
+                  {Icon && <Icon style={{ color: "#FF6B00", fontSize: 15 }} />}
+                </div>
 
-              {/* Amount */}
-              <span
-                className="text-sm font-bold flex-shrink-0 px-2.5 py-1 rounded-full"
-                style={{
-                  background: "rgba(255,107,0,0.08)",
-                  color: "#FF6B00",
-                }}
-              >
-                {t.amount}
-              </span>
-            </div>
-          );
-        })}
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="font-semibold text-sm truncate"
+                    style={{ color: "#030712" }}
+                  >
+                    {t.description}
+                  </p>
+                  <p
+                    className="text-[10px] sm:text-[11px] font-medium mt-0.5"
+                    style={{ color: "#9ca3af" }}
+                  >
+                    {new Date(t.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+
+                {/* Amount */}
+                <span
+                  className="text-sm font-bold flex-shrink-0 px-2.5 py-1 rounded-full"
+                  style={{
+                    background: "rgba(255,107,0,0.08)",
+                    color: "#FF6B00",
+                  }}
+                >
+                  {t.amount}
+                </span>
+              </div>
+            );
+          })
+        ) : (
+          // No transactions
+          <div
+            className="text-center py-8 rounded-xl"
+            style={{ background: "rgba(0,0,0,0.02)" }}
+          >
+            <p style={{ color: "#9ca3af" }}>No transactions yet</p>
+          </div>
+        )}
       </div>
 
       {/* ── Footer ── */}

@@ -106,29 +106,41 @@ const StatCard = ({
 
 const StatsLeft = ({ selectedStat, onSelectStat }) => {
   const [stats, setStats] = useState({
-    completedTasks: 15,
+    completedTasks: 0,
     totalEarnings: 0,
-    completedSurveys: 8,
+    completedSurveys: 0,
     totalReferrals: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
-      const res = await fetch("http://localhost:5000/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(
+        "http://localhost:5000/api/user/dashboard-stats",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       const data = await res.json();
-      if (data) {
-        setStats((prev) => ({
-          ...prev,
-          totalEarnings: data.creds || 0,
-          totalReferrals: data.referralCount || prev.totalReferrals,
-        }));
+
+      if (data.success && data.stats) {
+        setStats({
+          completedTasks: data.stats.completedTasks || 0,
+          totalEarnings: data.stats.totalEarnings || 0,
+          completedSurveys: data.stats.completedSurveys || 0,
+          totalReferrals: data.stats.totalReferrals || 0,
+        });
       }
     } catch (err) {
       console.error("Failed to fetch stats", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -233,14 +245,29 @@ const StatsLeft = ({ selectedStat, onSelectStat }) => {
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-3 h-full">
-      {cards.map((card, i) => (
-        <StatCard
-          key={i}
-          {...card}
-          selectedStat={selectedStat}
-          onSelectStat={onSelectStat}
-        />
-      ))}
+      {loading
+        ? // Loading skeleton
+          [1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="rounded-2xl p-3 sm:p-4 animate-pulse"
+              style={{
+                background: "#f0f0f0",
+                border: "1.5px solid rgba(0,0,0,0.07)",
+              }}
+            >
+              <div className="h-4 w-16 rounded mb-4 bg-gray-300" />
+              <div className="h-8 w-12 rounded bg-gray-300" />
+            </div>
+          ))
+        : cards.map((card, i) => (
+            <StatCard
+              key={i}
+              {...card}
+              selectedStat={selectedStat}
+              onSelectStat={onSelectStat}
+            />
+          ))}
     </div>
   );
 };

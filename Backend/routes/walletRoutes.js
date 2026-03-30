@@ -4,12 +4,9 @@ const router = express.Router();
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 
-
 // GET WALLET BALANCE
 router.get("/balance/:userId", async (req, res) => {
-
   try {
-
     const user = await User.findById(req.params.userId);
 
     if (!user) {
@@ -17,24 +14,19 @@ router.get("/balance/:userId", async (req, res) => {
     }
 
     res.json({
-      balance: user.wallet || 0
+      balance: user.wallet || 0,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-
 });
-
 
 // ADD MONEY
 router.post("/add", async (req, res) => {
-
   try {
-
     const { userId, amount } = req.body;
 
-     console.log("Request body:", req.body); // 👈 ADD THIS
+    console.log("Request body:", req.body); // 👈 ADD THIS
 
     if (!userId || !amount) {
       return res.status(400).json({ message: "Missing data" });
@@ -56,30 +48,22 @@ router.post("/add", async (req, res) => {
       userId,
       type: "credit",
       amount: value,
-      description: "Money added"
+      description: "Money added",
     });
 
     res.json({
       message: "Money added successfully",
-      balance: user.wallet
+      balance: user.wallet,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
-
 });
-
-
-
-
 
 // WITHDRAW MONEY
 router.post("/withdraw", async (req, res) => {
-
   try {
-
     const { userId, amount } = req.body;
 
     const user = await User.findById(userId);
@@ -102,38 +86,34 @@ router.post("/withdraw", async (req, res) => {
       userId,
       type: "debit",
       amount: value,
-      description: "Money withdrawn"
+      description: "Money withdrawn",
     });
 
     res.json({
       message: "Withdraw successful",
-      balance: user.wallet
+      balance: user.wallet,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-
 });
-
 
 // TRANSACTION HISTORY
 router.get("/transactions/:userId", async (req, res) => {
-
   try {
-
     const transactions = await Transaction.find({
-      userId: req.params.userId
-    }).sort({ createdAt: -1 });
+      userId: req.params.userId,
+    })
+      .sort({ createdAt: -1 })
+      .limit(20);
 
-    res.json(transactions);
-
+    res.json({
+      success: true,
+      transactions: transactions,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
-
-  
-
 });
 
 module.exports = router;
