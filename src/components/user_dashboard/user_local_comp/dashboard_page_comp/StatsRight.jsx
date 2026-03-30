@@ -1,196 +1,245 @@
 import React from "react";
 
 const StatsRight = ({ selectedStat }) => {
-  // Weekly data for different stats (last 7 days)
   const weeklyData = {
     tasks: {
       label: "Tasks Completed",
       color: "#FF6B00",
       total: 15,
       days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      values: [3, 5, 4, 7, 6, 9, 5], // Daily tasks completed
+      values: [3, 5, 4, 7, 6, 9, 5],
       unit: "",
     },
     earnings: {
       label: "Earnings",
-      color: "#16a34a",
+      color: "#FF6B00",
       total: 240,
       days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      values: [12, 18, 15, 22, 28, 35, 20], // Daily earnings in $
+      values: [12, 18, 15, 22, 28, 35, 20],
       unit: "$",
     },
     surveys: {
       label: "Surveys Completed",
-      color: "#7C3AED",
+      color: "#FF6B00",
       total: 8,
       days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      values: [1, 2, 1, 3, 2, 4, 2], // Daily surveys completed
+      values: [1, 2, 1, 3, 2, 4, 2],
       unit: "",
     },
     referrals: {
       label: "Referrals",
-      color: "#0ea5e9",
+      color: "#FF6B00",
       total: 5,
       days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      values: [0, 1, 0, 2, 1, 2, 1], // Daily referrals made
+      values: [0, 1, 0, 2, 1, 2, 1],
       unit: "",
     },
   };
 
   const current = weeklyData[selectedStat] || weeklyData.tasks;
   const max = Math.max(...current.values);
-  
-  // Calculate weekly total and average
   const weeklyTotal = current.values.reduce((sum, val) => sum + val, 0);
   const weeklyAverage = (weeklyTotal / 7).toFixed(1);
-  
-  // Calculate growth from previous week (mock data - would come from API)
-  const growthRates = {
-    tasks: 12,
-    earnings: 8,
-    surveys: 15,
-    referrals: 20,
-  };
+  const growthRates = { tasks: 12, earnings: 8, surveys: 15, referrals: 20 };
   const growthRate = growthRates[selectedStat] || 0;
-  
-  // Find best day
   const bestDayIndex = current.values.indexOf(Math.max(...current.values));
   const bestDay = current.days[bestDayIndex];
   const bestDayValue = current.values[bestDayIndex];
+  const isPositive = growthRate >= 0;
 
-  // Generate Y-axis ticks
-  const getYAxisTicks = () => {
-    if (max <= 5) return [0, 1, 2, 3, 4, 5];
-    if (max <= 10) return [0, 2, 4, 6, 8, 10];
-    if (max <= 20) return [0, 5, 10, 15, 20];
-    if (max <= 50) return [0, 10, 20, 30, 40, 50];
-    return [0, 10, 20, 30, 40, 50];
-  };
-
-  const yAxisTicks = getYAxisTicks();
+  const fmt = (val) => (selectedStat === "earnings" ? `$${val}` : val);
 
   return (
     <div
       className="flex flex-col h-full w-full rounded-2xl p-4 sm:p-6"
       style={{
         background: "#ffffff",
-        border: "1px solid #f0f0f0",
-        boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
+        border: "1.5px solid rgba(0,0,0,0.07)",
+        boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between mb-5">
         <div>
           <p
-            className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest"
-            style={{ color: current.color }}
+            className="text-[10px] font-semibold uppercase tracking-widest mb-1"
+            style={{ color: "#FF6B00" }}
           >
-            {current.label} (This Week)
+            {current.label}
           </p>
           <h3
-            className="text-2xl sm:text-3xl font-bold mt-1"
-            style={{ color: "#0a0a0a" }}
+            className="text-3xl sm:text-4xl font-black leading-none"
+            style={{ color: "#030712" }}
           >
-            {selectedStat === "earnings" ? `$${current.total}` : current.total}
+            {fmt(current.total)}
           </h3>
-          <p className="text-[10px] sm:text-xs mt-1" style={{ color: "#9ca3af" }}>
-            Total this week
+          <p
+            className="text-[11px] mt-1.5 font-medium"
+            style={{ color: "#9ca3af" }}
+          >
+            This week
           </p>
         </div>
+
+        {/* Growth pill — moved to header top-right */}
         <div
-          className="flex items-center justify-center rounded-full flex-shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
           style={{
-            width: 40,
-            height: 40,
-            mdWidth: 48,
-            mdHeight: 48,
-            background: `${current.color}14`,
-            border: `1px solid ${current.color}33`,
+            background: isPositive
+              ? "rgba(255,107,0,0.08)"
+              : "rgba(239,68,68,0.08)",
+            color: isPositive ? "#FF6B00" : "#ef4444",
+            border: `1px solid ${isPositive ? "rgba(255,107,0,0.2)" : "rgba(239,68,68,0.2)"}`,
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke={current.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="1" x2="12" y2="23" />
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-          </svg>
+          <span>{isPositive ? "↑" : "↓"}</span>
+          <span>{Math.abs(growthRate)}%</span>
+          <span className="font-normal opacity-70">vs last wk</span>
         </div>
       </div>
 
-      {/* Weekly Summary Stats */}
-      <div className="grid grid-cols-2 sm:flex sm:justify-between gap-3 mb-4 px-1 sm:px-2">
-        <div className="text-left sm:text-center">
-          <p className="text-[10px] text-gray-500">Weekly Total</p>
-          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
-            {selectedStat === "earnings" ? `$${weeklyTotal}` : weeklyTotal}
-          </p>
-        </div>
-        <div className="text-left sm:text-center">
-          <p className="text-[10px] text-gray-500">Daily Avg</p>
-          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
-            {selectedStat === "earnings" ? `$${weeklyAverage}` : weeklyAverage}
-          </p>
-        </div>
-        <div className="text-left sm:text-center col-span-2 sm:col-span-1">
-          <p className="text-[10px] text-gray-500">Best Day</p>
-          <p className="text-xs sm:text-sm font-bold" style={{ color: current.color }}>
-            {bestDay} ({bestDayValue})
-          </p>
-        </div>
-      </div>
-
-      {/* Bar Chart with Y-axis */}
-      <div className="flex gap-1 sm:gap-2 flex-1 min-h-[140px]">
-        {/* Y-axis Labels */}
-        <div className="flex flex-col justify-between text-right pr-1 sm:pr-2" style={{ height: "140px" }}>
-          {yAxisTicks.slice().reverse().map((tick) => (
-            <div key={tick} className="text-[9px] sm:text-xs" style={{ color: "#9ca3af", lineHeight: "1" }}>
-              {current.unit}{tick}
-            </div>
-          ))}
-        </div>
-        
-        {/* Bars Container */}
-        <div className="flex items-end gap-1.5 sm:gap-3 flex-1">
-          {current.days.map((day, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
-              <div
-                className="w-full rounded-md sm:rounded-lg transition-all duration-500 relative group"
-                style={{
-                  height: max > 0 ? `${(current.values[i] / max) * 120}px` : "0px",
-                  background:
-                    i === current.days.length - 1
-                       ? `linear-gradient(180deg, ${current.color}, ${current.color}cc)`
-                       : `${current.color}1F`,
-                }}
-              >
-                {/* Tooltip on hover */}
-                <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-[10px] text-white rounded px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  {current.unit}{current.values[i]}
-                </div>
-              </div>
-              <span className="text-[8px] sm:text-[0.65rem]" style={{ color: "#9ca3af" }}>
-                {day}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer */}
+      {/* ── Summary Stats ── */}
       <div
-        className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4"
-        style={{ borderTop: "1px solid #f0f0f0" }}
+        className="grid grid-cols-3 gap-2 mb-5 rounded-xl p-3"
+        style={{
+          background: "rgba(0,0,0,0.02)",
+          border: "1px solid rgba(0,0,0,0.05)",
+        }}
       >
-        <span style={{ color: growthRate >= 0 ? "#22c55e" : "#ef4444", fontSize: "0.75rem", fontWeight: 600 }}>
-          {growthRate >= 0 ? "↑" : "↓"} {Math.abs(growthRate)}%
-        </span>
-        <span style={{ color: "#9ca3af", fontSize: "0.75rem" }}>
-          vs last week
-        </span>
+        {[
+          { label: "Weekly Total", val: fmt(weeklyTotal) },
+          { label: "Daily Avg", val: fmt(weeklyAverage) },
+          { label: "Best Day", val: `${bestDay} (${bestDayValue})` },
+        ].map((item, i) => (
+          <div key={i} className="text-center">
+            <p
+              className="text-[10px] font-medium mb-1"
+              style={{ color: "#9ca3af" }}
+            >
+              {item.label}
+            </p>
+            <p
+              className="text-xs sm:text-sm font-bold"
+              style={{ color: "#030712" }}
+            >
+              {item.val}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Bar Chart ── */}
+      <div className="flex gap-1 sm:gap-2 flex-1 min-h-[120px]">
+        {/* Y-axis */}
+        <div
+          className="flex flex-col justify-between text-right pr-2"
+          style={{ height: 120 }}
+        >
+          {[max, Math.round(max / 2), 0].map((tick) => (
+            <span
+              key={tick}
+              className="text-[9px] leading-none"
+              style={{ color: "#d1d5db" }}
+            >
+              {current.unit}
+              {tick}
+            </span>
+          ))}
+        </div>
+
+        {/* Bars */}
+        <div className="flex items-end gap-1.5 sm:gap-2.5 flex-1">
+          {current.days.map((day, i) => {
+            const isLast = i === current.days.length - 1;
+            const isBest = i === bestDayIndex;
+            const heightPct = max > 0 ? (current.values[i] / max) * 120 : 2;
+
+            return (
+              <div
+                key={i}
+                className="flex flex-col items-center gap-1.5 flex-1"
+              >
+                <div
+                  className="w-full relative group"
+                  style={{
+                    height: `${heightPct}px`,
+                    background:
+                      isLast || isBest ? "#FF6B00" : "rgba(255,107,0,0.12)",
+                    borderRadius: "6px 6px 3px 3px",
+                    transition: "all 0.4s ease",
+                  }}
+                >
+                  {/* Top accent line on active bar */}
+                  {(isLast || isBest) && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 3,
+                        background: "rgba(255,255,255,0.4)",
+                        borderRadius: "6px 6px 0 0",
+                      }}
+                    />
+                  )}
+                  {/* Tooltip */}
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-[10px] text-white rounded-md px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    {current.unit}
+                    {current.values[i]}
+                  </div>
+                </div>
+                <span
+                  className="text-[9px] sm:text-[10px] font-medium"
+                  style={{ color: isLast || isBest ? "#FF6B00" : "#9ca3af" }}
+                >
+                  {day}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Footer ── */}
+      <div
+        className="flex items-center justify-between mt-4 pt-4"
+        style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+      >
+        <p className="text-[11px] font-medium" style={{ color: "#9ca3af" }}>
+          7-day performance
+        </p>
+        <div className="flex gap-3">
+          <div className="flex items-center gap-1.5">
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: "#FF6B00",
+              }}
+            />
+            <span className="text-[10px]" style={{ color: "#9ca3af" }}>
+              Best / Today
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: "rgba(255,107,0,0.15)",
+              }}
+            />
+            <span className="text-[10px]" style={{ color: "#9ca3af" }}>
+              Other days
+            </span>
+          </div>
+        </div>
       </div>
     </div>
-
   );
 };
 

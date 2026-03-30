@@ -17,44 +17,93 @@ const WelcomeLeft = () => {
   })();
 
   return (
-    <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2 sm:gap-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-
-      {/* Greeting */}
-      <div className="flex items-center gap-2">
-        <span className="w-8 h-[2px] bg-[#FF6B00] hidden md:block" />
-        <p
-          className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em]"
-          style={{ color: "#FF6B00" }}
+    <div
+      className="flex flex-col gap-6 w-full"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      {/* Greeting Badge */}
+      <div className="flex items-center gap-3">
+        <div
+          className="p-2 rounded-lg"
+          style={{ background: "rgba(255,107,0,0.1)" }}
         >
-          {getGreeting()} 👋
-        </p>
+          <span style={{ fontSize: "20px" }}>👋</span>
+        </div>
+        <div>
+          <p
+            className="text-xs uppercase font-bold tracking-wider"
+            style={{ color: "#FF6B00" }}
+          >
+            {getGreeting()}
+          </p>
+          <p
+            className="text-sm font-medium mt-0.5"
+            style={{ color: "#6b7280" }}
+          >
+            Welcome back to your dashboard
+          </p>
+        </div>
       </div>
 
-      {/* Welcome + Username */}
-      <div className="space-y-1">
-        <h2
-          className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight"
-          style={{ color: "#0a0a0a", lineHeight: 1.1 }}
+      {/* Welcome Message */}
+      <div className="space-y-2">
+        <p
+          className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight"
+          style={{ color: "#030712", lineHeight: 1.2 }}
         >
           Welcome Back,
-        </h2>
-        <h3 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight" style={{ color: "#FF6B00", lineHeight: 1.1 }}>
+        </p>
+        <p
+          className="text-2xl sm:text-3xl md:text-4xl font-black"
+          style={{ color: "#FF6B00", lineHeight: 1.2 }}
+        >
           {username}!
-        </h3>
+        </p>
       </div>
 
-      {/* Taglines */}
-      <div className="max-w-md">
-        <p className="text-sm sm:text-base font-medium mt-2" style={{ color: "#4b5563" }}>
+      {/* Description */}
+      <div className="space-y-2">
+        <p
+          className="text-sm sm:text-base font-semibold"
+          style={{ color: "#030712" }}
+        >
           Ready to unlock your earning potential today?
         </p>
-        <p className="text-xs sm:text-sm mt-1 leading-relaxed" style={{ color: "#9ca3af" }}>
-          Join thousands of users completing surveys, playing games, and growing their portfolios every day.
+        <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>
+          Complete surveys, play games, and earn rewards. You're just a few
+          clicks away from growing your portfolio.
         </p>
       </div>
+
+      {/* Quick Stats Inline */}
+      <div
+        className="grid grid-cols-2 gap-3 pt-4 border-t"
+        style={{ borderColor: "rgba(0,0,0,0.05)" }}
+      >
+        <div>
+          <p
+            className="text-xs uppercase font-bold mb-1"
+            style={{ color: "#6b7280" }}
+          >
+            Today's Earnings
+          </p>
+          <p className="text-lg font-black" style={{ color: "#FF6B00" }}>
+            $0.00
+          </p>
+        </div>
+        <div>
+          <p
+            className="text-xs uppercase font-bold mb-1"
+            style={{ color: "#6b7280" }}
+          >
+            Active Streaks
+          </p>
+          <p className="text-lg font-black" style={{ color: "#FF6B00" }}>
+            0 Days
+          </p>
+        </div>
+      </div>
     </div>
-
-
   );
 };
 

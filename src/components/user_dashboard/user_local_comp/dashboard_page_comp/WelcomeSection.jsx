@@ -31,10 +31,7 @@ const WelcomeRight = ({ userData }) => {
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Name on top */}
-      <p
-        className="text-sm font-semibold"
-        style={{ color: "#0a0a0a" }}
-      >
+      <p className="text-sm font-semibold" style={{ color: "#0a0a0a" }}>
         {userData.username}
       </p>
 
@@ -70,7 +67,7 @@ const WelcomeRight = ({ userData }) => {
           style={{
             width: 13,
             height: 13,
-            background: "#22c55e",
+            background: "#FF6B00",
             border: "2px solid #ffffff",
           }}
         />
@@ -142,7 +139,8 @@ const WelcomeSection = () => {
       setUserData((prev) => ({ ...prev, avatar: e.detail.avatar }));
     };
     window.addEventListener("avatarUpdated", handleAvatarUpdate);
-    return () => window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+    return () =>
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
   }, []);
 
   return (

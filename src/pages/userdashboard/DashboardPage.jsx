@@ -1,37 +1,42 @@
-import React, { useState } from 'react'
-import WelcomeLeft from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/WelcomeLeft'
-import WelcomeRight from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/WelcomeRight'
-import StatsLeft from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatsLeft'
-import StatsRight from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatsRight'
-import RecentTransactions from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/RecentTransactions'
-import QuickActions from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/QuickActions'
-import StatisticsGraph from '../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatisticsGraph'
+import React, { useState } from "react";
+import WelcomeLeft from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/WelcomeLeft";
+import WelcomeRight from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/WelcomeRight";
+import StatsLeft from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatsLeft";
+import StatsRight from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatsRight";
+import RecentTransactions from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/RecentTransactions";
+import QuickActions from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/QuickActions";
+import StatisticsGraph from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/StatisticsGraph";
+import UserProfileOverview from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/UserProfileOverview";
+import AccountStatsSection from "../../components/user_dashboard/user_local_comp/dashboard_page_comp/AccountStatsSection";
 
 function DashboardPage() {
   const [selectedStat, setSelectedStat] = useState("tasks");
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 lg:space-y-12">
-
+    <div
+      className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 lg:space-y-12"
+      style={{ background: "#fafafa" }}
+    >
       {/* Unified Welcome Section Card */}
-      <div 
-        className="w-full rounded-[2rem] p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8"
+      <div
+        className="w-full rounded-2xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
         style={{
           background: "#ffffff",
           border: "1px solid rgba(0,0,0,0.05)",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
+          boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
           fontFamily: "'DM Sans', sans-serif",
         }}
       >
-        <div className="w-full md:w-1/2">
+        <div>
           <WelcomeLeft />
         </div>
-        <div className="w-full md:w-auto">
+        <div>
           <WelcomeRight />
         </div>
       </div>
 
-
+      {/* User Profile Overview */}
+      <UserProfileOverview />
 
       {/* Quick Actions - Full Width Card */}
       <div
@@ -46,6 +51,9 @@ function DashboardPage() {
         <QuickActions />
       </div>
 
+      {/* Account Stats Section */}
+      <AccountStatsSection />
+
       {/* Stats Section - Cards on Left, Chart on Right */}
       <div className="flex flex-col md:flex-row gap-4 sm:gap-6 w-full">
         <div className="w-full md:w-[45%] lg:w-[40%]">
@@ -59,7 +67,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      
       {/* Statistics Graph - Full Width Card */}
       <div className="w-full">
         <StatisticsGraph />
@@ -69,10 +76,8 @@ function DashboardPage() {
       <div className="w-full">
         <RecentTransactions />
       </div>
-
     </div>
   );
 }
-
 
 export default DashboardPage;

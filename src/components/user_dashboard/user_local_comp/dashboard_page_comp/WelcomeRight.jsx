@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Settings, CheckCircle, Calendar } from "lucide-react";
 
 const WelcomeRight = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const WelcomeRight = () => {
           avatar,
           memberSince: user.createdAt
             ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                month: "long",
+                month: "short",
                 year: "numeric",
               })
             : "N/A",
@@ -47,7 +48,7 @@ const WelcomeRight = () => {
             avatar,
             memberSince: data.user.createdAt
               ? new Date(data.user.createdAt).toLocaleDateString("en-US", {
-                  month: "long",
+                  month: "short",
                   year: "numeric",
                 })
               : "N/A",
@@ -67,110 +68,143 @@ const WelcomeRight = () => {
       setUserData((prev) => ({ ...prev, avatar: e.detail.avatar }));
     };
     window.addEventListener("avatarUpdated", handleAvatarUpdate);
-    return () => window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+    return () =>
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
   }, []);
 
   return (
     <div
-      className="flex flex-col sm:flex-row md:flex-row items-center gap-6 md:gap-10 w-full text-center md:text-left"
+      className="flex flex-col gap-6 w-full"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Avatar Section */}
-      <div className="relative flex-shrink-0">
-        <div
-          className="flex items-center justify-center rounded-full overflow-hidden"
-          style={{
-            width: "clamp(120px, 15vw, 180px)",
-            height: "clamp(120px, 15vw, 180px)",
-            border: "4px solid #FF6B00",
-            boxShadow: "0 8px 32px rgba(255,107,0,0.15)",
-            background: userData.avatar
-              ? "transparent"
-              : "linear-gradient(135deg, #FF6B00, #FF8C00)",
-          }}
-        >
-          {userData.avatar ? (
-            <img
-              src={userData.avatar}
-              alt="avatar"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span 
-              style={{ 
-                color: "#fff", 
-                fontSize: "clamp(3rem, 6vw, 4.5rem)", 
-                fontWeight: 800 
-              }}
-            >
-              {userData.initial}
-            </span>
-          )}
+      {/* Profile Card */}
+      <div className="flex items-start gap-4">
+        {/* Avatar */}
+        <div className="relative flex-shrink-0">
+          <div
+            className="flex items-center justify-center rounded-full overflow-hidden"
+            style={{
+              width: "110px",
+              height: "110px",
+              background: userData.avatar ? "transparent" : "#FF6B00",
+              border: "2px solid rgba(255,107,0,0.2)",
+              boxShadow: "0 4px 12px rgba(255,107,0,0.1)",
+            }}
+          >
+            {userData.avatar ? (
+              <img
+                src={userData.avatar}
+                alt="avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span
+                style={{
+                  color: "#fff",
+                  fontSize: "48px",
+                  fontWeight: 800,
+                }}
+              >
+                {userData.initial}
+              </span>
+            )}
+          </div>
+
+          {/* Online Status */}
+          <div
+            className="absolute bottom-0 right-0 rounded-full"
+            style={{
+              width: "18px",
+              height: "18px",
+              background: "#22c55e",
+              border: "3px solid white",
+              boxShadow: "0 2px 8px rgba(34,197,94,0.3)",
+            }}
+          />
         </div>
 
-        {/* Online Status Signal */}
-        <div
-          className="absolute bottom-1 right-1 md:bottom-2 md:right-2 rounded-full ring-4 ring-white"
-          style={{
-            width: "clamp(16px, 2.5vw, 22px)",
-            height: "clamp(16px, 2.5vw, 22px)",
-            background: "#22c55e",
-          }}
-        />
+        {/* Profile Info */}
+        <div className="flex-1">
+          <p
+            className="text-xs uppercase font-bold mb-1"
+            style={{ color: "#6b7280" }}
+          >
+            Your Profile
+          </p>
+          <h3
+            className="text-xl sm:text-2xl font-black"
+            style={{ color: "#030712" }}
+          >
+            {userData.username}
+          </h3>
+          <div className="flex items-center gap-2 mt-2">
+            <div
+              className="px-2.5 py-1 rounded-lg flex items-center gap-1.5"
+              style={{ background: "rgba(34,197,94,0.1)" }}
+            >
+              <CheckCircle
+                width={14}
+                height={14}
+                style={{ color: "#22c55e" }}
+              />
+              <span
+                className="text-xs font-semibold"
+                style={{ color: "#22c55e" }}
+              >
+                Active
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* User Info & Actions */}
-      <div className="flex flex-col gap-1 items-center md:items-start">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#9ca3af] hidden md:block">
-          Your Profile
-        </h4>
-        <h3
-          className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight"
-          style={{ color: "#0a0a0a" }}
+      {/* Status Info Cards */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Member Since */}
+        <div
+          className="p-3 rounded-lg flex items-center gap-2"
+          style={{
+            background: "rgba(0,0,0,0.02)",
+            border: "1px solid rgba(0,0,0,0.05)",
+          }}
         >
-          {userData.username}
-        </h3>
-
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
-            Active Now
-          </span>
-          <p className="text-xs text-[#9ca3af]">
-            Joined {userData.memberSince}
-          </p>
+          <div
+            className="p-2 rounded-lg flex-shrink-0"
+            style={{ background: "rgba(255,107,0,0.1)" }}
+          >
+            <Calendar width={16} height={16} style={{ color: "#FF6B00" }} />
+          </div>
+          <div className="min-w-0">
+            <p
+              className="text-xs font-bold uppercase"
+              style={{ color: "#6b7280" }}
+            >
+              Member Since
+            </p>
+            <p
+              className="text-sm font-semibold truncate"
+              style={{ color: "#030712" }}
+            >
+              {userData.memberSince}
+            </p>
+          </div>
         </div>
 
+        {/* Account Button */}
         <button
           onClick={() => navigate("/dashboard/profile")}
-          className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300"
+          className="p-3 rounded-lg flex items-center gap-2 transition-all duration-200 hover:shadow-md"
           style={{
-            background: "rgba(255,107,0,0.06)",
-            border: "1px solid rgba(255,107,0,0.15)",
-            color: "#FF6B00",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#FF6B00";
-            e.currentTarget.style.color = "#ffffff";
-            e.currentTarget.style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(255,107,0,0.06)";
-            e.currentTarget.style.color = "#FF6B00";
-            e.currentTarget.style.transform = "translateY(0)";
+            background: "#FF6B00",
+            border: "1px solid rgba(255,107,0,0.2)",
+            color: "#ffffff",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-          Account Settings
+          <Settings width={16} height={16} />
+          <span className="text-xs font-bold uppercase">Settings</span>
         </button>
       </div>
     </div>
-
-
   );
 };
 
