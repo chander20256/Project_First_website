@@ -7,6 +7,7 @@ const crypto   = require('crypto');
 const User     = require('../models/User');
 const Referral = require('../models/Referral');
 const { protectRoute } = require('../middleware/authMiddleware');
+const sendEmail = require('../utils/sendEmail');
 
 // ── Helper: auto-generate referral code (e.g. "A1B2C3") ──
 const generateReferralCode = () => {
@@ -461,6 +462,132 @@ router.post('/verify-password', protectRoute, async (req, res) => {
   } catch (err) {
     console.error('Verify password error:', err.message);
     res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// @route   POST /api/auth/forgot-password
+// @access  Public
+// ════════════════════════════════════════════════════════
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const lowerCaseEmail = email.toLowerCase();
+    const user = await User.findOne({ email: lowerCaseEmail });
+    if (!user) return res.status(404).json({ message: 'No account found with this email' });
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set expiry to 15 mins
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordExpires = expires;
+    await user.save();
+
+    // Send email
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+        <div style="background: #FF6B00; padding: 20px; text-align: center;">
+          <h2 style="color: white; margin: 0; font-size: 24px;">REVADOO</h2>
+        </div>
+        <div style="padding: 30px; text-align: center;">
+          <h3 style="color: #333; margin-top: 0;">Password Reset Request</h3>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">We received a request to reset your password. Here is your Authorization Code:</p>
+          <div style="margin: 30px 0;">
+            <span style="font-size: 32px; font-weight: bold; color: #FF6B00; letter-spacing: 5px; background: #fff8f3; padding: 10px 20px; border-radius: 8px; border: 1px dashed #ffc299;">${otp}</span>
+          </div>
+          <p style="color: #666; font-size: 14px;">This code will expire in 15 minutes.</p>
+          <p style="color: #aaa; font-size: 12px; margin-top: 30px;">If you didn't request a password reset, you can safely ignore this email.</p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      email: user.email,
+      subject: 'REVADOO - Your Password Reset Code',
+      html: emailHtml
+    });
+
+    res.status(200).json({ message: 'OTP sent successfully to your email' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ message: 'Server error while sending email' });
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// @route   POST /api/auth/verify-otp
+// @access  Public
+// ════════════════════════════════════════════════════════
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return res.status(404).json({ message: 'No account found with this email' });
+
+    if (!user.resetPasswordOtp || user.resetPasswordOtp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP code' });
+    }
+
+    if (user.resetPasswordExpires < new Date()) {
+      return res.status(400).json({ message: 'OTP code has expired. Please request a new one.' });
+    }
+
+    res.status(200).json({ message: 'OTP verified successfully' });
+  } catch (err) {
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ message: 'Server error during OTP verification' });
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// @route   POST /api/auth/reset-password
+// @access  Public
+// ════════════════════════════════════════════════════════
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) return res.status(400).json({ message: 'All fields are required' });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return res.status(404).json({ message: 'No account found with this email' });
+
+    if (!user.resetPasswordOtp || user.resetPasswordOtp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP code' });
+    }
+
+    if (user.resetPasswordExpires < new Date()) {
+      return res.status(400).json({ message: 'OTP code has expired. Please request a new one.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Hash the new password & update
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    
+    // Optionally also update the temp password so the user can see setting if they forget again it's not the auto generated one anymore.
+    // Or just clear temp password
+    user.tempPassword = null;
+    
+    // Clear OTP fields
+    user.resetPasswordOtp = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ message: 'Server error during password reset' });
   }
 });
 
