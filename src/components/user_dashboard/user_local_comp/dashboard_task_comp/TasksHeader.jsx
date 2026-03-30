@@ -1,29 +1,23 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// LOCATION: TasksHeader.jsx
+// ─────────────────────────────────────────────────────────────────────────────
 import { useTasksContext } from "./Taskscontext";
 
-const TasksHeader = () => {
-  const { completedIds, tasks, totalCredits } = useTasksContext();
-  const allDone = completedIds.length === tasks.length;
-
+export const TasksHeader = () => {
+  const { completedCount, tasks } = useTasksContext();
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12 }}>
-      <div>
-        <p style={{ color: "#FF6B00", fontWeight: 800, fontSize: 11, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
-          Earn Rewards
-        </p>
-        <h1 style={{ fontSize: 36, fontWeight: 900, color: "#0A0A0A", margin: 0, letterSpacing: -1 }}>
-          Task Center
-        </h1>
-        <p style={{ color: "#888", marginTop: 4, fontSize: 14 }}>
-          Complete tasks and earn GamingForge credits
-        </p>
-      </div>
-      {allDone && (
-        <div style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", borderRadius: 14, padding: "14px 24px", fontWeight: 800, fontSize: 14 }}>
-          🎉 All tasks complete! You've earned {totalCredits} credits
-        </div>
-      )}
+    <div className="mb-2">
+      <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+        Task <span className="text-orange-600">Center</span>
+      </h1>
+      <p className="text-gray-500 mt-2 text-lg max-w-2xl">
+        Complete tasks, upload proof and earn <span className="font-bold text-orange-500">credits</span> after admin approval.
+      </p>
+      <div className="h-1 w-20 bg-gradient-to-r from-orange-500 to-orange-300 mt-4 rounded-full" />
     </div>
   );
 };
 
 export default TasksHeader;
+
+

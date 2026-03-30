@@ -1,39 +1,28 @@
+// LOCATION: src/components/user_dashboard/user_local_comp/dashboard_task_comp/TasksStats.jsx
+
 import { useTasksContext } from "./Taskscontext";
 
-const TasksStats = () => {
-  const { completedIds, tasks, totalCredits } = useTasksContext();
+const StatCard = ({ icon, label, value, highlight }) => (
+  <div className={`bg-white rounded-2xl shadow-sm border p-5 flex flex-col gap-3 transition-all ${highlight ? "border-orange-200 shadow-orange-100" : "border-gray-100"}`}>
+    <div className="flex items-center justify-between">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{label}</p>
+      <span className="text-xl">{icon}</span>
+    </div>
+    <p className={`text-3xl font-black ${highlight ? "text-orange-600" : "text-gray-900"}`}>{value}</p>
+  </div>
+);
 
-  const stats = [
-    { label: "Tasks Completed", value: `${completedIds.length}/${tasks.length}`, icon: "✅" },
-    { label: "Credits Earned",  value: totalCredits,                              icon: "🎁", highlight: true },
-    { label: "Available Tasks", value: tasks.length - completedIds.length,        icon: "🔥" },
-  ];
+const TasksStats = () => {
+  const { completedCount, tasks, totalCredits, submissions } = useTasksContext();
+  const pendingCount  = Object.values(submissions).filter((s) => s.status === "pending").length;
+  const available     = tasks.length - completedCount;
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-      {stats.map((stat, i) => (
-        <div
-          key={i}
-          style={{
-            background: "#fff",
-            border: `1px solid ${stat.highlight && totalCredits > 0 ? "rgba(255,107,0,0.25)" : "#E5E5E5"}`,
-            borderRadius: 16,
-            padding: "18px 20px",
-            boxShadow: stat.highlight && totalCredits > 0 ? "0 4px 20px rgba(255,107,0,0.1)" : "0 2px 8px rgba(0,0,0,0.05)",
-            transition: "all 0.4s",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 20 }}>{stat.icon}</span>
-            <p style={{ color: "#888", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, margin: 0 }}>
-              {stat.label}
-            </p>
-          </div>
-          <p style={{ fontSize: 28, fontWeight: 900, color: stat.highlight ? "#FF6B00" : "#0A0A0A", margin: 0, transition: "color 0.3s" }}>
-            {stat.value}
-          </p>
-        </div>
-      ))}
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <StatCard icon="✅" label="Tasks Done"      value={`${completedCount}/${tasks.length}`} />
+      <StatCard icon="🪙" label="Credits Earned"  value={totalCredits}  highlight={totalCredits > 0} />
+      <StatCard icon="⏳" label="Under Review"    value={pendingCount} />
+      <StatCard icon="🔥" label="Available"       value={available > 0 ? available : "All done!"} />
     </div>
   );
 };

@@ -1,8 +1,50 @@
-const express = require("express");
-const router = express.Router();
-const { getAllTasks, createTask } = require("../Controllers/taskController");
+// LOCATION: Backend/routes/taskRoutes.js  (REPLACE existing)
+// Includes thumbnail in list endpoint so task cards can show uploaded images
 
-router.get("/", getAllTasks);
-router.post("/", createTask);
+const express = require("express");
+const router  = express.Router();
+const Task    = require("../models/Task");
+
+// GET /api/tasks  — list, includes thumbnail
+router.get("/", async (req, res) => {
+  try {
+    const now   = new Date();
+    const tasks = await Task.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Mark expired but still return them so user context can also filter
+    const result = tasks.map((t) => ({
+      ...t,
+      expired: t.expiresAt ? now > new Date(t.expiresAt) : false,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/tasks/:id  — single task WITH thumbnail (loaded when modal opens)
+router.get("/:id", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id).lean();
+    if (!task) return res.status(404).json({ message: "Task not found" });
+    res.json(task);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/tasks  (kept for backward compat — prefer /api/admin/tasks)
+router.post("/", async (req, res) => {
+  try {
+    const { title, platform, reward, timeMinutes, link } = req.body;
+    const task = await Task.create({ title, platform, reward, timeMinutes, link });
+    res.status(201).json(task);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;

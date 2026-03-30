@@ -9,7 +9,7 @@ const dnsServers = (process.env.DNS_SERVERS || "8.8.8.8,1.1.1.1")
 if (dnsServers.length) {
   dns.setServers(dnsServers);
 }
-
+const ensureIndexes = require("./utils/dbIndexes");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -36,11 +36,15 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // ✅ FIXED server.js — only change these 2 lines order
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/wallet", walletRoutes);
-app.use("/api/tasks", taskRoutes);
 app.use("/api/user-tasks", userTaskRoutes);
 app.use("/api/user", require("./routes/user"));
 app.use("/api/user", userRoutes);
 app.use("/api/top-referrer", require("./routes/topReferrer"));
+
+// Admin task management routes
+app.use("/api/tasks", taskRoutes);
+app.use("/api/task-submissions",  require("./routes/Tasksubmissions"));  // ← NEW
+app.use("/api/admin/tasks",       require("./routes/Admintasks")); 
 
 // Quiz & Attempt Routes
 app.use("/api/quizzes", require("./routes/quizzes"));
@@ -88,10 +92,8 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected successfully");
+    ensureIndexes();                        // ← add this line
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
   });

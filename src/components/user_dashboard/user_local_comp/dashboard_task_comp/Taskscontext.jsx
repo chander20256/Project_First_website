@@ -1,92 +1,167 @@
-import { createContext, useContext, useState, useCallback } from "react";
+// LOCATION: src/components/user_dashboard/user_local_comp/dashboard_task_comp/Taskscontext.jsx
+//
+// PERF STRATEGY:
+//  1. stale-while-revalidate — show cached data instantly, refresh silently in bg
+//  2. Tasks list cached in localStorage (TTL 60s)
+//  3. Submissions cached in sessionStorage (TTL 30s) — cleared on tab close
+//  4. Thumbnail lazy-loaded only when user opens a task modal
+//  5. Single combined fetch with Promise.all
+
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 
 const TasksContext = createContext(null);
+const BASE = "http://localhost:5000";
 
-export const TASKS = [
-  {
-    id: 1,
-    title: "Follow on Instagram",
-    desc: "Follow our official Instagram page",
-    reward: "50 Credits",
-    time: "1 min",
-    credits: 50,
-    platform: "instagram",
-    link: "https://instagram.com",   // 🔁 replace with your real handle URL
-  },
-  {
-    id: 2,
-    title: "Join Telegram Channel",
-    desc: "Join our Telegram community channel",
-    reward: "35 Credits",
-    time: "1 min",
-    credits: 35,
-    platform: "telegram",
-    link: "https://t.me/yourchannel",  // 🔁 replace with your real channel link
-  },
-  {
-    id: 3,
-    title: "Word Solving Game",
-    desc: "Answer 3 vocabulary questions correctly",
-    reward: "75 Credits",
-    time: "3 min",
-    credits: 75,
-    platform: "game",
-  },
-];
+const TASKS_TTL  = 60_000;   // 60 s — task list cache
+const SUBS_TTL   = 30_000;   // 30 s — submissions cache
 
-/**
- * Mock backend verification call.
- * Replace this with your real API endpoint, e.g.:
- *   POST /api/verify  { platform: "instagram", userId: "..." }
- * Returns { verified: boolean, message: string }
- */
-export async function verifyPlatformAction(platform, userId = "guest") {
-  // Simulate network latency
-  await new Promise((res) => setTimeout(res, 1800));
+// ── Cache helpers ─────────────────────────────────────────────────────────────
+const cacheSet = (store, key, data, ttl) => {
+  try { store.setItem(key, JSON.stringify({ data, expires: Date.now() + ttl })); } catch {}
+};
+const cacheGet = (store, key) => {
+  try {
+    const raw = store.getItem(key);
+    if (!raw) return null;
+    const { data, expires } = JSON.parse(raw);
+    return Date.now() < expires ? data : null;
+  } catch { return null; }
+};
+const cacheDel = (store, key) => { try { store.removeItem(key); } catch {} };
 
-  // In production, call your real backend here:
-  // const res = await fetch("/api/verify", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({ platform, userId }),
-  // });
-  // return res.json();
-
-  // Mock: always succeeds after the user has visited the link
-  return { verified: true, message: "Verification successful!" };
+// ── Verification mock (replace with real API) ─────────────────────────────────
+export async function verifyPlatformAction(platform) {
+  await new Promise((r) => setTimeout(r, 1200));
+  return { verified: true };
 }
 
+// ── Provider ─────────────────────────────────────────────────────────────────
 export function TasksProvider({ children }) {
-  const [completedIds, setCompletedIds] = useState([]);
-  const [totalCredits, setTotalCredits] = useState(0);
-  const [activeTask, setActiveTask] = useState(null);
-  // history: [{ id, title, credits, completedAt }]
-  const [history, setHistory] = useState([]);
+  const [tasks,        setTasks]        = useState(() => cacheGet(localStorage, "tasks_list") || []);
+  const [submissions,  setSubmissions]  = useState(() => cacheGet(sessionStorage, "tasks_subs") || {});
+  const [activeTask,   setActiveTaskRaw]= useState(null);
+  const [loading,      setLoading]      = useState(tasks.length === 0); // skip spinner if cache hit
+  const [refreshing,   setRefreshing]   = useState(false);
+  const fetchingRef = useRef(false);
 
-  const completeTask = useCallback((taskId) => {
-    const task = TASKS.find((t) => t.id === taskId);
-    if (!task || completedIds.includes(taskId)) return;
-    setCompletedIds((prev) => [...prev, taskId]);
-    setTotalCredits((prev) => prev + task.credits);
-    setHistory((prev) => [
-      { id: taskId, title: task.title, credits: task.credits, completedAt: new Date() },
-      ...prev,
-    ]);
-    setActiveTask(null);
-  }, [completedIds]);
+  const getToken = () => localStorage.getItem("token");
+  const authHeaders = () => {
+    const t = getToken();
+    return { "Content-Type": "application/json", ...(t ? { Authorization: `Bearer ${t}` } : {}) };
+  };
 
-  const isCompleted = (taskId) => completedIds.includes(taskId);
+  // ── Fetch tasks + submissions (combined, cancellation-safe) ──────────────
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+    if (!silent) setLoading(tasks.length === 0);
+    else         setRefreshing(true);
+
+    try {
+      const [tasksRes, subsRes] = await Promise.all([
+        fetch(`${BASE}/api/tasks`),
+        fetch(`${BASE}/api/task-submissions/my`, { headers: authHeaders() }),
+      ]);
+
+      if (tasksRes.ok) {
+        const data = await tasksRes.json();
+        const arr  = Array.isArray(data) ? data : [];
+        setTasks(arr);
+        cacheSet(localStorage, "tasks_list", arr, TASKS_TTL);
+      }
+
+      if (subsRes.ok) {
+        const data = await subsRes.json();
+        const map  = {};
+        (Array.isArray(data) ? data : []).forEach((s) => {
+          map[s.taskId?._id || s.taskId] = s;
+        });
+        setSubmissions(map);
+        cacheSet(sessionStorage, "tasks_subs", map, SUBS_TTL);
+      }
+    } catch (err) {
+      console.error("Load tasks:", err.message);
+    } finally {
+      fetchingRef.current = false;
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  // On mount: if cache hit → show instantly + silently refresh in bg
+  useEffect(() => {
+    const hasCached = tasks.length > 0;
+    if (hasCached) loadData({ silent: true });
+    else           loadData();
+  }, []);
+
+  // ── Lazy-load thumbnail when user opens a task ───────────────────────────
+  const setActiveTask = useCallback(async (task) => {
+    if (!task) { setActiveTaskRaw(null); return; }
+
+    // If already have thumbnail, open immediately
+    if (task.thumbnail) { setActiveTaskRaw(task); return; }
+
+    // Otherwise fetch the full task (with thumbnail) first
+    try {
+      const res  = await fetch(`${BASE}/api/tasks/${task._id || task.id}`);
+      const full = res.ok ? await res.json() : task;
+      setActiveTaskRaw(full);
+    } catch {
+      setActiveTaskRaw(task); // fallback — open without thumbnail
+    }
+  }, []);
+
+  // ── Submit task ───────────────────────────────────────────────────────────
+  const submitTask = useCallback(async (taskId, screenshotData = "") => {
+    try {
+      const res  = await fetch(`${BASE}/api/task-submissions`, {
+        method:  "POST",
+        headers: authHeaders(),
+        body:    JSON.stringify({ taskId, screenshotData }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      // Optimistic update — no need to refetch
+      setSubmissions((prev) => {
+        const updated = { ...prev, [taskId]: data.submission };
+        cacheSet(sessionStorage, "tasks_subs", updated, SUBS_TTL);
+        return updated;
+      });
+      setActiveTaskRaw(null);
+      return { success: true, submission: data.submission };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // Invalidate caches and hard-reload
+  const invalidateAndRefresh = useCallback(() => {
+    cacheDel(localStorage,   "tasks_list");
+    cacheDel(sessionStorage,  "tasks_subs");
+    loadData();
+  }, [loadData]);
+
+  // ── Derived getters ───────────────────────────────────────────────────────
+  const getSubmission  = (id) => submissions[id] || null;
+  const isCompleted    = (id) => !!submissions[id];
+  const isPaid         = (id) => submissions[id]?.status === "paid";
+  const isPending      = (id) => submissions[id]?.status === "pending";
+  const isApproved     = (id) => submissions[id]?.status === "approved";
+  const isRejected     = (id) => submissions[id]?.status === "rejected";
+  const completedCount = Object.keys(submissions).length;
+  const totalCredits   = Object.values(submissions)
+    .filter((s) => s.status === "paid")
+    .reduce((sum, s) => sum + (s.earnedPoints || 0), 0);
 
   return (
     <TasksContext.Provider value={{
-      tasks: TASKS,
-      completedIds,
-      totalCredits,
-      activeTask,
-      setActiveTask,
-      completeTask,
-      isCompleted,
-      history,
+      tasks, submissions, loading, refreshing,
+      activeTask, setActiveTask,
+      submitTask, loadData: invalidateAndRefresh,
+      getSubmission, isCompleted, isPaid, isPending, isApproved, isRejected,
+      completedCount, totalCredits,
     }}>
       {children}
     </TasksContext.Provider>
@@ -95,6 +170,6 @@ export function TasksProvider({ children }) {
 
 export function useTasksContext() {
   const ctx = useContext(TasksContext);
-  if (!ctx) throw new Error("useTasksContext must be used inside <TasksProvider>");
+  if (!ctx) throw new Error("useTasksContext must be inside <TasksProvider>");
   return ctx;
 }
