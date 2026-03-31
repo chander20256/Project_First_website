@@ -3,8 +3,9 @@
 import ProfileHeader  from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileHeader";
 import ProfileCard    from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileCard";
 import ProfileStats   from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileStats";
-import ProfileActivity from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileActivity";
+// import ProfileActivity from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileActivity";
 import ProfileActions from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileActions";
+import EditProfileModal from "../../components/user_dashboard/user_local_comp/dashboard_profile_comp/Editprofilemodal";
 
 const DashboardProfile = () => {
   return (
@@ -21,10 +22,11 @@ const DashboardProfile = () => {
 
         {/* Right — personal info form + recent activity */}
         <div className="space-y-5">
-          <ProfileActivity />
+          {/* <ProfileActivity /> */}
            {/* Avatar picker — full width, unchanged */}
           <ProfileHeader />
           <ProfileActions />
+          <EditProfileModal />
 
         </div>
       </div>

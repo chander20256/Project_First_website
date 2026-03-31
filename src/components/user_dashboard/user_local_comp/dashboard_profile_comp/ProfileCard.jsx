@@ -1,66 +1,64 @@
-import React, { useState, useEffect } from "react";
+// LOCATION: src/components/user_dashboard/user_local_comp/dashboard_profile_comp/ProfileCard.jsx
+// CHANGES: fetches real data from /api/auth/me, removed Edit Profile button & modal trigger
+//          (user cannot change username or email — read-only profile)
 
-const ProfileCard = ({ onEditProfile }) => {
-  const [username, setUsername] = useState("User");
-  const [email, setEmail] = useState("user@gmail.com");
-  const [avatar, setAvatar] = useState(null);
-  const [initial, setInitial] = useState("U");
-  const [level, setLevel] = useState(5);
-  const [location, setLocation] = useState("India");
+import { useState, useEffect } from "react";
+
+const BASE = "http://localhost:5000";
+
+const ProfileCard = () => {
+  const [user,    setUser]    = useState(null);
+  const [avatar,  setAvatar]  = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!document.getElementById("profile-fonts")) {
-      const link = document.createElement("link");
-      link.id = "profile-fonts";
-      link.rel = "stylesheet";
-      link.href =
-        "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;900&display=swap";
-      document.head.appendChild(link);
-    }
+    // Load avatar from localStorage (set by ProfileHeader avatar picker)
+    const stored = localStorage.getItem("userAvatar");
+    if (stored) setAvatar(stored);
 
-    const loadData = () => {
-      try {
-        const storedAvatar = localStorage.getItem("userAvatar");
-        if (storedAvatar) setAvatar(storedAvatar);
-
-        const stored = localStorage.getItem("user");
-        if (stored) {
-          const user = JSON.parse(stored);
-          setUsername(user.username || "User");
-          setEmail(user.email || "user@gmail.com");
-          setLevel(user.level || 5);
-          setLocation(user.location || "India");
-          setInitial((user.username || "U").charAt(0).toUpperCase());
+    // Fetch real user data from backend
+    const token = localStorage.getItem("token");
+    fetch(`${BASE}/api/auth/me`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.username) {
+          setUser(d);
+          // Keep localStorage in sync for other components
+          localStorage.setItem("user", JSON.stringify(d));
         }
-      } catch (e) {}
-    };
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback to localStorage cache
+        try {
+          const cached = localStorage.getItem("user");
+          if (cached) setUser(JSON.parse(cached));
+        } catch {}
+        setLoading(false);
+      });
 
-    loadData();
-
-    const handleAvatarUpdate = (e) => {
-      setAvatar(e.detail.avatar);
-    };
-    const handleProfileUpdate = (e) => {
-      const { username: u, location: l } = e.detail || {};
-      if (u) { setUsername(u); setInitial(u.charAt(0).toUpperCase()); }
-      if (l) setLocation(l);
-    };
-
-    window.addEventListener("avatarUpdated", handleAvatarUpdate);
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-    return () => {
-      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
-    };
+    // Listen for avatar updates from ProfileHeader
+    const onAvatar = (e) => setAvatar(e.detail.avatar);
+    window.addEventListener("avatarUpdated", onAvatar);
+    return () => window.removeEventListener("avatarUpdated", onAvatar);
   }, []);
 
-  const maskedEmail = email.length > 4
-    ? email.charAt(0) + email.charAt(1) + email.charAt(2) + "****" + email.slice(email.indexOf("@"))
-    : email;
+  const initial     = (user?.username || "U").charAt(0).toUpperCase();
+  const maskedEmail = user?.email
+    ? user.email.charAt(0) + user.email.charAt(1) + user.email.charAt(2) +
+      "****" + user.email.slice(user.email.indexOf("@"))
+    : "••••@••••";
+
+  const joinedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "—";
 
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap');
         .pc-card {
           background: #ffffff;
           border-radius: 20px;
@@ -69,7 +67,6 @@ const ProfileCard = ({ onEditProfile }) => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0;
           font-family: 'DM Sans', sans-serif;
           position: relative;
           overflow: hidden;
@@ -83,108 +80,6 @@ const ProfileCard = ({ onEditProfile }) => {
           background: linear-gradient(135deg, rgba(255,107,0,0.08), rgba(255,140,0,0.04));
           border-radius: 20px 20px 60% 60%;
         }
-        .pc-avatar-wrap {
-          position: relative;
-          width: 100px;
-          height: 100px;
-          margin-bottom: 16px;
-        }
-        .pc-avatar {
-          width: 100px;
-          height: 100px;
-          border-radius: 50%;
-          border: 3.5px solid #FF6B00;
-          overflow: hidden;
-          background: linear-gradient(135deg, #FF6B00, #FF8C00);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 20px rgba(255,107,0,0.22);
-        }
-        .pc-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .pc-avatar-initial {
-          color: #fff;
-          font-weight: 700;
-          font-size: 2.2rem;
-          font-family: 'Bebas Neue', sans-serif;
-          letter-spacing: 2px;
-        }
-        .pc-edit-badge {
-          position: absolute;
-          bottom: 2px;
-          right: 2px;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          background: #FF6B00;
-          border: 2.5px solid #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: transform 0.18s, box-shadow 0.18s;
-          box-shadow: 0 2px 8px rgba(255,107,0,0.35);
-        }
-        .pc-edit-badge:hover { transform: scale(1.12); box-shadow: 0 4px 14px rgba(255,107,0,0.45); }
-        .pc-username {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 2rem;
-          letter-spacing: 0.06em;
-          color: #0a0a0a;
-          margin: 0 0 4px;
-          line-height: 1;
-        }
-        .pc-level-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          background: #fff8f0;
-          border: 1.5px solid #ffd4a8;
-          border-radius: 99px;
-          padding: 4px 12px;
-          margin-bottom: 20px;
-        }
-        .pc-level-text {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #FF6B00;
-          letter-spacing: 0.04em;
-        }
-        .pc-edit-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          background: none;
-          border: 1.8px solid #e8e8e8;
-          border-radius: 10px;
-          padding: 10px 20px;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.83rem;
-          font-weight: 700;
-          color: #0a0a0a;
-          cursor: pointer;
-          transition: border-color 0.18s, background 0.18s, transform 0.15s;
-          letter-spacing: 0.02em;
-          margin-bottom: 20px;
-        }
-        .pc-edit-btn:hover {
-          border-color: #FF6B00;
-          background: #fff8f0;
-          color: #FF6B00;
-          transform: translateY(-1px);
-        }
-        .pc-divider {
-          width: 100%;
-          height: 1px;
-          background: #f4f4f4;
-          margin-bottom: 18px;
-        }
         .pc-info-row {
           width: 100%;
           display: flex;
@@ -193,24 +88,15 @@ const ProfileCard = ({ onEditProfile }) => {
           margin-bottom: 12px;
         }
         .pc-info-icon {
-          width: 32px;
-          height: 32px;
+          width: 32px; height: 32px;
           border-radius: 8px;
           background: #f8f8f8;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
-        }
-        .pc-info-text {
-          font-size: 0.82rem;
-          color: #555;
-          font-weight: 500;
         }
         .pc-watermark {
           position: absolute;
-          bottom: -18px;
-          right: -18px;
+          bottom: -18px; right: -18px;
           opacity: 0.04;
           font-family: 'Bebas Neue', sans-serif;
           font-size: 7rem;
@@ -222,59 +108,89 @@ const ProfileCard = ({ onEditProfile }) => {
       `}</style>
 
       <div className="pc-card">
-        <div className="pc-avatar-wrap">
-          <div className="pc-avatar">
-            {avatar
-              ? <img src={avatar} alt="avatar" />
-              : <span className="pc-avatar-initial">{initial}</span>
-            }
-          </div>
-          <div className="pc-edit-badge" onClick={onEditProfile} title="Edit Avatar">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
+        {/* Avatar */}
+        <div style={{ position: "relative", width: 100, height: 100, marginBottom: 16 }}>
+          <div style={{
+            width: 100, height: 100, borderRadius: "50%",
+            border: "3.5px solid #FF6B00",
+            overflow: "hidden",
+            background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 20px rgba(255,107,0,0.22)",
+          }}>
+            {loading ? (
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
+            ) : avatar ? (
+              <img src={avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ color: "#fff", fontWeight: 700, fontSize: "2.2rem", fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2 }}>
+                {initial}
+              </span>
+            )}
           </div>
         </div>
 
-        <h2 className="pc-username">{username}</h2>
+        {/* Username */}
+        {loading ? (
+          <div style={{ height: 32, width: 120, borderRadius: 8, background: "#f0f0f0", marginBottom: 12 }} />
+        ) : (
+          <h2 style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "2rem", letterSpacing: "0.06em",
+            color: "#0a0a0a", margin: "0 0 4px", lineHeight: 1,
+          }}>
+            {user?.username || "User"}
+          </h2>
+        )}
 
-        <div className="pc-level-badge">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#FF6B00">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        {/* Joined badge */}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 5,
+          background: "#fff8f0", border: "1.5px solid #ffd4a8",
+          borderRadius: 99, padding: "4px 12px", marginBottom: 20,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2.2" strokeLinecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
-          <span className="pc-level-text">Level {level}</span>
+          <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#FF6B00" }}>
+            Joined {joinedDate}
+          </span>
         </div>
 
-        <button className="pc-edit-btn" onClick={onEditProfile}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-          Edit Profile
-        </button>
+        {/* Divider */}
+        <div style={{ width: "100%", height: 1, background: "#f4f4f4", marginBottom: 18 }} />
 
-        <div className="pc-divider" />
-
+        {/* Email row */}
         <div className="pc-info-row">
           <div className="pc-info-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4l3 3" />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
             </svg>
           </div>
-          <span className="pc-info-text">{maskedEmail}</span>
+          {loading
+            ? <div style={{ height: 14, width: 140, borderRadius: 6, background: "#f0f0f0" }} />
+            : <span style={{ fontSize: "0.82rem", color: "#555", fontWeight: 500 }}>{maskedEmail}</span>
+          }
         </div>
 
-        <div className="pc-info-row">
-          <div className="pc-info-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
+        {/* Referral code row */}
+        {user?.referralCode && (
+          <div className="pc-info-row">
+            <div className="pc-info-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" strokeWidth="2.2" strokeLinecap="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+            </div>
+            <span style={{ fontSize: "0.82rem", color: "#555", fontWeight: 600, letterSpacing: "0.08em" }}>
+              {user.referralCode}
+            </span>
           </div>
-          <span className="pc-info-text">{location}</span>
-        </div>
+        )}
 
         <div className="pc-watermark">P</div>
       </div>
