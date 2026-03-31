@@ -37,9 +37,10 @@ const TransactionHistory = () => {
       const res = await axios.get(
         `http://localhost:5000/api/wallet/transactions/${user.id}`
       );
-      setTransactions(res.data);
+      setTransactions(res.data.transactions || []);
     } catch (error) {
       console.error("Error fetching transactions:", error);
+      setTransactions([]);
     }
   };
 
