@@ -1,7 +1,7 @@
 // LOCATION: src/components/admin/tasks/AdminTasksTable.jsx
 
-import { useEffect, useState, useCallback } from "react";
-import { RefreshCw, Trash2, Power, Edit3, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { RefreshCw, Trash2, Power, Edit3, AlertTriangle, ChevronDown, ChevronRight, Search } from "lucide-react";
 
 const BASE = "http://localhost:5000";
 
@@ -31,7 +31,6 @@ const ConfirmModal = ({ open, title, onConfirm, onCancel }) => {
 // ── Single task row ───────────────────────────────────────────────────────────
 const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
   <tr className={`hover:bg-gray-50 transition-colors ${isExpiredSection ? "opacity-60" : ""}`}>
-    {/* Thumbnail */}
     <td className="px-4 py-3">
       {task.thumbnail ? (
         <img src={task.thumbnail} alt="" className="h-10 w-14 rounded-lg object-cover border border-gray-200" />
@@ -41,50 +40,35 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
         </div>
       )}
     </td>
-
-    {/* Title */}
     <td className="px-4 py-3">
       <p className="font-semibold text-gray-800 max-w-[160px] truncate">{task.title}</p>
       <p className="text-xs text-gray-400 truncate max-w-[160px]">{task.description}</p>
     </td>
-
-    {/* Platform */}
     <td className="px-4 py-3">
       <span className="rounded-full bg-orange-50 border border-orange-100 px-2.5 py-0.5 text-xs font-bold text-orange-600 capitalize">
         {task.platform}
       </span>
     </td>
-
-    {/* Reward */}
     <td className="px-4 py-3 font-bold text-orange-500">{task.reward} TKN</td>
-
-    {/* Time */}
     <td className="px-4 py-3 text-xs text-gray-500">
       {task.timeMinutes > 0 ? `${task.timeMinutes} min` : <span className="text-gray-300">No limit</span>}
     </td>
-
-    {/* Expires */}
     <td className="px-4 py-3 text-xs">
       {task.expiresAt ? (
         <span className={task.expired ? "text-red-500 font-semibold" : "text-gray-500"}>
           {task.expired
             ? `⛔ ${new Date(task.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-            : new Date(task.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-          }
+            : new Date(task.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
         </span>
       ) : (
         <span className="text-gray-300">Never</span>
       )}
     </td>
-
-    {/* Submissions */}
     <td className="px-4 py-3 text-xs">
       <span className="text-yellow-600 font-semibold">{task.stats?.pending || 0} pending</span>
       {" · "}
       <span className="text-green-600">{task.stats?.paid || 0} paid</span>
     </td>
-
-    {/* Status */}
     <td className="px-4 py-3">
       <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
         task.expired ? "bg-red-100 text-red-600" :
@@ -93,8 +77,6 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
         {task.expired ? "Expired" : task.isActive ? "Active" : "Inactive"}
       </span>
     </td>
-
-    {/* Actions */}
     <td className="px-4 py-3">
       <div className="flex items-center gap-1.5">
         <button onClick={() => onEdit(task)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors" title="Edit">
@@ -115,11 +97,15 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 const TasksTable = ({ refreshKey, onEdit }) => {
-  const [tasks,           setTasks]           = useState([]);
-  const [loading,         setLoading]         = useState(true);
-  const [confirm,         setConfirm]         = useState(null);
-  const [toast,           setToast]           = useState(null);
+  const [tasks,            setTasks]            = useState([]);
+  const [loading,          setLoading]          = useState(true);
+  const [confirm,          setConfirm]          = useState(null);
+  const [toast,            setToast]            = useState(null);
   const [expiredCollapsed, setExpiredCollapsed] = useState(false);
+
+  // ── Filter state ──
+  const [search,         setSearch]         = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -158,11 +144,33 @@ const TasksTable = ({ refreshKey, onEdit }) => {
     finally { setConfirm(null); }
   };
 
-  // Separate active vs expired
-  const activeTasks  = tasks.filter((t) => !t.expired);
-  const expiredTasks = tasks.filter((t) =>  t.expired);
+  // ── Derived data ──────────────────────────────────────────────────────────
+  const allActiveTasks  = useMemo(() => tasks.filter((t) => !t.expired), [tasks]);
+  const allExpiredTasks = useMemo(() => tasks.filter((t) =>  t.expired), [tasks]);
 
-  const TABLE_HEADERS = ["Image", "Title", "Platform", "Reward", "Time Limit", "Expires", "Submissions", "Status", "Actions"];
+  // Unique categories from ALL tasks (active + expired)
+  const categories = useMemo(() => {
+    const set = new Set(tasks.map((t) => (t.platform || "other").toLowerCase()));
+    return [...set].sort();
+  }, [tasks]);
+
+  // Apply search + category filter
+  const applyFilters = (list) => {
+    let out = list;
+    if (categoryFilter !== "all") {
+      out = out.filter((t) => (t.platform || "other").toLowerCase() === categoryFilter);
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      out = out.filter((t) => t.title?.toLowerCase().includes(q) || t.platform?.toLowerCase().includes(q));
+    }
+    return out;
+  };
+
+  const activeTasks  = applyFilters(allActiveTasks);
+  const expiredTasks = applyFilters(allExpiredTasks);
+
+  const TABLE_HEADERS = ["Image", "Title", "Category", "Reward", "Time Limit", "Expires", "Submissions", "Status", "Actions"];
 
   const renderHead = () => (
     <thead className="bg-gray-50">
@@ -185,16 +193,71 @@ const TasksTable = ({ refreshKey, onEdit }) => {
 
       <div className="space-y-4">
 
-        {/* ── Active Tasks ── */}
+        {/* ── Filter toolbar ── */}
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm px-5 py-3.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Search */}
+          <div className="relative shrink-0">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search tasks…"
+              className="w-52 rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-orange-300 focus:ring-1 focus:ring-orange-100"
+            />
+          </div>
+
+          {/* Category chips */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-400 shrink-0 mr-1">Category:</span>
+
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={`rounded-full px-3 py-1 text-xs font-bold transition-colors border ${
+                categoryFilter === "all"
+                  ? "bg-orange-500 border-orange-500 text-white"
+                  : "border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-500"
+              }`}
+            >
+              All ({allActiveTasks.length})
+            </button>
+
+            {categories.map((cat) => {
+              const catCount = allActiveTasks.filter((t) => (t.platform || "other").toLowerCase() === cat).length;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold capitalize transition-colors border ${
+                    categoryFilter === cat
+                      ? "bg-orange-500 border-orange-500 text-white"
+                      : "border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-500"
+                  }`}
+                >
+                  {cat} ({catCount})
+                </button>
+              );
+            })}
+
+            <button
+              onClick={load}
+              className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-orange-300 hover:text-orange-500 transition-colors ml-1"
+            >
+              <RefreshCw size={11} /> Refresh
+            </button>
+          </div>
+        </div>
+
+        {/* ── Active Tasks table ── */}
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <div>
               <h2 className="font-bold text-gray-800">All Tasks</h2>
-              <p className="text-xs text-gray-400 mt-0.5">{activeTasks.length} active tasks</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
+                {categoryFilter !== "all" && ` in "${categoryFilter}"`}
+                {search.trim() && ` matching "${search}"`}
+              </p>
             </div>
-            <button onClick={load} className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-orange-300 hover:text-orange-500 transition-colors">
-              <RefreshCw size={12} /> Refresh
-            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -206,7 +269,23 @@ const TasksTable = ({ refreshKey, onEdit }) => {
                     <tr key={i}>{[...Array(9)].map((_, j) => <td key={j} className="px-4 py-3"><div className="h-4 animate-pulse rounded bg-gray-100"/></td>)}</tr>
                   ))
                 ) : activeTasks.length === 0 ? (
-                  <tr><td colSpan={9} className="py-12 text-center text-gray-400">No active tasks — create one above</td></tr>
+                  <tr>
+                    <td colSpan={9} className="py-14 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-3xl">🔍</span>
+                        <p className="text-sm text-gray-400">
+                          {categoryFilter !== "all" || search.trim()
+                            ? "No tasks match your filters"
+                            : "No active tasks — create one above"}
+                        </p>
+                        {(categoryFilter !== "all" || search.trim()) && (
+                          <button onClick={() => { setCategoryFilter("all"); setSearch(""); }} className="mt-1 text-xs text-orange-500 font-semibold hover:underline">
+                            Clear filters
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 ) : activeTasks.map((task) => (
                   <TaskRow key={task._id} task={task} onToggle={handleToggle} onEdit={onEdit} onDelete={setConfirm} isExpiredSection={false} />
                 ))}
@@ -216,9 +295,8 @@ const TasksTable = ({ refreshKey, onEdit }) => {
         </div>
 
         {/* ── Expired Tasks (collapsible) ── */}
-        {!loading && expiredTasks.length > 0 && (
+        {!loading && allExpiredTasks.length > 0 && (
           <div className="rounded-xl border border-red-100 bg-white shadow-sm overflow-hidden">
-            {/* Collapsible header */}
             <button
               onClick={() => setExpiredCollapsed((v) => !v)}
               className="w-full flex items-center justify-between border-b border-red-100 bg-red-50 px-5 py-4 hover:bg-red-100 transition-colors"
@@ -228,7 +306,7 @@ const TasksTable = ({ refreshKey, onEdit }) => {
                 <div className="text-left">
                   <h2 className="font-bold text-red-700">Expired Tasks</h2>
                   <p className="text-xs text-red-400 mt-0.5">
-                    {expiredTasks.length} task{expiredTasks.length !== 1 ? "s" : ""} — hidden from user dashboard automatically
+                    {expiredTasks.length} of {allExpiredTasks.length} shown · hidden from user dashboard automatically
                   </p>
                 </div>
               </div>
@@ -243,7 +321,9 @@ const TasksTable = ({ refreshKey, onEdit }) => {
                 <table className="min-w-full text-sm divide-y divide-gray-100">
                   {renderHead()}
                   <tbody className="divide-y divide-gray-50">
-                    {expiredTasks.map((task) => (
+                    {expiredTasks.length === 0 ? (
+                      <tr><td colSpan={9} className="py-8 text-center text-sm text-gray-400">No expired tasks match your filters</td></tr>
+                    ) : expiredTasks.map((task) => (
                       <TaskRow key={task._id} task={task} onToggle={handleToggle} onEdit={onEdit} onDelete={setConfirm} isExpiredSection={true} />
                     ))}
                   </tbody>
