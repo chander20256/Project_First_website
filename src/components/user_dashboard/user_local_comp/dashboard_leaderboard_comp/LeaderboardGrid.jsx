@@ -1,16 +1,16 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Medal, Award, TrendingUp, TrendingDown, Minus, CheckCircle, BarChart2, Zap } from "lucide-react";
+import { Crown, Medal, Award, CheckCircle, BarChart2, Zap } from "lucide-react";
 import LeaderboardPodium from "./Leaderboardpodium";
 
 // Pass `players` prop for backend data connectivity
 const defaultPlayers = [
-  { rank: 1, username: "PlayerOne",   points: 980, tasks: 15, surveys: 5,  trend: "up",   avatar: "https://i.pravatar.cc/40?img=1",  change: 0 },
-  { rank: 2, username: "GamerGirl",   points: 870, tasks: 12, surveys: 7,  trend: "up",   avatar: "https://i.pravatar.cc/40?img=5",  change: 2 },
-  { rank: 3, username: "NoobMaster",  points: 820, tasks: 10, surveys: 8,  trend: "down", avatar: "https://i.pravatar.cc/40?img=3",  change: -1 },
-  { rank: 4, username: "ProPlayer",   points: 750, tasks: 8,  surveys: 6,  trend: "same", avatar: "https://i.pravatar.cc/40?img=4",  change: 0 },
-  { rank: 5, username: "LuckyOne",    points: 700, tasks: 9,  surveys: 4,  trend: "up",   avatar: "https://i.pravatar.cc/40?img=7",  change: 1 },
-  { rank: 6, username: "SpeedRacer",  points: 660, tasks: 7,  surveys: 3,  trend: "down", avatar: "https://i.pravatar.cc/40?img=8",  change: -2 },
-  { rank: 7, username: "ShadowX",     points: 610, tasks: 6,  surveys: 5,  trend: "up",   avatar: "https://i.pravatar.cc/40?img=9",  change: 3 },
+  { rank: 1, username: "PlayerOne",   points: 980, tasks: 15, surveys: 5, avatar: "https://i.pravatar.cc/40?img=1" },
+  { rank: 2, username: "GamerGirl",   points: 870, tasks: 12, surveys: 7, avatar: "https://i.pravatar.cc/40?img=5" },
+  { rank: 3, username: "NoobMaster",  points: 820, tasks: 10, surveys: 8, avatar: "https://i.pravatar.cc/40?img=3" },
+  { rank: 4, username: "ProPlayer",   points: 750, tasks: 8,  surveys: 6, avatar: "https://i.pravatar.cc/40?img=4" },
+  { rank: 5, username: "LuckyOne",    points: 700, tasks: 9,  surveys: 4, avatar: "https://i.pravatar.cc/40?img=7" },
+  { rank: 6, username: "SpeedRacer",  points: 660, tasks: 7,  surveys: 3, avatar: "https://i.pravatar.cc/40?img=8" },
+  { rank: 7, username: "ShadowX",     points: 610, tasks: 6,  surveys: 5, avatar: "https://i.pravatar.cc/40?img=9" },
 ];
 
 const RankIcon = ({ rank }) => {
@@ -18,20 +18,6 @@ const RankIcon = ({ rank }) => {
   if (rank === 2) return <Medal className="w-5 h-5 text-gray-400" fill="currentColor" />;
   if (rank === 3) return <Award className="w-5 h-5 text-amber-600" fill="currentColor" />;
   return null;
-};
-
-const TrendIcon = ({ trend, change }) => {
-  if (trend === "up") return (
-    <span className="flex items-center gap-0.5 text-green-500 text-xs font-bold">
-      <TrendingUp className="w-3.5 h-3.5" /> +{Math.abs(change)}
-    </span>
-  );
-  if (trend === "down") return (
-    <span className="flex items-center gap-0.5 text-red-500 text-xs font-bold">
-      <TrendingDown className="w-3.5 h-3.5" /> -{Math.abs(change)}
-    </span>
-  );
-  return <Minus className="w-3.5 h-3.5 text-gray-400" />;
 };
 
 const rankColors = {
@@ -56,8 +42,8 @@ const LeaderboardGrid = ({ players = defaultPlayers }) => {
       </div>
 
       {/* Column header (hidden on mobile) */}
-      <div className="hidden sm:grid grid-cols-[48px_1fr_120px_100px_100px_80px] gap-3 px-4 py-2">
-        {["RANK", "PLAYER", "POINTS", "TASKS", "SURVEYS", "TREND"].map((h) => (
+      <div className="hidden sm:grid grid-cols-[48px_1fr_120px_100px_100px] gap-3 px-4 py-2">
+        {["RANK", "PLAYER", "POINTS", "TASKS", "SURVEYS"].map((h) => (
           <span key={h} className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{h}</span>
         ))}
       </div>
@@ -82,7 +68,7 @@ const LeaderboardGrid = ({ players = defaultPlayers }) => {
               {/* Progress bar BG */}
               <div className="absolute bottom-0 left-0 h-0.5 bg-orange-500/30 rounded-full" style={{ width: `${barWidth}%` }} />
 
-              <div className="grid grid-cols-[48px_1fr] sm:grid-cols-[48px_1fr_120px_100px_100px_80px] gap-3 items-center px-4 py-3">
+              <div className="grid grid-cols-[48px_1fr] sm:grid-cols-[48px_1fr_120px_100px_100px] gap-3 items-center px-4 py-3">
                 {/* Rank */}
                 <div className="flex flex-col items-center justify-center gap-0.5">
                   {isTopThree ? (
@@ -135,10 +121,6 @@ const LeaderboardGrid = ({ players = defaultPlayers }) => {
                   <span className="font-semibold text-gray-700 text-sm">{p.surveys}</span>
                 </div>
 
-                {/* Trend */}
-                <div className="hidden sm:flex items-center">
-                  <TrendIcon trend={p.trend} change={p.change} />
-                </div>
               </div>
             </motion.div>
           );

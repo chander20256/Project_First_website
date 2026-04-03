@@ -2,11 +2,13 @@
 const express = require("express");
 const router  = express.Router();
 const User    = require("../models/User");
+const TaskSubmission = require("../models/Tasksubmission");
+const Transaction = require("../models/Transaction");
 const { protectRoute } = require("../middleware/authMiddleware");
 
 // ════════════════════════════════════════════════════════
 // @route   GET /api/leaderboard
-// @desc    Top 100 users sorted by creds (highest first)
+// @desc    Top 100 users sorted by creds with tasks/surveys counts
 // @access  Private
 // ════════════════════════════════════════════════════════
 router.get("/", protectRoute, async (req, res) => {
@@ -16,6 +18,27 @@ router.get("/", protectRoute, async (req, res) => {
       .limit(100)
       .lean();
 
+    const [taskCounts, surveyCounts] = await Promise.all([
+      TaskSubmission.aggregate([
+        { $match: { status: { $in: ["approved", "paid"] } } },
+        { $group: { _id: "$userId", count: { $sum: 1 } } },
+      ]),
+      Transaction.aggregate([
+        { $match: { type: "credit", description: { $regex: "Survey", $options: "i" } } },
+        { $group: { _id: "$userId", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const taskCountMap = {};
+    taskCounts.forEach((row) => {
+      taskCountMap[row._id.toString()] = row.count;
+    });
+
+    const surveyCountMap = {};
+    surveyCounts.forEach((row) => {
+      surveyCountMap[row._id.toString()] = row.count;
+    });
+
     const players = top.map((u, i) => ({
       rank:      i + 1,
       userId:    u._id,
@@ -24,6 +47,8 @@ router.get("/", protectRoute, async (req, res) => {
       avatar:    u.avatar    || null,
       initial:   (u.username || "U").charAt(0).toUpperCase(),
       joinedAt:  u.createdAt,
+      tasks:     taskCountMap[u._id.toString()] || 0,
+      surveys:   surveyCountMap[u._id.toString()] || 0,
     }));
 
     res.json(players);

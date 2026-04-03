@@ -11,7 +11,7 @@ import LeaderboardQuickActions from "../../components/user_dashboard/user_local_
 
 // ─── Map backend shape → Grid shape ──────────────────────────────────────────
 // Backend: { rank, userId, username, creds, avatar, initial, joinedAt }
-// Grid:    { rank, username, points, tasks, surveys, avatar, trend, change }
+// Grid:    { rank, username, points, tasks, surveys, avatar }
 const mapPlayer = (u) => ({
   rank    : u.rank,
   username: u.username,
@@ -20,8 +20,6 @@ const mapPlayer = (u) => ({
   surveys : u.surveys || 0,
   avatar  : u.avatar  ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=f97316&color=fff`,
-  trend   : "same",
-  change  : 0,
 });
 
 // ─── Map rank-1 player → TopUserHighlight shape ───────────────────────────────
