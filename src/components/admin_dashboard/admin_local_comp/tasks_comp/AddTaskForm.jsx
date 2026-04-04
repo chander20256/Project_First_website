@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { Save, X, Link, Calendar, Upload, Clock } from "lucide-react";
 
 const BASE = "http://localhost:5000";
+const MAX_IMAGE_WIDTH = 1280;
+const MAX_IMAGE_HEIGHT = 720;
+const IMAGE_QUALITY = 0.8;
 
 const CATEGORIES = [
   { value: "ptc",        label: "PTC (Pay To Click)",  icon: "💰", desc: "User visits your URL and stays for set time" },
@@ -27,6 +30,52 @@ const inputCls = (err) =>
   `w-full rounded-lg border ${err ? "border-red-400" : "border-gray-200"} bg-gray-50 px-3 py-2.5 text-sm text-gray-700 outline-none focus:border-orange-300 focus:ring-1 focus:ring-orange-100 transition-colors`;
 
 const EMPTY = { title: "", description: "", platform: "", reward: "", timeMinutes: "30", link: "", expiresAt: "", thumbnail: "" };
+
+const readFileAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Could not read image file."));
+    reader.readAsDataURL(file);
+  });
+
+const loadImage = (src) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not process image file."));
+    image.src = src;
+  });
+
+const compressImage = async (file) => {
+  const originalDataUrl = await readFileAsDataUrl(file);
+  const image = await loadImage(originalDataUrl);
+
+  const scale = Math.min(
+    1,
+    MAX_IMAGE_WIDTH / image.width,
+    MAX_IMAGE_HEIGHT / image.height,
+  );
+
+  if (scale === 1 && file.size <= 250 * 1024) {
+    return originalDataUrl;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return originalDataUrl;
+  }
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL("image/jpeg", IMAGE_QUALITY);
+};
 
 const AddTaskForm = ({ editTask, onSaved, onCancel }) => {
   const [form,    setForm]    = useState(EMPTY);
@@ -66,7 +115,7 @@ const AddTaskForm = ({ editTask, onSaved, onCancel }) => {
 
   const set = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -74,12 +123,15 @@ const AddTaskForm = ({ editTask, onSaved, onCancel }) => {
       setTimeout(() => setToast(null), 3000);
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result);
-      setForm((p) => ({ ...p, thumbnail: reader.result }));
-    };
-    reader.readAsDataURL(file);
+
+    try {
+      const optimizedImage = await compressImage(file);
+      setPreview(optimizedImage);
+      setForm((p) => ({ ...p, thumbnail: optimizedImage }));
+    } catch (error) {
+      setToast({ msg: error.message || "Image upload failed", type: "error" });
+      setTimeout(() => setToast(null), 3000);
+    }
   };
 
   const validate = () => {
@@ -180,7 +232,7 @@ const AddTaskForm = ({ editTask, onSaved, onCancel }) => {
             <input ref={fileRef} type="file" accept="image/*" id="task-thumbnail" className="hidden" onChange={handleImageChange} />
             {preview ? (
               <div className="relative rounded-xl overflow-hidden border border-gray-200">
-                <img src={preview} alt="preview" className="w-full h-36 object-cover" />
+                <img src={preview} alt="preview" className="w-full h-36 object-cover" loading="lazy" decoding="async" />
                 <button type="button" onClick={() => { setPreview(null); setForm((p) => ({ ...p, thumbnail: "" })); }}
                   className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 shadow">
                   <X size={13} />
@@ -196,7 +248,7 @@ const AddTaskForm = ({ editTask, onSaved, onCancel }) => {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-semibold text-gray-600">Click to upload image</p>
-                  <p className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 5 MB</p>
+                  <p className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 5 MB. Images are compressed for faster loading.</p>
                 </div>
               </label>
             )}

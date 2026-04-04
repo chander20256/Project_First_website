@@ -4,6 +4,32 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { RefreshCw, Trash2, Power, Edit3, AlertTriangle, ChevronDown, ChevronRight, Search } from "lucide-react";
 
 const BASE = "http://localhost:5000";
+const CACHE_KEY = "admin_tasks_list_v2";
+const CACHE_TTL = 45_000;
+
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ts || Date.now() - parsed.ts > CACHE_TTL) return null;
+    return Array.isArray(parsed.tasks) ? parsed.tasks : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (tasks) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ tasks, ts: Date.now() }));
+  } catch {}
+};
+
+const clearCache = () => {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {}
+};
 
 const ConfirmModal = ({ open, title, onConfirm, onCancel }) => {
   if (!open) return null;
@@ -33,7 +59,7 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
   <tr className={`hover:bg-gray-50 transition-colors ${isExpiredSection ? "opacity-60" : ""}`}>
     <td className="px-4 py-3">
       {task.thumbnail ? (
-        <img src={task.thumbnail} alt="" className="h-10 w-14 rounded-lg object-cover border border-gray-200" />
+        <img src={task.thumbnail} alt="" loading="lazy" decoding="async" className="h-10 w-14 rounded-lg object-cover border border-gray-200" />
       ) : (
         <div className="h-10 w-14 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center">
           <span className="text-xs font-black text-orange-300 uppercase">{(task.platform || "?").charAt(0)}</span>
@@ -97,13 +123,14 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 const TasksTable = ({ refreshKey, onEdit }) => {
-  const [tasks,            setTasks]            = useState([]);
-  const [loading,          setLoading]          = useState(true);
+  const [tasks,            setTasks]            = useState(() => readCache() || []);
+  const [loading,          setLoading]          = useState(() => !readCache());
   const [refreshing,       setRefreshing]       = useState(false);
   const [confirm,          setConfirm]          = useState(null);
   const [toast,            setToast]            = useState(null);
   const [expiredCollapsed, setExpiredCollapsed] = useState(false);
   const didMountRef = useRef(false);
+  const hasCachedTasksRef = useRef(Boolean(readCache()));
 
   // ── Filter state ──
   const [search,         setSearch]         = useState("");
@@ -133,6 +160,7 @@ const TasksTable = ({ refreshKey, onEdit }) => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Failed to load tasks");
       setTasks(Array.isArray(data) ? data : []);
+      writeCache(Array.isArray(data) ? data : []);
     } catch (err) {
       showToast(err.message || "Failed to load tasks", "error");
     } finally {
@@ -141,7 +169,7 @@ const TasksTable = ({ refreshKey, onEdit }) => {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load({ silent: hasCachedTasksRef.current }); }, [load]);
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
@@ -159,7 +187,11 @@ const TasksTable = ({ refreshKey, onEdit }) => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setTasks((prev) => prev.map((t) => t._id === id ? { ...t, isActive: !t.isActive } : t));
+      setTasks((prev) => {
+        const next = prev.map((t) => t._id === id ? { ...t, isActive: !t.isActive } : t);
+        writeCache(next);
+        return next;
+      });
       showToast(data.message);
     } catch (err) { showToast(err.message || "Failed", "error"); }
   };
@@ -173,7 +205,11 @@ const TasksTable = ({ refreshKey, onEdit }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setTasks((prev) => prev.filter((t) => t._id !== confirm._id));
+      setTasks((prev) => {
+        const next = prev.filter((t) => t._id !== confirm._id);
+        writeCache(next);
+        return next;
+      });
       showToast("Task deleted");
     } catch (err) { showToast(err.message || "Failed", "error"); }
     finally { setConfirm(null); }

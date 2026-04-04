@@ -10,6 +10,8 @@ const TaskSubmission = require("../models/Tasksubmission");
 const User           = require("../models/User");
 const Transaction    = require("../models/Transaction");
 
+const TASK_LIST_FIELDS = "title description thumbnail platform reward timeMinutes link expiresAt isActive createdAt";
+
 // ══════════════════════════════════════════════════
 // STATS  (fast — single aggregate)
 // ══════════════════════════════════════════════════
@@ -49,6 +51,7 @@ router.get("/", async (req, res) => {
     // 1. Fetch tasks with thumbnail so UI can render task images
     const tasks = await Task.find()
       .sort({ createdAt: -1 })
+      .select(TASK_LIST_FIELDS)
       .lean();
 
     if (tasks.length === 0) return res.json([]);
@@ -94,7 +97,9 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res, next) => {
   try {
     if (!Task.db.base.Types.ObjectId.isValid(req.params.id)) return next();
-    const task = await Task.findById(req.params.id).lean();
+    const task = await Task.findById(req.params.id)
+      .select(TASK_LIST_FIELDS)
+      .lean();
     if (!task) return res.status(404).json({ message: "Task not found." });
     res.json(task);
   } catch (err) {
@@ -132,7 +137,8 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res, next) => {
   try {
     if (!Task.db.base.Types.ObjectId.isValid(req.params.id)) return next();
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" })
+      .select(TASK_LIST_FIELDS);
     if (!task) return res.status(404).json({ message: "Task not found." });
     const { thumbnail: _t, ...taskLight } = task.toObject();
     res.json({ message: "Task updated.", task: taskLight });

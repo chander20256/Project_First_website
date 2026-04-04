@@ -194,8 +194,7 @@ const PTCTask = ({ task, onVerified, onForcedCancel }) => {
         {/* Rules */}
         <div style={{ width: "100%", background: "#fafafa", borderRadius: 14, padding: "14px 16px", border: `1px solid ${C.borderGray}` }}>
           {[
-              ["✅", "Open the external site and leave this tab open"],
-              ["❌", "Coming back here before the timer ends cancels the task"],
+              ["❌", "Coming back here when the timer ends and  the is done  task"],
               ["⏱️", "Wait for the full timer to finish"],
             ["🖱️", "Stay interactive — confirm button may appear"],
           ].map(([icon, text]) => (

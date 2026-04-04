@@ -8,6 +8,8 @@ const Task           = require("../models/Task");
 const TaskSubmission = require("../models/Tasksubmission");
 const jwt            = require("jsonwebtoken");
 
+const TASK_LIST_FIELDS = "title description thumbnail platform reward timeMinutes link expiresAt isActive createdAt";
+
 // GET /api/tasks/bundle
 // Public-ish: tasks always returned, submissions only if JWT present
 router.get("/", async (req, res) => {
@@ -17,6 +19,7 @@ router.get("/", async (req, res) => {
     // Always fetch tasks including thumbnail so user cards can display uploaded images.
     const tasksPromise = Task.find({ isActive: true })
       .sort({ createdAt: -1 })
+      .select(TASK_LIST_FIELDS)
       .lean();
 
     // Try to decode JWT for submissions — fail silently if missing/expired

@@ -6,12 +6,15 @@ const router  = express.Router();
 const Task    = require("../models/Task");
 const mongoose = require("mongoose");
 
+const TASK_LIST_FIELDS = "title description thumbnail platform reward timeMinutes link expiresAt isActive createdAt";
+
 // GET /api/tasks  — list, includes thumbnail
 router.get("/", async (req, res) => {
   try {
     const now   = new Date();
     const tasks = await Task.find({ isActive: true })
       .sort({ createdAt: -1 })
+      .select(TASK_LIST_FIELDS)
       .lean();
 
     // Mark expired but still return them so user context can also filter
@@ -33,7 +36,9 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const task = await Task.findById(req.params.id).lean();
+    const task = await Task.findById(req.params.id)
+      .select(TASK_LIST_FIELDS)
+      .lean();
     if (!task) return res.status(404).json({ message: "Task not found" });
     res.json(task);
   } catch (err) {
