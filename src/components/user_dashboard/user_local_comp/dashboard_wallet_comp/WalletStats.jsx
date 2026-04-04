@@ -19,13 +19,14 @@ const WalletStats = () => {
   const fetchStats = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
+      const userId = user?._id || user?.id;
+      if (!userId) {
         console.error("User not found in localStorage");
         return;
       }
 
       const res = await axios.get(
-        `http://localhost:5000/api/wallet/transactions/${user.id}`
+        `http://localhost:5000/api/wallet/transactions/${userId}`
       );
       const transactions = res.data.transactions || [];
 

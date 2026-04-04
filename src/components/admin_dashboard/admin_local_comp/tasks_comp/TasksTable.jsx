@@ -1,6 +1,6 @@
 // LOCATION: src/components/admin/tasks/AdminTasksTable.jsx
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { RefreshCw, Trash2, Power, Edit3, AlertTriangle, ChevronDown, ChevronRight, Search } from "lucide-react";
 
 const BASE = "http://localhost:5000";
@@ -99,9 +99,11 @@ const TaskRow = ({ task, onToggle, onEdit, onDelete, isExpiredSection }) => (
 const TasksTable = ({ refreshKey, onEdit }) => {
   const [tasks,            setTasks]            = useState([]);
   const [loading,          setLoading]          = useState(true);
+  const [refreshing,       setRefreshing]       = useState(false);
   const [confirm,          setConfirm]          = useState(null);
   const [toast,            setToast]            = useState(null);
   const [expiredCollapsed, setExpiredCollapsed] = useState(false);
+  const didMountRef = useRef(false);
 
   // ── Filter state ──
   const [search,         setSearch]         = useState("");
@@ -112,19 +114,49 @@ const TasksTable = ({ refreshKey, onEdit }) => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const load = useCallback(() => {
-    setLoading(true);
-    fetch(`${BASE}/api/admin/tasks`)
-      .then((r) => r.json())
-      .then((d) => { setTasks(Array.isArray(d) ? d : []); setLoading(false); })
-      .catch(() => { showToast("Failed to load tasks", "error"); setLoading(false); });
-  }, [refreshKey]);
+  const getAuthHeaders = (json = false) => {
+    const token = localStorage.getItem("token");
+    return {
+      ...(json ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
+  const load = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+
+      const res = await fetch(`${BASE}/api/admin/tasks`, {
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Failed to load tasks");
+      setTasks(Array.isArray(data) ? data : []);
+    } catch (err) {
+      showToast(err.message || "Failed to load tasks", "error");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    load({ silent: true });
+  }, [refreshKey, load]);
 
   const handleToggle = async (id) => {
     try {
-      const res  = await fetch(`${BASE}/api/admin/tasks/${id}/toggle`, { method: "PATCH" });
+      const res  = await fetch(`${BASE}/api/admin/tasks/${id}/toggle`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+      });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setTasks((prev) => prev.map((t) => t._id === id ? { ...t, isActive: !t.isActive } : t));
@@ -135,7 +167,10 @@ const TasksTable = ({ refreshKey, onEdit }) => {
   const handleDelete = async () => {
     if (!confirm) return;
     try {
-      const res  = await fetch(`${BASE}/api/admin/tasks/${confirm._id}`, { method: "DELETE" });
+      const res  = await fetch(`${BASE}/api/admin/tasks/${confirm._id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setTasks((prev) => prev.filter((t) => t._id !== confirm._id));
@@ -153,6 +188,15 @@ const TasksTable = ({ refreshKey, onEdit }) => {
     const set = new Set(tasks.map((t) => (t.platform || "other").toLowerCase()));
     return [...set].sort();
   }, [tasks]);
+
+  const categoryCounts = useMemo(() => {
+    const counts = {};
+    allActiveTasks.forEach((t) => {
+      const key = (t.platform || "other").toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }, [allActiveTasks]);
 
   // Apply search + category filter
   const applyFilters = (list) => {
@@ -222,7 +266,7 @@ const TasksTable = ({ refreshKey, onEdit }) => {
             </button>
 
             {categories.map((cat) => {
-              const catCount = allActiveTasks.filter((t) => (t.platform || "other").toLowerCase() === cat).length;
+              const catCount = categoryCounts[cat] || 0;
               return (
                 <button
                   key={cat}
@@ -239,13 +283,19 @@ const TasksTable = ({ refreshKey, onEdit }) => {
             })}
 
             <button
-              onClick={load}
+              onClick={() => load({ silent: true })}
               className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-orange-300 hover:text-orange-500 transition-colors ml-1"
             >
               <RefreshCw size={11} /> Refresh
             </button>
           </div>
         </div>
+
+        {refreshing && !loading && (
+          <div className="rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-xs font-medium text-orange-600">
+            Refreshing task list...
+          </div>
+        )}
 
         {/* ── Active Tasks table ── */}
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">

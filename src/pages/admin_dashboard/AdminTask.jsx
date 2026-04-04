@@ -1,15 +1,48 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TasksHeader from "../../components/admin_dashboard/admin_local_comp/tasks_comp/TasksHeader";
 import TasksStats from "../../components/admin_dashboard/admin_local_comp/tasks_comp/TasksStats";
 import TasksTable from "../../components/admin_dashboard/admin_local_comp/tasks_comp/TasksTable";
 import AdminTaskSubmissions from "../../components/admin_dashboard/admin_local_comp/tasks_comp/Admintasksubmissions";
 import AddTaskForm from "../../components/admin_dashboard/admin_local_comp/tasks_comp/AddTaskForm";
 
+const BASE = "http://localhost:5000";
+
 const AdminTask = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [editTask,   setEditTask]   = useState(null);
   const [activeTab,  setActiveTab]  = useState("tasks"); // "tasks" | "submissions" | "create"
+  const [stats,      setStats]      = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadStats = async () => {
+      try {
+        setStatsLoading(true);
+        const res = await fetch(`${BASE}/api/admin/tasks/stats`, {
+          headers: getAuthHeaders(),
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || "Failed to load stats");
+        setStats(data);
+      } catch (err) {
+        if (err.name !== "AbortError") setStats(null);
+      } finally {
+        if (!controller.signal.aborted) setStatsLoading(false);
+      }
+    };
+
+    loadStats();
+    return () => controller.abort();
+  }, [refreshKey]);
 
   const refresh = () => setRefreshKey((k) => k + 1);
 
@@ -34,10 +67,10 @@ const AdminTask = () => {
       <div className="mx-auto max-w-7xl space-y-6">
 
         {/* Header */}
-        <TasksHeader key={`hdr-${refreshKey}`} />
+        <TasksHeader count={stats?.activeTasks} loading={statsLoading} />
 
         {/* Stats */}
-        <TasksStats key={`stats-${refreshKey}`} />
+        <TasksStats stats={stats} loading={statsLoading} />
 
         {/* Tab switcher */}
         <div className="flex gap-1 rounded-lg border border-gray-200 bg-white p-1 w-fit shadow-sm">

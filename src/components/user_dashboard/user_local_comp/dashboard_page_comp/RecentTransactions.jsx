@@ -28,10 +28,15 @@ const RecentTransactions = () => {
         }
 
         const user = JSON.parse(userStr);
+        const userId = user?._id || user?.id;
+        if (!userId || !token) {
+          setLoading(false);
+          return;
+        }
 
         // Fetch transactions from API
         const response = await axios.get(
-          `http://localhost:5000/api/wallet/transactions/${user._id}`,
+          `http://localhost:5000/api/wallet/transactions/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
 

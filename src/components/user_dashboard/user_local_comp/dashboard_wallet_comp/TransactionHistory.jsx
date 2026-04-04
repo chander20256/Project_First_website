@@ -30,12 +30,18 @@ const TxRow = ({ t, isLast }) => {
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const userId = user?._id || user?.id;
 
   const fetchTransactions = async () => {
+    if (!userId) {
+      setTransactions([]);
+      return;
+    }
+
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/wallet/transactions/${user.id}`
+        `http://localhost:5000/api/wallet/transactions/${userId}`
       );
       setTransactions(res.data.transactions || []);
     } catch (error) {

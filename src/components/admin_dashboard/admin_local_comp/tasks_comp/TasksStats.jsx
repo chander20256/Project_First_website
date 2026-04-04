@@ -1,9 +1,6 @@
 // LOCATION: src/components/admin/tasks/AdminTasksStats.jsx
 
-import { useEffect, useState } from "react";
 import { CheckSquare, Clock, Coins, Activity } from "lucide-react";
-
-const BASE = "http://localhost:5000";
 
 const CARDS = [
   { key: "activeTasks",      label: "Active Tasks",       icon: Activity,    style: { bg: "bg-orange-50", icon: "text-orange-600", val: "text-orange-600", border: "border-orange-100" } },
@@ -12,16 +9,7 @@ const CARDS = [
   { key: "totalPaidTKN",    label: "Total TKN Paid Out", icon: Coins,       style: { bg: "bg-green-50",  icon: "text-green-600",  val: "text-green-700",  border: "border-green-100"  }, suffix: " TKN" },
 ];
 
-const TasksStats = () => {
-  const [stats,   setStats]   = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${BASE}/api/admin/tasks/stats`)
-      .then((r) => r.json())
-      .then((d) => { setStats(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+const TasksStats = ({ stats, loading }) => {
 
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

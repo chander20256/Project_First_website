@@ -4,6 +4,7 @@
 const express = require("express");
 const router  = express.Router();
 const Task    = require("../models/Task");
+const mongoose = require("mongoose");
 
 // GET /api/tasks  — list, includes thumbnail
 router.get("/", async (req, res) => {
@@ -28,6 +29,10 @@ router.get("/", async (req, res) => {
 // GET /api/tasks/:id  — single task WITH thumbnail (loaded when modal opens)
 router.get("/:id", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     const task = await Task.findById(req.params.id).lean();
     if (!task) return res.status(404).json({ message: "Task not found" });
     res.json(task);

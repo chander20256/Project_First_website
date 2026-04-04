@@ -42,6 +42,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/top-referrer", require("./routes/topReferrer"));
 
 // Admin task management routes
+app.use("/api/tasks/bundle", require("./routes/taskBundle"));
 app.use("/api/tasks", taskRoutes);
 app.use("/api/task-submissions",  require("./routes/Tasksubmissions"));  // ← NEW
 app.use("/api/admin/tasks",       require("./routes/Admintasks")); 

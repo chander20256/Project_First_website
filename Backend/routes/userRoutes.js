@@ -8,9 +8,21 @@ const Survey = require("../models/Survey");
 const Referral = require("../models/Referral");
 const auth = require("../middleware/auth");
 
+const resolveAuthUserId = (req) => req.user?.id || req.user?.userId || req.user?._id;
+
+const isValidObjectId = (value) => {
+  if (!value) return false;
+  return /^([0-9a-fA-F]{24})$/.test(String(value));
+};
+
 router.get("/me", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const authUserId = resolveAuthUserId(req);
+    if (!isValidObjectId(authUserId)) {
+      return res.status(401).json({ message: "Invalid token payload" });
+    }
+
+    const user = await User.findById(authUserId).select("-password");
 
     res.json(user);
   } catch (err) {
@@ -21,7 +33,12 @@ router.get("/me", auth, async (req, res) => {
 // Get user profile
 router.get("/profile", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const authUserId = resolveAuthUserId(req);
+    if (!isValidObjectId(authUserId)) {
+      return res.status(401).json({ message: "Invalid token payload" });
+    }
+
+    const user = await User.findById(authUserId).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -37,6 +54,9 @@ router.get("/profile", auth, async (req, res) => {
 router.get("/stats/:userId", auth, async (req, res) => {
   try {
     const userId = req.params.userId;
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ message: "Invalid userId" });
+    }
 
     // Fetch all related data in parallel
     const [transactions, attempts, tasks, surveys, referrals, referredCount] =
@@ -80,7 +100,11 @@ router.get("/stats/:userId", auth, async (req, res) => {
 // Get dashboard stats (for cards)
 router.get("/dashboard-stats", auth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveAuthUserId(req);
+    if (!isValidObjectId(userId)) {
+      return res.status(401).json({ message: "Invalid token payload" });
+    }
+
     const user = await User.findById(userId);
 
     const [completedTasks, attemptedQuizzes, completedSurveys, referrals] =

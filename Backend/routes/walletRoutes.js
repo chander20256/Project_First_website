@@ -3,11 +3,33 @@ const router = express.Router();
 
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
+const jwt = require("jsonwebtoken");
+
+const isValidObjectId = (value) => {
+  if (!value) return false;
+  return /^([0-9a-fA-F]{24})$/.test(String(value));
+};
+
+const resolveUserIdFromAuth = (req) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  try {
+    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+    return decoded.userId || decoded.id || null;
+  } catch {
+    return null;
+  }
+};
 
 // GET WALLET BALANCE
 router.get("/balance/:userId", async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
+    const requestedUserId = req.params.userId;
+    if (!isValidObjectId(requestedUserId)) {
+      return res.status(400).json({ message: "Invalid userId" });
+    }
+
+    const user = await User.findById(requestedUserId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -101,8 +123,21 @@ router.post("/withdraw", async (req, res) => {
 // TRANSACTION HISTORY
 router.get("/transactions/:userId", async (req, res) => {
   try {
+    const requestedUserId = req.params.userId;
+    const authUserId = resolveUserIdFromAuth(req);
+
+    const userId = isValidObjectId(requestedUserId)
+      ? requestedUserId
+      : isValidObjectId(authUserId)
+        ? authUserId
+        : null;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "Valid userId is required" });
+    }
+
     const transactions = await Transaction.find({
-      userId: req.params.userId,
+      userId,
     })
       .sort({ createdAt: -1 })
       .limit(20);

@@ -35,6 +35,11 @@ const StatsCards = () => {
         }
 
         const user = JSON.parse(userStr);
+        const userId = user?._id || user?.id;
+        if (!userId || !token) {
+          setLoading(false);
+          return;
+        }
 
         // Fetch dashboard stats
         const res = await fetch(
@@ -48,7 +53,7 @@ const StatsCards = () => {
         if (data.success && data.stats) {
           // Fetch transactions for transaction count and totals
           const txnRes = await fetch(
-            `http://localhost:5000/api/wallet/transactions/${user._id}`,
+            `http://localhost:5000/api/wallet/transactions/${userId}`,
             { headers: { Authorization: `Bearer ${token}` } },
           );
           const txnData = await txnRes.json();

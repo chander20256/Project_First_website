@@ -21,7 +21,10 @@ const ScreenshotModal = ({ subId, onClose }) => {
   useEffect(() => {
     if (!subId) return;
     setLoading(true);
-    fetch(`${BASE}/api/admin/tasks/submissions/${subId}`)
+    const token = localStorage.getItem("token");
+    fetch(`${BASE}/api/admin/tasks/submissions/${subId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((r) => r.json())
       .then((d) => { setSub(d); setLoading(false); })
       .catch(() => setLoading(false));
@@ -97,6 +100,14 @@ const AdminTaskSubmissions = ({ refreshKey }) => {
   const [reviewNote,  setReviewNote]  = useState("");
   const [activeNote,  setActiveNote]  = useState(null);
 
+  const getAuthHeaders = (json = false) => {
+    const token = localStorage.getItem("token");
+    return {
+      ...(json ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -105,15 +116,19 @@ const AdminTaskSubmissions = ({ refreshKey }) => {
   const load = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page, limit: 15, ...(status && { status }) });
-    fetch(`${BASE}/api/admin/tasks/submissions?${params}`)
-      .then((r) => r.json())
+    fetch(`${BASE}/api/admin/tasks/submissions?${params}`, { headers: getAuthHeaders() })
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.message || "Failed to load submissions");
+        return d;
+      })
       .then((d) => {
         setSubmissions(d.submissions || []);
         setTotal(d.total  || 0);
         setPages(d.pages  || 1);
         setLoading(false);
       })
-      .catch(() => { showToast("Failed to load", "error"); setLoading(false); });
+      .catch((err) => { showToast(err.message || "Failed to load", "error"); setLoading(false); });
   }, [page, status, refreshKey]);
 
   useEffect(() => { load(); }, [load]);
@@ -122,7 +137,7 @@ const AdminTaskSubmissions = ({ refreshKey }) => {
   const action = async (id, endpoint, body = {}) => {
     try {
       const res  = await fetch(`${BASE}/api/admin/tasks/submissions/${id}/${endpoint}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        method: "PUT", headers: getAuthHeaders(true), body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -133,7 +148,10 @@ const AdminTaskSubmissions = ({ refreshKey }) => {
 
   const handlePayAll = async () => {
     try {
-      const res  = await fetch(`${BASE}/api/admin/tasks/submissions/pay-all/approved`, { method: "PUT" });
+      const res  = await fetch(`${BASE}/api/admin/tasks/submissions/pay-all/approved`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       showToast(data.message);

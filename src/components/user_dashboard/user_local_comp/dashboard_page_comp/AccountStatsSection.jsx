@@ -66,9 +66,14 @@ const AccountStatsSection = () => {
         }
 
         const user = JSON.parse(userStr);
+        const userId = user?._id || user?.id;
+        if (!userId || !token) {
+          setLoading(false);
+          return;
+        }
         try {
           const res = await axios.get(
-            `http://localhost:5000/api/user/stats/${user._id}`,
+            `http://localhost:5000/api/user/stats/${userId}`,
             { headers: { Authorization: `Bearer ${token}` } },
           );
           if (res.data.success) setStats(res.data.stats);
