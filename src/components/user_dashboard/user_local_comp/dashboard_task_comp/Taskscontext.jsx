@@ -10,13 +10,14 @@
 
 import {
   createContext, useContext, useReducer,
-  useCallback, useEffect, useRef, memo,
+  useCallback, useEffect, useRef,
 } from "react";
 
 const TasksContext = createContext(null);
 const BASE        = "http://localhost:5000";
 const CACHE_KEY   = "tasks_bundle_v2";
 const CACHE_TTL   = 90_000; // 90 s
+const REFRESH_THROTTLE_MS = 15_000;
 
 // ── Cache helpers (localStorage only — single key for entire bundle) ───────
 const cacheWrite = (data) => {
@@ -65,7 +66,12 @@ const reducer = (state, action) => {
 export function TasksProvider({ children }) {
   const [state,    dispatch]       = useReducer(reducer, null, init);
   const abortRef  = useRef(null);
-  const activeTaskRef = useRef(null);
+  const lastFetchAtRef = useRef(0);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // Expose activeTask as plain state to avoid re-renders on unrelated changes
   const [activeTask, setActiveTaskState] = useReducer(
@@ -75,12 +81,18 @@ export function TasksProvider({ children }) {
   const getToken = () => localStorage.getItem("token");
 
   // ── Core fetch — single bundle request ──────────────────────────────────
-  const fetchBundle = useCallback(async ({ force = false } = {}) => {
+  const fetchBundle = useCallback(async ({ force = false, silent = false } = {}) => {
+    if (!force && Date.now() - lastFetchAtRef.current < REFRESH_THROTTLE_MS) {
+      return;
+    }
+
     // Cancel previous in-flight request
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
 
-    dispatch({ type: "FETCH_START" });
+    if (!silent) {
+      dispatch({ type: "FETCH_START" });
+    }
 
     try {
       const token = getToken();
@@ -91,6 +103,7 @@ export function TasksProvider({ children }) {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { tasks, submissions } = await res.json();
+      lastFetchAtRef.current = Date.now();
 
       dispatch({ type: "FETCH_OK", tasks, submissions });
       cacheWrite({ tasks, submissions });
@@ -102,15 +115,14 @@ export function TasksProvider({ children }) {
 
   // Mount: serve cache instantly, always revalidate in background
   useEffect(() => {
-    fetchBundle();
+    fetchBundle({ silent: stateRef.current.tasks.length > 0 });
   }, [fetchBundle]);
 
   // Re-validate on window focus (picks up admin payment changes)
   useEffect(() => {
     const onFocus = () => {
       if (document.visibilityState === "visible") {
-        cacheClear();
-        fetchBundle();
+        fetchBundle({ silent: true });
       }
     };
     document.addEventListener("visibilitychange", onFocus);
@@ -155,9 +167,10 @@ export function TasksProvider({ children }) {
       dispatch({ type: "SUB_OPTIMISTIC", taskId, submission: data.submission });
 
       // Also update cache so next load is accurate
+      const current = stateRef.current;
       cacheWrite({
-        tasks:       state.tasks,
-        submissions: { ...state.submissions, [taskId]: data.submission },
+        tasks:       current.tasks,
+        submissions: { ...current.submissions, [taskId]: data.submission },
       });
 
       setActiveTaskState(null);
@@ -165,12 +178,12 @@ export function TasksProvider({ children }) {
     } catch (err) {
       return { success: false, error: err.message };
     }
-  }, [state.tasks, state.submissions]);
+  }, []);
 
   // ── Hard refresh (clears cache) ──────────────────────────────────────────
   const forceRefresh = useCallback(() => {
     cacheClear();
-    fetchBundle({ force: true });
+    fetchBundle({ force: true, silent: true });
   }, [fetchBundle]);
 
   // ── Derived values (no extra renders) ────────────────────────────────────

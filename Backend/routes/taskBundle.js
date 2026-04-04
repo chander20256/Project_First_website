@@ -14,6 +14,7 @@ const TASK_LIST_FIELDS = "title description thumbnail platform reward timeMinute
 // Public-ish: tasks always returned, submissions only if JWT present
 router.get("/", async (req, res) => {
   try {
+    res.set("Cache-Control", "private, max-age=10");
     const now = new Date();
 
     // Always fetch tasks including thumbnail so user cards can display uploaded images.
